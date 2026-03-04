@@ -1,0 +1,262 @@
+---
+title: Server-Side Rendering
+description: Learn how to use Radix UI Primitives with server-side rendering frameworks like Next.js
+---
+
+Radix UI Primitives work seamlessly with server-side rendering (SSR) and React Server Components (RSC). All components are designed to be SSR-compatible and handle hydration correctly.
+
+## Compatibility
+
+Radix Primitives are fully compatible with:
+
+- Next.js App Router (React Server Components)
+- Next.js Pages Router
+- Remix
+- Any React SSR framework
+
+<Note>
+All Radix components are client components by default. While they don't include explicit `'use client'` directives in the source, they require client-side JavaScript for interactivity.
+</Note>
+
+## Using with Next.js App Router
+
+When using Radix Primitives in the Next.js App Router, you'll need to mark files that use them with the `'use client'` directive since they require client-side interactivity.
+
+<Steps>
+  <Step title="Install the component">
+    ```bash
+    npm install @radix-ui/react-dialog
+    ```
+  </Step>
+
+  <Step title="Create a client component">
+    Create a separate component file and add the `'use client'` directive:
+
+    ```tsx filename="components/dialog.tsx"
+    'use client';
+
+    import * as Dialog from '@radix-ui/react-dialog';
+
+    export function MyDialog() {
+      return (
+        <Dialog.Root>
+          <Dialog.Trigger>Open Dialog</Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay className="dialog-overlay" />
+            <Dialog.Content className="dialog-content">
+              <Dialog.Title>Dialog Title</Dialog.Title>
+              <Dialog.Description>
+                This is a dialog description.
+              </Dialog.Description>
+              <Dialog.Close>Close</Dialog.Close>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      );
+    }
+    ```
+  </Step>
+
+  <Step title="Use in Server Components">
+    You can now import and use your client component in Server Components:
+
+    ```tsx filename="app/page.tsx"
+    import { MyDialog } from '@/components/dialog';
+
+    export default function Page() {
+      return (
+        <main>
+          <h1>Welcome</h1>
+          <MyDialog />
+        </main>
+      );
+    }
+    ```
+  </Step>
+</Steps>
+
+## Hydration Considerations
+
+Radix Primitives handle hydration automatically, but there are some best practices to follow:
+
+### Avoid Hydration Mismatches
+
+Ensure that the server-rendered HTML matches the client-rendered output. Avoid using browser-only APIs during initial render:
+
+```tsx
+'use client';
+
+import * as Accordion from '@radix-ui/react-accordion';
+import { useEffect, useState } from 'react';
+
+export function MyAccordion() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  return (
+    <Accordion.Root type="single" collapsible>
+      <Accordion.Item value="item-1">
+        <Accordion.Header>
+          <Accordion.Trigger>Trigger</Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content>
+          {/* Only render after hydration if needed */}
+          {mounted && <div>Client-only content</div>}
+        </Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+### Portal Behavior
+
+Components that use portals (Dialog, Popover, Tooltip, etc.) will render to `document.body` by default. This works correctly with SSR as portals are only activated on the client:
+
+```tsx
+'use client';
+
+import * as Popover from '@radix-ui/react-popover';
+
+export function MyPopover() {
+  return (
+    <Popover.Root>
+      <Popover.Trigger>Open</Popover.Trigger>
+      <Popover.Portal>
+        {/* This will be portaled to document.body after hydration */}
+        <Popover.Content>
+          Popover content
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+```
+
+You can specify a custom container:
+
+```tsx
+<Popover.Portal container={document.getElementById('portal-root')}>
+  <Popover.Content>Content</Popover.Content>
+</Popover.Portal>
+```
+
+## Form Components and SSR
+
+Form components like Switch and Checkbox work seamlessly with SSR and progressive enhancement:
+
+```tsx
+'use client';
+
+import * as Switch from '@radix-ui/react-switch';
+
+export function MyForm() {
+  return (
+    <form>
+      <Switch.Root name="notifications" defaultChecked>
+        <Switch.Thumb />
+      </Switch.Root>
+    </form>
+  );
+}
+```
+
+<Note>
+Form controls include hidden inputs that work even before JavaScript loads, providing progressive enhancement.
+</Note>
+
+## Testing SSR
+
+The Radix repository includes a comprehensive SSR testing app using Next.js 15 with the App Router. You can reference this for examples of every component working with SSR:
+
+```tsx filename="Example from SSR test suite"
+import * as React from 'react';
+import { Dialog } from 'radix-ui';
+
+export default function Page() {
+  return (
+    <Dialog.Root defaultOpen>
+      <Dialog.Trigger>open</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay />
+        <Dialog.Content>
+          <Dialog.Title>Title</Dialog.Title>
+          <Dialog.Description>Description</Dialog.Description>
+          <Dialog.Close>close</Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+## Common Patterns
+
+### Wrap Components for Reusability
+
+Create wrapper components with the `'use client'` directive:
+
+```tsx filename="components/ui/dialog.tsx"
+'use client';
+
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
+
+export const Dialog = DialogPrimitive.Root;
+export const DialogTrigger = DialogPrimitive.Trigger;
+export const DialogPortal = DialogPrimitive.Portal;
+export const DialogClose = DialogPrimitive.Close;
+
+export const DialogContent = forwardRef<
+  ElementRef<typeof DialogPrimitive.Content>,
+  ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogPrimitive.Overlay className="dialog-overlay" />
+    <DialogPrimitive.Content ref={ref} {...props}>
+      {children}
+    </DialogPrimitive.Content>
+  </DialogPortal>
+));
+DialogContent.displayName = 'DialogContent';
+```
+
+### Lazy Loading Components
+
+For better performance, lazy load dialog and overlay components:
+
+```tsx
+import dynamic from 'next/dynamic';
+
+const Dialog = dynamic(() => import('@/components/ui/dialog'), {
+  ssr: false,
+});
+
+export function Page() {
+  return <Dialog />;
+}
+```
+
+<Warning>
+When using `ssr: false`, the component won't be rendered during SSR. Use this only when necessary.
+</Warning>
+
+## Troubleshooting
+
+### "Cannot read property of undefined" errors
+
+This usually happens when components try to access browser APIs during SSR. Wrap browser-specific code in `useEffect` or check for `typeof window !== 'undefined'`.
+
+### Hydration warnings
+
+Ensure that:
+- Server and client render the same initial output
+- You're not using browser-only APIs during initial render
+- Random values or dates are consistent between server and client
+
+### Portal components not appearing
+
+Make sure your app has a root element where portals can render. Next.js provides this automatically with the `<body>` tag.

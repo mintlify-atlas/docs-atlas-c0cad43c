@@ -1,0 +1,301 @@
+---
+title: Tooltip
+description: A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.
+---
+
+## Overview
+
+A tooltip provides contextual information or labels for UI elements on hover or focus.
+
+## Features
+
+- Provider to control display delay globally
+- Opens when the trigger is focused or hovered
+- Closes when the trigger is activated or when pressing Esc
+- Supports custom timings
+- Ignores hovering on touch devices
+
+## Installation
+
+```bash
+npm install @radix-ui/react-tooltip
+```
+
+## Anatomy
+
+Import all parts and piece them together.
+
+```tsx
+import * as Tooltip from '@radix-ui/react-tooltip';
+
+export default () => (
+  <Tooltip.Provider>
+    <Tooltip.Root>
+      <Tooltip.Trigger />
+      <Tooltip.Portal>
+        <Tooltip.Content>
+          <Tooltip.Arrow />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  </Tooltip.Provider>
+);
+```
+
+## API Reference
+
+### Provider
+
+Wraps your app to provide global settings for tooltips.
+
+<ParamField path="delayDuration" type="number" default="700">
+  The duration from when the mouse enters a tooltip trigger until the tooltip opens.
+</ParamField>
+
+<ParamField path="skipDelayDuration" type="number" default="300">
+  How much time a user has to enter another trigger without incurring a delay again.
+</ParamField>
+
+<ParamField path="disableHoverableContent" type="boolean" default="false">
+  When `true`, trying to hover the content will result in the tooltip closing as the pointer leaves the trigger.
+</ParamField>
+
+### Root
+
+Contains all the parts of a tooltip.
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the tooltip. Must be used in conjunction with `onOpenChange`.
+</ParamField>
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state of the tooltip when it is initially rendered. Use when you do not need to control its open state.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state of the tooltip changes.
+</ParamField>
+
+<ParamField path="delayDuration" type="number" default="700">
+  Override the duration given to the Provider to customize the open delay for a specific tooltip.
+</ParamField>
+
+<ParamField path="disableHoverableContent" type="boolean" default="false">
+  When `true`, trying to hover the content will result in the tooltip closing as the pointer leaves the trigger.
+</ParamField>
+
+### Trigger
+
+The button that toggles the tooltip.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+### Portal
+
+When used, portals the content part into the `body`.
+
+<ParamField path="container" type="HTMLElement" default="document.body">
+  Specify a container element to portal the content into.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+### Content
+
+The component that pops out when the tooltip is open.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="aria-label" type="string">
+  By default, screen readers will announce the content inside the tooltip. Use this when you want to announce something different.
+</ParamField>
+
+<ParamField path="side" type="'top' | 'right' | 'bottom' | 'left'" default="'top'">
+  The preferred side of the trigger to render against when open.
+</ParamField>
+
+<ParamField path="sideOffset" type="number" default="0">
+  The distance in pixels from the trigger.
+</ParamField>
+
+<ParamField path="align" type="'start' | 'center' | 'end'" default="'center'">
+  The preferred alignment against the trigger. May change when collisions occur.
+</ParamField>
+
+<ParamField path="alignOffset" type="number" default="0">
+  An offset in pixels from the "start" or "end" alignment options.
+</ParamField>
+
+<ParamField path="avoidCollisions" type="boolean" default="true">
+  When `true`, overrides the `side` and `align` preferences to prevent collisions with boundary edges.
+</ParamField>
+
+<ParamField path="collisionBoundary" type="Element | Element[]" default="[]">
+  The element used as the collision boundary. By default this is the viewport.
+</ParamField>
+
+<ParamField path="collisionPadding" type="number | Padding" default="0">
+  The distance in pixels from the boundary edges where collision detection should occur.
+</ParamField>
+
+<ParamField path="sticky" type="'partial' | 'always'" default="'partial'">
+  The sticky behavior on the align axis. `partial` will keep the content in the boundary as long as the trigger is at least partially in the boundary whilst `always` will keep the content in the boundary regardless.
+</ParamField>
+
+<ParamField path="hideWhenDetached" type="boolean" default="false">
+  Whether to hide the content when the trigger becomes fully occluded.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is down. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer event occurs outside the bounds of the component. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+### Arrow
+
+An optional arrow element to render alongside the tooltip.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="width" type="number" default="10">
+  The width of the arrow in pixels.
+</ParamField>
+
+<ParamField path="height" type="number" default="5">
+  The height of the arrow in pixels.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+
+```tsx Basic Usage
+import * as Tooltip from '@radix-ui/react-tooltip';
+
+function TooltipDemo() {
+  return (
+    <Tooltip.Provider>
+      <Tooltip.Root>
+        <Tooltip.Trigger>Hover me</Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content className="tooltip-content">
+            Add to library
+            <Tooltip.Arrow className="tooltip-arrow" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
+```
+
+```tsx Custom Delay
+import * as Tooltip from '@radix-ui/react-tooltip';
+
+function CustomDelayTooltip() {
+  return (
+    <Tooltip.Provider delayDuration={200}>
+      <Tooltip.Root>
+        <Tooltip.Trigger>Quick tooltip</Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content>
+            Opens after 200ms
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
+```
+
+```tsx Icon Button with Tooltip
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { PlusIcon } from '@radix-ui/react-icons';
+
+function IconButtonWithTooltip() {
+  return (
+    <Tooltip.Provider>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button className="icon-button" aria-label="Add">
+            <PlusIcon />
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content side="bottom" className="tooltip-content">
+            Add to collection
+            <Tooltip.Arrow />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
+```
+
+```tsx Multiple Tooltips
+import * as Tooltip from '@radix-ui/react-tooltip';
+
+function MultipleTooltips() {
+  return (
+    <Tooltip.Provider skipDelayDuration={200}>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <Tooltip.Root>
+          <Tooltip.Trigger>Save</Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Content side="top">
+              Save changes
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+
+        <Tooltip.Root>
+          <Tooltip.Trigger>Delete</Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Content side="top">
+              Delete item
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+
+        <Tooltip.Root>
+          <Tooltip.Trigger>Share</Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Content side="top">
+              Share with others
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+      </div>
+    </Tooltip.Provider>
+  );
+}
+```
+
+</CodeGroup>
+
+## Accessibility
+
+Adheres to the [Tooltip WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tooltip).
+
+### Keyboard Interactions
+
+- `Tab` - Opens the tooltip when the trigger receives keyboard focus
+- `Space` - Opens the tooltip without closing when keyboard users activate the trigger
+- `Enter` - Opens the tooltip without closing when keyboard users activate the trigger
+- `Esc` - Closes the tooltip
+
+<Note>
+Tooltips are automatically dismissed when the user activates the trigger, unless using keyboard navigation.
+</Note>

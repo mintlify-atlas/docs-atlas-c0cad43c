@@ -1,0 +1,348 @@
+---
+title: Dismissable Layer
+description: A component that detects and handles interactions outside of itself, commonly used for dismissing overlays and menus.
+---
+
+`DismissableLayer` is a component that listens for interactions outside of its boundaries and provides callbacks for handling dismissal. It's essential for building modals, popovers, dropdowns, and other overlay components that should close when users interact outside them.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-dismissable-layer
+```
+
+## Components
+
+### DismissableLayer
+
+The main component that wraps content and detects outside interactions.
+
+```tsx
+interface DismissableLayerProps extends PrimitiveDivProps {
+  disableOutsidePointerEvents?: boolean;
+  onEscapeKeyDown?: (event: KeyboardEvent) => void;
+  onPointerDownOutside?: (event: PointerDownOutsideEvent) => void;
+  onFocusOutside?: (event: FocusOutsideEvent) => void;
+  onInteractOutside?: (event: PointerDownOutsideEvent | FocusOutsideEvent) => void;
+  onDismiss?: () => void;
+}
+```
+
+### DismissableLayerBranch
+
+Marks a part of the DOM tree as belonging to the dismissable layer, preventing dismissal when interacting with it.
+
+## Props
+
+<ParamField path="disableOutsidePointerEvents" type="boolean">
+  When `true`, hover/focus/click interactions are disabled on elements outside the layer. Users must click twice: once to dismiss the layer, then again to interact with outside elements.
+  
+  Default: `false`
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the Escape key is pressed. Call `event.preventDefault()` to prevent dismissal.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer down event occurs outside the layer. Call `event.preventDefault()` to prevent dismissal.
+</ParamField>
+
+<ParamField path="onFocusOutside" type="(event: FocusOutsideEvent) => void">
+  Event handler called when focus moves outside the layer. Call `event.preventDefault()` to prevent dismissal.
+</ParamField>
+
+<ParamField path="onInteractOutside" type="(event: PointerDownOutsideEvent | FocusOutsideEvent) => void">
+  Event handler called for any interaction outside the layer (pointer down or focus). Called before specific handlers. Call `event.preventDefault()` to prevent dismissal.
+</ParamField>
+
+<ParamField path="onDismiss" type="() => void">
+  Handler called when the layer should be dismissed (after outside interaction or Escape key, if not prevented).
+</ParamField>
+
+## Usage
+
+### Basic Modal
+
+```tsx
+import { DismissableLayer } from '@radix-ui/react-dismissable-layer';
+import { useState } from 'react';
+
+function Modal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <DismissableLayer onDismiss={onClose}>
+        <div className="modal">
+          <h2>Modal Title</h2>
+          <p>Click outside or press Escape to close</p>
+          <button onClick={onClose}>Close</button>
+        </div>
+      </DismissableLayer>
+    </div>
+  );
+}
+```
+
+### Dropdown Menu
+
+```tsx
+import { DismissableLayer } from '@radix-ui/react-dismissable-layer';
+import { useState } from 'react';
+
+function Dropdown() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <button onClick={() => setIsOpen(true)}>Open Menu</button>
+      
+      {isOpen && (
+        <DismissableLayer 
+          onDismiss={() => setIsOpen(false)}
+        >
+          <div className="dropdown-menu">
+            <button>New File</button>
+            <button>Open</button>
+            <button>Save</button>
+          </div>
+        </DismissableLayer>
+      )}
+    </div>
+  );
+}
+```
+
+### With Disabled Outside Pointer Events
+
+```tsx
+import { DismissableLayer } from '@radix-ui/react-dismissable-layer';
+
+function Dialog({ onClose }: { onClose: () => void }) {
+  return (
+    <DismissableLayer 
+      disableOutsidePointerEvents
+      onDismiss={onClose}
+    >
+      <div className="dialog">
+        <h2>Important Dialog</h2>
+        <p>Users must click here first to close, then interact with outside content</p>
+        <button onClick={onClose}>Got it</button>
+      </div>
+    </DismissableLayer>
+  );
+}
+```
+
+### Preventing Dismissal on Specific Interactions
+
+```tsx
+import { DismissableLayer } from '@radix-ui/react-dismissable-layer';
+
+function ConfirmDialog({ onClose, onConfirm }: { 
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <DismissableLayer 
+      onEscapeKeyDown={(event) => {
+        // Prevent closing on Escape for critical actions
+        event.preventDefault();
+      }}
+      onPointerDownOutside={(event) => {
+        // Allow closing by clicking outside
+        console.log('Clicked outside');
+      }}
+      onDismiss={onClose}
+    >
+      <div className="confirm-dialog">
+        <h2>Delete File?</h2>
+        <p>This action cannot be undone.</p>
+        <button onClick={onClose}>Cancel</button>
+        <button onClick={onConfirm}>Delete</button>
+      </div>
+    </DismissableLayer>
+  );
+}
+```
+
+### Using Branches
+
+```tsx
+import { 
+  DismissableLayer, 
+  DismissableLayerBranch 
+} from '@radix-ui/react-dismissable-layer';
+import { useState } from 'react';
+
+function PopoverWithTooltip({ onClose }: { onClose: () => void }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  return (
+    <DismissableLayer onDismiss={onClose}>
+      <div className="popover">
+        <h3>Popover Content</h3>
+        
+        <button 
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          Hover me
+        </button>
+        
+        {/* Tooltip won't dismiss the popover when interacted with */}
+        {showTooltip && (
+          <DismissableLayerBranch>
+            <div className="tooltip">
+              Helpful tooltip
+            </div>
+          </DismissableLayerBranch>
+        )}
+      </div>
+    </DismissableLayer>
+  );
+}
+```
+
+### Nested Dismissable Layers
+
+```tsx
+import { DismissableLayer } from '@radix-ui/react-dismissable-layer';
+import { useState } from 'react';
+
+function NestedModals() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setModalOpen(true)}>Open Modal</button>
+      
+      {modalOpen && (
+        <DismissableLayer onDismiss={() => setModalOpen(false)}>
+          <div className="modal">
+            <h2>Main Modal</h2>
+            <button onClick={() => setConfirmOpen(true)}>Delete</button>
+            
+            {confirmOpen && (
+              <DismissableLayer onDismiss={() => setConfirmOpen(false)}>
+                <div className="confirm-modal">
+                  <h3>Are you sure?</h3>
+                  <button onClick={() => setConfirmOpen(false)}>Cancel</button>
+                  <button>Confirm</button>
+                </div>
+              </DismissableLayer>
+            )}
+          </div>
+        </DismissableLayer>
+      )}
+    </>
+  );
+}
+```
+
+### Custom Interaction Handling
+
+```tsx
+import { DismissableLayer } from '@radix-ui/react-dismissable-layer';
+
+function SmartPopover({ onClose }: { onClose: () => void }) {
+  const handleInteractOutside = (event: any) => {
+    const target = event.target as HTMLElement;
+    
+    // Don't dismiss if clicking on elements with specific class
+    if (target.closest('.keep-open')) {
+      event.preventDefault();
+      return;
+    }
+    
+    // Log analytics before dismissing
+    console.log('Popover dismissed via outside interaction');
+  };
+
+  return (
+    <DismissableLayer 
+      onInteractOutside={handleInteractOutside}
+      onDismiss={onClose}
+    >
+      <div className="popover">
+        <p>Popover content</p>
+      </div>
+    </DismissableLayer>
+  );
+}
+```
+
+## Event Details
+
+### PointerDownOutsideEvent
+
+A custom event dispatched when pointer down occurs outside the layer.
+
+```tsx
+interface PointerDownOutsideEvent extends CustomEvent {
+  detail: {
+    originalEvent: PointerEvent;
+  };
+}
+```
+
+### FocusOutsideEvent
+
+A custom event dispatched when focus moves outside the layer.
+
+```tsx
+interface FocusOutsideEvent extends CustomEvent {
+  detail: {
+    originalEvent: FocusEvent;
+  };
+}
+```
+
+## Behavior
+
+### Layer Stacking
+
+Multiple `DismissableLayer` components create a stack:
+- Only the topmost layer responds to outside interactions
+- Nested layers are handled correctly
+- Lower layers are paused while upper layers are active
+
+### Pointer Events
+
+When `disableOutsidePointerEvents={true}`:
+- Body pointer events are set to `none`
+- Only the highest layer with this prop enabled is interactive
+- Prevents accidental interaction with underlying content
+
+### Branches
+
+`DismissableLayerBranch` marks elements as "inside" the layer:
+- Interactions with branches don't trigger dismissal
+- Useful for tooltips, nested popovers, or portaled content
+- Branches are tracked globally across all layers
+
+## Accessibility
+
+<Note>
+  Always provide a way to dismiss layers using the keyboard (Escape key is handled automatically) to ensure keyboard users aren't trapped.
+</Note>
+
+<Note>
+  Use `disableOutsidePointerEvents` carefully as it requires users to click twice to interact with outside content, which may be confusing. Reserve it for critical interactions like modals.
+</Note>
+
+## Notes
+
+<Note>
+  The component uses custom events (`dismissableLayer.pointerDownOutside` and `dismissableLayer.focusOutside`) to communicate between layers and handle stacking properly.
+</Note>
+
+<Note>
+  Escape key handling uses `useEscapeKeydown` internally with capture phase event listeners to ensure the topmost layer handles the event first.
+</Note>
+
+<Note>
+  When multiple layers exist, only the topmost layer (highest in the stack) will respond to outside interactions. Lower layers automatically ignore events until they become the topmost layer.
+</Note>

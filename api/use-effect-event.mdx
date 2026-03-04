@@ -1,0 +1,170 @@
+---
+title: useEffectEvent
+description: A hook that approximates React's experimental useEffectEvent, providing a stable function reference with the latest closure.
+---
+
+`useEffectEvent` is designed to approximate the behavior of React's experimental `useEffectEvent` hook. It provides a stable function reference that can be safely used in effect dependencies while always executing with the latest props and state.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-use-effect-event
+```
+
+## Function Signature
+
+```tsx
+function useEffectEvent<T extends (...args: any[]) => any>(
+  callback?: T
+): T
+```
+
+## Parameters
+
+<ParamField path="callback" type="T">
+  The callback function to be wrapped. The returned function will always call the latest version of this callback.
+</ParamField>
+
+## Return Value
+
+<ResponseField name="stableCallback" type="T">
+  A stable function reference that always calls the latest version of the provided callback. Safe to use in effect dependencies without causing re-runs.
+</ResponseField>
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useEffectEvent } from '@radix-ui/react-use-effect-event';
+import { useEffect } from 'react';
+
+function Chat({ roomId, onMessage }: { 
+  roomId: string; 
+  onMessage: (msg: string) => void;
+}) {
+  const handleMessage = useEffectEvent(onMessage);
+
+  useEffect(() => {
+    const connection = connectToRoom(roomId);
+    connection.on('message', handleMessage);
+    return () => connection.disconnect();
+  }, [roomId]); // onMessage is not in dependencies
+
+  return <div>Chat Room: {roomId}</div>;
+}
+```
+
+### Avoiding Stale Closures
+
+```tsx
+import { useEffectEvent } from '@radix-ui/react-use-effect-event';
+import { useEffect, useState } from 'react';
+
+function Logger({ userId }: { userId: string }) {
+  const [count, setCount] = useState(0);
+  
+  const logEvent = useEffectEvent(() => {
+    // Always uses the latest count and userId
+    console.log(`User ${userId} count: ${count}`);
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      logEvent();
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, []); // Empty dependencies, but logEvent always has latest values
+
+  return (
+    <button onClick={() => setCount(c => c + 1)}>
+      Increment ({count})
+    </button>
+  );
+}
+```
+
+### Event Handlers in Effects
+
+```tsx
+import { useEffectEvent } from '@radix-ui/react-use-effect-event';
+import { useEffect } from 'react';
+
+function WindowListener({ onResize }: { 
+  onResize: (width: number, height: number) => void 
+}) {
+  const handleResize = useEffectEvent(onResize);
+
+  useEffect(() => {
+    const listener = () => {
+      handleResize(window.innerWidth, window.innerHeight);
+    };
+    
+    window.addEventListener('resize', listener);
+    return () => window.removeEventListener('resize', listener);
+  }, []); // Effect only runs once, but handleResize always current
+
+  return null;
+}
+```
+
+### With External APIs
+
+```tsx
+import { useEffectEvent } from '@radix-ui/react-use-effect-event';
+import { useEffect } from 'react';
+
+function Subscription({ topic, onData, apiKey }: {
+  topic: string;
+  onData: (data: any) => void;
+  apiKey: string;
+}) {
+  const handleData = useEffectEvent((data) => {
+    // Can access latest apiKey without re-subscribing
+    if (apiKey) {
+      onData(data);
+    }
+  });
+
+  useEffect(() => {
+    // Only re-subscribe when topic changes
+    const unsubscribe = subscribe(topic, handleData);
+    return unsubscribe;
+  }, [topic]);
+
+  return <div>Subscribed to {topic}</div>;
+}
+```
+
+## Implementation Details
+
+The hook has three implementation strategies:
+
+1. **React's native `useEffectEvent`** (when available in future React versions)
+2. **`useInsertionEffect`** for React 18+ (when available)
+3. **`useLayoutEffect`** as a fallback for older React versions
+
+The implementation:
+- Stores the callback in a ref
+- Updates the ref before layout/paint using the most appropriate hook
+- Returns a stable memoized function that calls the latest callback
+- Throws an error if called during render
+
+## Notes
+
+<Note>
+  This is a shim/polyfill for React's experimental `useEffectEvent` hook. When React's official version becomes stable, this hook will automatically use the native implementation.
+</Note>
+
+<Note>
+  The returned function cannot be called during render - it will throw an error if you try. It's designed specifically for use in effects, event handlers, and callbacks.
+</Note>
+
+<Note>
+  This hook is similar to `useCallbackRef` but is specifically designed for the effect event pattern where you want the latest closure without re-running effects.
+</Note>
+
+<Note>
+  For more context, see the [React RFC for useEffectEvent](https://github.com/reactjs/rfcs/blob/useevent/text/0000-useevent.md).
+</Note>

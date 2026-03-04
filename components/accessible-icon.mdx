@@ -1,0 +1,144 @@
+---
+title: Accessible Icon
+description: Makes icons accessible by providing a text alternative.
+---
+
+## Overview
+
+Accessible Icon provides an accessible label for icons by rendering visually hidden text. This ensures screen reader users understand the purpose of icon-only UI elements.
+
+## Features
+
+- Hides the icon from the accessibility tree
+- Provides a text alternative for screen readers
+- Works with any icon component or SVG
+
+## Installation
+
+```bash
+npm install @radix-ui/react-accessible-icon
+```
+
+## Anatomy
+
+```tsx
+import * as AccessibleIcon from '@radix-ui/react-accessible-icon';
+
+export default () => (
+  <AccessibleIcon.Root label="Home">
+    <svg>{/* icon content */}</svg>
+  </AccessibleIcon.Root>
+)
+```
+
+## API Reference
+
+### Root
+
+Wraps an icon to make it accessible.
+
+<ParamField path="label" type="string" required>
+  The accessible label for the icon. This label will be visually hidden but announced to screen reader users.
+</ParamField>
+
+<ParamField path="children" type="React.ReactNode">
+  The icon element to make accessible. Should be a single child element.
+</ParamField>
+
+## Examples
+
+### Basic Usage
+
+<CodeGroup>
+```tsx Basic
+import * as AccessibleIcon from '@radix-ui/react-accessible-icon';
+import { HomeIcon } from './icons';
+
+export default () => (
+  <button>
+    <AccessibleIcon.Root label="Home">
+      <HomeIcon />
+    </AccessibleIcon.Root>
+  </button>
+);
+```
+</CodeGroup>
+
+### With SVG
+
+<CodeGroup>
+```tsx SVG
+import * as AccessibleIcon from '@radix-ui/react-accessible-icon';
+
+export default () => (
+  <AccessibleIcon.Root label="Settings">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 15 15"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M7.5 0C7.77614 0 8 0.223858 8 0.5V2.5C8 2.77614 7.77614 3 7.5 3C7.22386 3 7 2.77614 7 2.5V0.5C7 0.223858 7.22386 0 7.5 0Z"
+        fill="currentColor"
+      />
+    </svg>
+  </AccessibleIcon.Root>
+);
+```
+</CodeGroup>
+
+### In Navigation
+
+<CodeGroup>
+```tsx Navigation
+import * as AccessibleIcon from '@radix-ui/react-accessible-icon';
+import { HomeIcon, ProfileIcon, SettingsIcon } from './icons';
+
+export default () => (
+  <nav>
+    <a href="/">
+      <AccessibleIcon.Root label="Home">
+        <HomeIcon />
+      </AccessibleIcon.Root>
+    </a>
+    <a href="/profile">
+      <AccessibleIcon.Root label="Profile">
+        <ProfileIcon />
+      </AccessibleIcon.Root>
+    </a>
+    <a href="/settings">
+      <AccessibleIcon.Root label="Settings">
+        <SettingsIcon />
+      </AccessibleIcon.Root>
+    </a>
+  </nav>
+);
+```
+</CodeGroup>
+
+## How It Works
+
+Accessible Icon works by:
+
+1. Setting `aria-hidden="true"` on the icon element to hide it from screen readers
+2. Rendering a visually hidden span with the label text that screen readers will announce
+3. Ensuring the icon cannot receive focus in SVG elements
+
+## When to Use
+
+Use Accessible Icon when:
+
+- You have icon-only buttons or links
+- Icons are used for navigation
+- Icons represent actions or states
+- You want to provide context for decorative icons that convey meaning
+
+## Accessibility
+
+This component follows the best practices for making icon-only interfaces accessible:
+
+- Icons are hidden from the accessibility tree with `aria-hidden="true"`
+- A text alternative is provided using visually hidden text
+- SVG icons are marked as `focusable="false"` to prevent keyboard focus issues in older browsers

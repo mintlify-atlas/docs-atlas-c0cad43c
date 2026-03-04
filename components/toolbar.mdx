@@ -1,0 +1,252 @@
+---
+title: "Toolbar"
+description: "A container for grouping a set of controls."
+---
+
+## Overview
+
+Toolbar provides a container for grouping related controls like buttons, toggle buttons, dropdown menus, and links. It supports keyboard navigation and proper focus management.
+
+## Features
+
+- Full keyboard navigation
+- Supports horizontal/vertical orientation
+- Flexible layout support
+- Can contain buttons, links, separators, and toggle groups
+- Focus management with roving tabindex
+- Proper ARIA attributes for accessibility
+
+## Installation
+
+```bash
+npm install @radix-ui/react-toolbar
+```
+
+## Anatomy
+
+```jsx
+import * as Toolbar from '@radix-ui/react-toolbar';
+
+export default () => (
+  <Toolbar.Root>
+    <Toolbar.Button />
+    <Toolbar.Separator />
+    <Toolbar.Link />
+    <Toolbar.ToggleGroup>
+      <Toolbar.ToggleItem />
+    </Toolbar.ToggleGroup>
+  </Toolbar.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the toolbar component parts.
+
+<ParamField path="orientation" type="'horizontal' | 'vertical'" default="'horizontal'">
+  The orientation of the toolbar.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction of the toolbar. If omitted, inherits from the parent.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="true">
+  When true, keyboard navigation will loop from last item to first, and vice versa.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Button
+
+A button item.
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the button.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Link
+
+A link item.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### ToggleGroup
+
+A set of two-state buttons that can be toggled on or off.
+
+<ParamField path="type" type="'single' | 'multiple'" required>
+  Determines whether a single or multiple items can be pressed at a time.
+</ParamField>
+
+**When `type="single"`:**
+
+<ParamField path="value" type="string">
+  The controlled value of the pressed item.
+</ParamField>
+
+<ParamField path="defaultValue" type="string">
+  The value of the item to show as pressed when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Event handler called when the pressed state changes.
+</ParamField>
+
+**When `type="multiple"`:**
+
+<ParamField path="value" type="string[]">
+  The controlled value of the pressed items.
+</ParamField>
+
+<ParamField path="defaultValue" type="string[]">
+  The values of the items to show as pressed when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string[]) => void">
+  Event handler called when the pressed state changes.
+</ParamField>
+
+**Common props:**
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the toggle group and all its items.
+</ParamField>
+
+<ParamField path="rovingFocus" type="boolean" default="true">
+  When false, prevents automatic focus cycling through items.
+</ParamField>
+
+<ParamField path="orientation" type="'horizontal' | 'vertical'" default="'horizontal'">
+  The orientation of the component.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction of the toggle group.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="true">
+  When loop and rovingFocus are true, keyboard navigation will loop.
+</ParamField>
+
+### ToggleItem
+
+An item in the toggle group.
+
+<ParamField path="value" type="string" required>
+  A unique value for the item.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Separator
+
+Used to visually separate items in the toolbar.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as Toolbar from '@radix-ui/react-toolbar';
+import {
+  FontBoldIcon,
+  FontItalicIcon,
+  UnderlineIcon,
+} from '@radix-ui/react-icons';
+import './styles.css';
+
+export default () => (
+  <Toolbar.Root className="ToolbarRoot" aria-label="Formatting options">
+    <Toolbar.Button className="ToolbarButton">Undo</Toolbar.Button>
+    <Toolbar.Button className="ToolbarButton">Redo</Toolbar.Button>
+    <Toolbar.Separator className="ToolbarSeparator" />
+    <Toolbar.ToggleGroup type="multiple" aria-label="Text formatting">
+      <Toolbar.ToggleItem className="ToolbarToggleItem" value="bold" aria-label="Bold">
+        <FontBoldIcon />
+      </Toolbar.ToggleItem>
+      <Toolbar.ToggleItem className="ToolbarToggleItem" value="italic" aria-label="Italic">
+        <FontItalicIcon />
+      </Toolbar.ToggleItem>
+      <Toolbar.ToggleItem className="ToolbarToggleItem" value="underline" aria-label="Underline">
+        <UnderlineIcon />
+      </Toolbar.ToggleItem>
+    </Toolbar.ToggleGroup>
+    <Toolbar.Separator className="ToolbarSeparator" />
+    <Toolbar.Link className="ToolbarLink" href="#" target="_blank">
+      Help
+    </Toolbar.Link>
+  </Toolbar.Root>
+);
+```
+
+```jsx Vertical
+import * as Toolbar from '@radix-ui/react-toolbar';
+
+export default () => (
+  <Toolbar.Root orientation="vertical" aria-label="Formatting options">
+    <Toolbar.Button>Cut</Toolbar.Button>
+    <Toolbar.Button>Copy</Toolbar.Button>
+    <Toolbar.Button>Paste</Toolbar.Button>
+  </Toolbar.Root>
+);
+```
+
+```jsx Single Toggle
+import { useState } from 'react';
+import * as Toolbar from '@radix-ui/react-toolbar';
+
+export default () => {
+  const [alignment, setAlignment] = useState('left');
+
+  return (
+    <Toolbar.Root>
+      <Toolbar.ToggleGroup
+        type="single"
+        value={alignment}
+        onValueChange={(value) => value && setAlignment(value)}
+      >
+        <Toolbar.ToggleItem value="left">Left</Toolbar.ToggleItem>
+        <Toolbar.ToggleItem value="center">Center</Toolbar.ToggleItem>
+        <Toolbar.ToggleItem value="right">Right</Toolbar.ToggleItem>
+      </Toolbar.ToggleGroup>
+    </Toolbar.Root>
+  );
+};
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Uses [roving tabindex](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/#kbd_roving_tabindex) to manage focus movement among items.
+</Note>
+
+### Keyboard Interactions
+
+- **Tab** - Moves focus to the first item in the toolbar.
+- **ArrowRight** - Moves focus to the next item in the toolbar (in horizontal orientation).
+- **ArrowLeft** - Moves focus to the previous item in the toolbar (in horizontal orientation).
+- **ArrowDown** - Moves focus to the next item in the toolbar (in vertical orientation).
+- **ArrowUp** - Moves focus to the previous item in the toolbar (in vertical orientation).
+- **Home** - Moves focus to the first item.
+- **End** - Moves focus to the last item.

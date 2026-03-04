@@ -1,0 +1,173 @@
+---
+title: "Switch"
+description: "A control that allows the user to toggle between checked and not checked."
+---
+
+## Overview
+
+Switch provides a binary control that users can toggle on or off. It's similar to a checkbox but styled to look like a physical toggle switch.
+
+## Features
+
+- Can be controlled or uncontrolled
+- Full keyboard navigation
+- Works inside forms
+- Accessible by default with proper ARIA attributes
+
+## Installation
+
+```bash
+npm install @radix-ui/react-switch
+```
+
+## Anatomy
+
+```jsx
+import * as Switch from '@radix-ui/react-switch';
+
+export default () => (
+  <Switch.Root>
+    <Switch.Thumb />
+  </Switch.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the switch component parts. An `input` will also render when used within a `form` to ensure events propagate correctly.
+
+<ParamField path="checked" type="boolean">
+  The controlled checked state of the switch.
+</ParamField>
+
+<ParamField path="defaultChecked" type="boolean">
+  The checked state when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onCheckedChange" type="(checked: boolean) => void">
+  Event handler called when the checked state changes.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the switch.
+</ParamField>
+
+<ParamField path="required" type="boolean">
+  When true, indicates that the user must check the switch before the form can be submitted.
+</ParamField>
+
+<ParamField path="name" type="string">
+  The name of the switch. Submitted with its owning form as part of a name/value pair.
+</ParamField>
+
+<ParamField path="value" type="string" default="'on'">
+  The value given as data when submitted with a name.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Thumb
+
+The thumb that is used to visually indicate whether the switch is on or off.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as Switch from '@radix-ui/react-switch';
+import './styles.css';
+
+export default () => (
+  <form>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <label className="Label" htmlFor="airplane-mode" style={{ paddingRight: 15 }}>
+        Airplane mode
+      </label>
+      <Switch.Root className="SwitchRoot" id="airplane-mode">
+        <Switch.Thumb className="SwitchThumb" />
+      </Switch.Root>
+    </div>
+  </form>
+);
+```
+
+```jsx Controlled
+import { useState } from 'react';
+import * as Switch from '@radix-ui/react-switch';
+import './styles.css';
+
+export default () => {
+  const [checked, setChecked] = useState(false);
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label htmlFor="s1" style={{ paddingRight: 15 }}>
+          Notifications
+        </label>
+        <Switch.Root
+          className="SwitchRoot"
+          id="s1"
+          checked={checked}
+          onCheckedChange={setChecked}
+        >
+          <Switch.Thumb className="SwitchThumb" />
+        </Switch.Root>
+      </div>
+      <p>Status: {checked ? 'On' : 'Off'}</p>
+    </div>
+  );
+};
+```
+
+```jsx In Form
+import * as Switch from '@radix-ui/react-switch';
+
+export default () => (
+  <form
+    onSubmit={(event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      console.log(Object.fromEntries(formData));
+    }}
+  >
+    <Switch.Root name="notifications" value="enabled">
+      <Switch.Thumb />
+    </Switch.Root>
+    <label>Enable notifications</label>
+
+    <button type="submit">Submit</button>
+  </form>
+);
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Adheres to the [Switch WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/switch/).
+</Note>
+
+### Keyboard Interactions
+
+- **Space** - Toggles the switch.
+
+### Data Attributes
+
+**Root**
+
+- `[data-state]` - "checked" or "unchecked"
+- `[data-disabled]` - Present when disabled
+
+**Thumb**
+
+- `[data-state]` - "checked" or "unchecked"
+- `[data-disabled]` - Present when disabled

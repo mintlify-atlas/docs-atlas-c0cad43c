@@ -1,0 +1,127 @@
+---
+title: useCallbackRef
+description: A hook that converts a callback to a ref to avoid triggering re-renders when passed as a prop or avoid re-executing effects when passed as a dependency.
+---
+
+`useCallbackRef` is a custom hook that stores a callback in a ref, providing a stable function reference that always calls the latest callback. This is useful for preventing unnecessary re-renders or effect re-executions when callbacks are passed as props or dependencies.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-use-callback-ref
+```
+
+## Function Signature
+
+```tsx
+function useCallbackRef<T extends (...args: any[]) => any>(
+  callback: T | undefined
+): T
+```
+
+## Parameters
+
+<ParamField path="callback" type="T | undefined" required>
+  The callback function to be converted to a stable ref-based function. Can be `undefined`.
+</ParamField>
+
+## Return Value
+
+<ResponseField name="stableCallback" type="T">
+  A memoized function that always calls the latest version of the provided callback. The function reference remains stable across re-renders.
+</ResponseField>
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useCallbackRef } from '@radix-ui/react-use-callback-ref';
+
+function Component({ onEvent }: { onEvent?: () => void }) {
+  const handleEvent = useCallbackRef(onEvent);
+
+  useEffect(() => {
+    // handleEvent is stable, so this effect won't re-run when onEvent changes
+    const subscription = subscribe(handleEvent);
+    return () => subscription.unsubscribe();
+  }, [handleEvent]); // Safe to include in dependencies
+
+  return <div>Component</div>;
+}
+```
+
+### Preventing Re-renders
+
+```tsx
+import { useCallbackRef } from '@radix-ui/react-use-callback-ref';
+
+function Parent() {
+  const [count, setCount] = useState(0);
+  
+  // Without useCallbackRef, this would cause Child to re-render on every count change
+  const handleClick = useCallbackRef(() => {
+    console.log('Current count:', count);
+  });
+
+  return <Child onClick={handleClick} />;
+}
+
+const Child = React.memo(({ onClick }: { onClick: () => void }) => {
+  return <button onClick={onClick}>Click me</button>;
+});
+```
+
+### Event Handler with Latest Props
+
+```tsx
+import { useCallbackRef } from '@radix-ui/react-use-callback-ref';
+
+function EscapeHandler({ onEscape }: { onEscape?: () => void }) {
+  const handleEscape = useCallbackRef(onEscape);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleEscape?.(); // Always calls the latest onEscape
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleEscape]); // Effect only runs once
+
+  return null;
+}
+```
+
+## Type Definition
+
+```tsx
+function useCallbackRef<T extends (...args: any[]) => any>(
+  callback: T | undefined
+): T
+```
+
+## Implementation Details
+
+The hook works by:
+
+1. Storing the callback in a ref using `useRef`
+2. Updating the ref value on every render using `useEffect`
+3. Returning a memoized function that calls the current ref value
+
+This ensures:
+- The returned function reference never changes
+- The callback always executes with the latest closure
+- No unnecessary re-renders or effect re-executions
+
+## Notes
+
+<Note>
+  This hook is particularly useful when you need to pass callbacks to child components or effect dependencies while ensuring they don't trigger unnecessary updates.
+</Note>
+
+<Note>
+  The implementation addresses [React issue #19240](https://github.com/facebook/react/issues/19240) regarding callback refs and stale closures.
+</Note>

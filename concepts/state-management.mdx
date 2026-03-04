@@ -1,0 +1,802 @@
+---
+title: "State Management"
+description: "Understanding controlled and uncontrolled components, state callbacks, and state patterns in Radix UI"
+---
+
+## Overview
+
+Radix UI components with internal state support both **controlled** and **uncontrolled** usage patterns, giving you flexibility in how you manage state.
+
+<Note>
+This follows the same pattern as form elements in React: you can either let the component manage its own state (uncontrolled) or manage it yourself (controlled).
+</Note>
+
+---
+
+## Controlled vs Uncontrolled
+
+### Uncontrolled Components
+
+Uncontrolled components manage their own internal state. You provide an initial value, and the component handles updates.
+
+**Example: Uncontrolled Accordion**
+
+```jsx
+import * as Accordion from '@radix-ui/react-accordion';
+
+function UncontrolledExample() {
+  return (
+    <Accordion.Root
+      type="single"
+      defaultValue="item-1" // Initial state
+      collapsible
+    >
+      <Accordion.Item value="item-1">
+        <Accordion.Header>
+          <Accordion.Trigger>Item 1</Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content>Content 1</Accordion.Content>
+      </Accordion.Item>
+      <Accordion.Item value="item-2">
+        <Accordion.Header>
+          <Accordion.Trigger>Item 2</Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content>Content 2</Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+The accordion manages which item is open internally. You don't need to track state.
+
+### Controlled Components
+
+Controlled components delegate state management to you. You provide the current value and an onChange handler.
+
+**Example: Controlled Accordion**
+
+```jsx
+import { useState } from 'react';
+import * as Accordion from '@radix-ui/react-accordion';
+
+function ControlledExample() {
+  const [value, setValue] = useState('item-1');
+
+  return (
+    <>
+      <p>Currently open: {value}</p>
+      
+      <Accordion.Root
+        type="single"
+        value={value} // You control the state
+        onValueChange={setValue} // You handle updates
+        collapsible
+      >
+        <Accordion.Item value="item-1">
+          <Accordion.Header>
+            <Accordion.Trigger>Item 1</Accordion.Trigger>
+          </Accordion.Header>
+          <Accordion.Content>Content 1</Accordion.Content>
+        </Accordion.Item>
+        <Accordion.Item value="item-2">
+          <Accordion.Header>
+            <Accordion.Trigger>Item 2</Accordion.Trigger>
+          </Accordion.Header>
+          <Accordion.Content>Content 2</Accordion.Content>
+        </Accordion.Item>
+      </Accordion.Root>
+      
+      <button onClick={() => setValue('item-1')}>Open Item 1</button>
+      <button onClick={() => setValue('item-2')}>Open Item 2</button>
+    </>
+  );
+}
+```
+
+You manage the state, so you can read it, update it from anywhere, persist it, sync it with URL params, etc.
+
+### Prop Patterns
+
+All stateful Radix components follow this pattern:
+
+| Pattern | Props | Example |
+|---------|-------|----------|
+| **Uncontrolled** | `defaultValue` | `<Accordion defaultValue="item-1">` |
+| **Controlled** | `value` + `onValueChange` | `<Accordion value={v} onValueChange={setV}>` |
+
+<Tip>
+Use **uncontrolled** for simple cases. Use **controlled** when you need to read or manipulate state externally.
+</Tip>
+
+---
+
+## How It Works Internally
+
+Radix uses the `useControllableState` hook to support both patterns.
+
+From `packages/react/use-controllable-state/src/use-controllable-state.tsx:18`:
+
+```tsx
+export function useControllableState<T>({
+  prop,
+  defaultProp,
+  onChange = () => {},
+  caller,
+}: UseControllableStateParams<T>): [T, SetStateFn<T>] {
+  const [uncontrolledProp, setUncontrolledProp, onChangeRef] = useUncontrolledState({
+    defaultProp,
+    onChange,
+  });
+  const isControlled = prop !== undefined;
+  const value = isControlled ? prop : uncontrolledProp;
+
+  const setValue = React.useCallback<SetStateFn<T>>(
+    (nextValue) => {
+      if (isControlled) {
+        const value = isFunction(nextValue) ? nextValue(prop) : nextValue;
+        if (value !== prop) {
+          onChangeRef.current?.(value);
+        }
+      } else {
+        setUncontrolledProp(nextValue);
+      }
+    },
+    [isControlled, prop, setUncontrolledProp, onChangeRef],
+  );
+
+  return [value, setValue];
+}
+```
+
+This hook:
+
+1. Detects if a `prop` value is provided (controlled)
+2. Uses internal state if no `prop` (uncontrolled)
+3. Calls `onChange` in controlled mode
+4. Warns in development if you switch between modes
+
+---
+
+## Component Examples
+
+### Dialog
+
+**Uncontrolled:**
+
+```jsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+function UncontrolledDialog() {
+  return (
+    <Dialog.Root defaultOpen={false}>
+      <Dialog.Trigger>Open</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay />
+        <Dialog.Content>
+          <Dialog.Title>Dialog</Dialog.Title>
+          <Dialog.Description>This is a dialog</Dialog.Description>
+          <Dialog.Close>Close</Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+**Controlled:**
+
+```jsx
+import { useState } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+
+function ControlledDialog() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Dialog.Trigger>Open</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay />
+          <Dialog.Content>
+            <Dialog.Title>Dialog</Dialog.Title>
+            <Dialog.Description>This is a dialog</Dialog.Description>
+            <Dialog.Close>Close</Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+      
+      {/* Control from outside */}
+      <button onClick={() => setOpen(true)}>Open from outside</button>
+    </>
+  );
+}
+```
+
+From `packages/react/dialog/src/dialog.tsx:61`:
+
+```tsx
+const [open, setOpen] = useControllableState({
+  prop: openProp,
+  defaultProp: defaultOpen ?? false,
+  onChange: onOpenChange,
+  caller: DIALOG_NAME,
+});
+```
+
+### Checkbox
+
+**Uncontrolled:**
+
+```jsx
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { CheckIcon } from '@radix-ui/react-icons';
+
+function UncontrolledCheckbox() {
+  return (
+    <Checkbox.Root defaultChecked={false}>
+      <Checkbox.Indicator>
+        <CheckIcon />
+      </Checkbox.Indicator>
+    </Checkbox.Root>
+  );
+}
+```
+
+**Controlled:**
+
+```jsx
+import { useState } from 'react';
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { CheckIcon } from '@radix-ui/react-icons';
+
+function ControlledCheckbox() {
+  const [checked, setChecked] = useState(false);
+
+  return (
+    <>
+      <Checkbox.Root checked={checked} onCheckedChange={setChecked}>
+        <Checkbox.Indicator>
+          <CheckIcon />
+        </Checkbox.Indicator>
+      </Checkbox.Root>
+      
+      <p>Checkbox is {checked ? 'checked' : 'unchecked'}</p>
+      <button onClick={() => setChecked(!checked)}>Toggle</button>
+    </>
+  );
+}
+```
+
+### Accordion (Multiple Mode)
+
+**Uncontrolled:**
+
+```jsx
+import * as Accordion from '@radix-ui/react-accordion';
+
+function UncontrolledMultiple() {
+  return (
+    <Accordion.Root
+      type="multiple"
+      defaultValue={['item-1', 'item-2']} // Multiple items open by default
+    >
+      {/* Items */}
+    </Accordion.Root>
+  );
+}
+```
+
+**Controlled:**
+
+```jsx
+import { useState } from 'react';
+import * as Accordion from '@radix-ui/react-accordion';
+
+function ControlledMultiple() {
+  const [value, setValue] = useState(['item-1']);
+
+  return (
+    <>
+      <Accordion.Root
+        type="multiple"
+        value={value}
+        onValueChange={setValue}
+      >
+        {/* Items */}
+      </Accordion.Root>
+      
+      <button onClick={() => setValue(['item-1', 'item-2', 'item-3'])}>
+        Open all
+      </button>
+      <button onClick={() => setValue([])}>
+        Close all
+      </button>
+    </>
+  );
+}
+```
+
+From `packages/react/accordion/src/accordion.tsx:161`:
+
+```tsx
+const [value, setValue] = useControllableState({
+  prop: valueProp,
+  defaultProp: defaultValue ?? [],
+  onChange: onValueChange,
+  caller: ACCORDION_NAME,
+});
+```
+
+---
+
+## State Change Callbacks
+
+All controlled components provide callbacks that fire when state changes.
+
+### Using Callbacks
+
+```jsx
+import { useState } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+
+function DialogWithCallbacks() {
+  const [open, setOpen] = useState(false);
+
+  const handleOpenChange = (newOpen) => {
+    console.log('Dialog is now:', newOpen ? 'open' : 'closed');
+    
+    // Track analytics
+    if (newOpen) {
+      analytics.track('dialog_opened');
+    }
+    
+    // Update state
+    setOpen(newOpen);
+  };
+
+  return (
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
+      {/* ... */}
+    </Dialog.Root>
+  );
+}
+```
+
+### Common Use Cases
+
+**1. Analytics tracking:**
+
+```jsx
+function TrackedAccordion() {
+  const handleValueChange = (value) => {
+    analytics.track('accordion_item_toggled', { value });
+  };
+
+  return (
+    <Accordion.Root
+      type="single"
+      defaultValue="item-1"
+      onValueChange={handleValueChange}
+    >
+      {/* ... */}
+    </Accordion.Root>
+  );
+}
+```
+
+**2. Persist to localStorage:**
+
+```jsx
+function PersistentAccordion() {
+  const [value, setValue] = useState(() => {
+    return localStorage.getItem('accordion-value') || 'item-1';
+  });
+
+  const handleValueChange = (newValue) => {
+    setValue(newValue);
+    localStorage.setItem('accordion-value', newValue);
+  };
+
+  return (
+    <Accordion.Root
+      type="single"
+      value={value}
+      onValueChange={handleValueChange}
+      collapsible
+    >
+      {/* ... */}
+    </Accordion.Root>
+  );
+}
+```
+
+**3. Sync with URL params:**
+
+```jsx
+import { useSearchParams } from 'react-router-dom';
+
+function URLSyncedAccordion() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const value = searchParams.get('section') || 'item-1';
+
+  const handleValueChange = (newValue) => {
+    setSearchParams({ section: newValue });
+  };
+
+  return (
+    <Accordion.Root
+      type="single"
+      value={value}
+      onValueChange={handleValueChange}
+      collapsible
+    >
+      {/* ... */}
+    </Accordion.Root>
+  );
+}
+```
+
+**4. Conditional logic:**
+
+```jsx
+function ConditionalDialog() {
+  const [open, setOpen] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(true);
+
+  const handleOpenChange = (newOpen) => {
+    if (!newOpen && hasUnsavedChanges) {
+      const confirmed = window.confirm('You have unsaved changes. Close anyway?');
+      if (!confirmed) return; // Don't close
+    }
+    setOpen(newOpen);
+  };
+
+  return (
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
+      {/* ... */}
+    </Dialog.Root>
+  );
+}
+```
+
+---
+
+## Finite State Machines
+
+Radix components use enumerated strings for state, not booleans.
+
+### Why Enums Over Booleans?
+
+❌ **Boolean state:**
+```typescript
+const [isOpen, setIsOpen] = useState(false);
+```
+
+Limitations:
+- Only two states
+- Doesn't scale to complex states
+- Less explicit
+
+✅ **Enumerated state:**
+```typescript
+type State = 'open' | 'closed';
+const [state, setState] = useState<State>('closed');
+```
+
+Benefits:
+- Explicit states
+- Easy to extend (add 'opening', 'closing', etc.)
+- Self-documenting
+- Type-safe
+
+### State Attributes
+
+Components expose state via `data-state` attributes:
+
+```jsx
+<Accordion.Item value="item-1">
+  {/* data-state="open" or data-state="closed" */}
+</Accordion.Item>
+```
+
+From `packages/react/accordion/src/accordion.tsx:372`:
+
+```tsx
+<CollapsiblePrimitive.Root
+  data-orientation={accordionContext.orientation}
+  data-state={getState(open)}
+  {...collapsibleScope}
+  {...accordionItemProps}
+  ref={forwardedRef}
+  disabled={disabled}
+  open={open}
+  onOpenChange={(open) => {
+    if (open) {
+      valueContext.onItemOpen(value);
+    } else {
+      valueContext.onItemClose(value);
+    }
+  }}
+/>
+```
+
+Helper function:
+```tsx
+function getState(open?: boolean) {
+  return open ? 'open' : 'closed';
+}
+```
+
+### Extended States
+
+Some components have richer state:
+
+```jsx
+// Checkbox has three states
+<Checkbox.Root checked={true} />        // data-state="checked"
+<Checkbox.Root checked={false} />       // data-state="unchecked"
+<Checkbox.Root checked="indeterminate" /> // data-state="indeterminate"
+```
+
+---
+
+## Advanced Patterns
+
+### Derived State
+
+Compute values from component state:
+
+```jsx
+function AccordionWithDerivedState() {
+  const [value, setValue] = useState(['item-1']);
+  
+  // Derived state
+  const allOpen = value.length === 3;
+  const allClosed = value.length === 0;
+  const someOpen = value.length > 0 && value.length < 3;
+
+  return (
+    <>
+      <div>
+        <span>Status: </span>
+        {allOpen && 'All items open'}
+        {allClosed && 'All items closed'}
+        {someOpen && `${value.length} items open`}
+      </div>
+      
+      <Accordion.Root
+        type="multiple"
+        value={value}
+        onValueChange={setValue}
+      >
+        {/* Items */}
+      </Accordion.Root>
+    </>
+  );
+}
+```
+
+### Coordinated State
+
+Manage multiple components together:
+
+```jsx
+function CoordinatedComponents() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [accordionValue, setAccordionValue] = useState('item-1');
+
+  // Open dialog when accordion changes
+  const handleAccordionChange = (newValue) => {
+    setAccordionValue(newValue);
+    if (newValue === 'item-3') {
+      setDialogOpen(true);
+    }
+  };
+
+  return (
+    <>
+      <Accordion.Root
+        type="single"
+        value={accordionValue}
+        onValueChange={handleAccordionChange}
+        collapsible
+      >
+        {/* Items */}
+      </Accordion.Root>
+
+      <Dialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
+        {/* Dialog */}
+      </Dialog.Root>
+    </>
+  );
+}
+```
+
+### State Machines with XState
+
+For complex state logic, integrate with state machine libraries:
+
+```jsx
+import { useMachine } from '@xstate/react';
+import { createMachine } from 'xstate';
+import * as Dialog from '@radix-ui/react-dialog';
+
+const dialogMachine = createMachine({
+  id: 'dialog',
+  initial: 'closed',
+  states: {
+    closed: {
+      on: { OPEN: 'open' }
+    },
+    open: {
+      on: {
+        CLOSE: 'closed',
+        CONFIRM: 'confirming'
+      }
+    },
+    confirming: {
+      on: {
+        SUCCESS: 'closed',
+        ERROR: 'open'
+      }
+    }
+  }
+});
+
+function StateMachineDialog() {
+  const [state, send] = useMachine(dialogMachine);
+  const open = state.matches('open') || state.matches('confirming');
+
+  const handleOpenChange = (newOpen) => {
+    if (newOpen) {
+      send('OPEN');
+    } else {
+      send('CLOSE');
+    }
+  };
+
+  return (
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
+      <Dialog.Trigger>Open</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay />
+        <Dialog.Content>
+          <Dialog.Title>Confirm Action</Dialog.Title>
+          <button
+            onClick={async () => {
+              send('CONFIRM');
+              try {
+                await performAction();
+                send('SUCCESS');
+              } catch (error) {
+                send('ERROR');
+              }
+            }}
+            disabled={state.matches('confirming')}
+          >
+            {state.matches('confirming') ? 'Loading...' : 'Confirm'}
+          </button>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+---
+
+## Best Practices
+
+### 1. Choose the Right Pattern
+
+<Tip>
+Use **uncontrolled** by default. Only use **controlled** when you need external access to state.
+</Tip>
+
+**Use uncontrolled when:**
+- Simple interactions
+- State doesn't need to be read elsewhere
+- No persistence required
+
+**Use controlled when:**
+- Need to read state
+- Sync with other state
+- Persist state
+- Conditional logic based on state
+- Analytics tracking
+
+### 2. Don't Switch Between Patterns
+
+<Warning>
+Never switch a component from controlled to uncontrolled (or vice versa) during its lifetime.
+</Warning>
+
+❌ **Avoid:**
+```jsx
+function BadExample({ shouldControl }) {
+  const [value, setValue] = useState('item-1');
+  
+  return (
+    <Accordion.Root
+      type="single"
+      // Switches between controlled and uncontrolled!
+      {...(shouldControl ? { value, onValueChange: setValue } : { defaultValue: 'item-1' })}
+    />
+  );
+}
+```
+
+Radix will warn you in development if you do this.
+
+### 3. Initialize State Consistently
+
+Ensure default/initial values match:
+
+```jsx
+const INITIAL_VALUE = 'item-1';
+
+function ConsistentExample() {
+  const [value, setValue] = useState(INITIAL_VALUE);
+  
+  return (
+    <Accordion.Root
+      type="single"
+      value={value}
+      onValueChange={setValue}
+      // Both use the same initial value
+    />
+  );
+}
+```
+
+### 4. Handle Edge Cases in Callbacks
+
+Validate state changes:
+
+```jsx
+function SafeDialog() {
+  const [open, setOpen] = useState(false);
+  const [isValid, setIsValid] = useState(true);
+
+  const handleOpenChange = (newOpen) => {
+    // Prevent closing if invalid
+    if (!newOpen && !isValid) {
+      alert('Please fix errors before closing');
+      return;
+    }
+    setOpen(newOpen);
+  };
+
+  return (
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
+      {/* ... */}
+    </Dialog.Root>
+  );
+}
+```
+
+---
+
+## Summary
+
+Radix UI state management provides:
+
+- **Flexibility** - Choose controlled or uncontrolled
+- **Consistency** - Same pattern across all components
+- **Callbacks** - React to state changes
+- **Explicit state** - Enumerated strings, not booleans
+- **Type safety** - Full TypeScript support
+
+<Note>
+The controlled/uncontrolled pattern gives you the flexibility to start simple and add complexity only when needed.
+</Note>
+
+---
+
+## Related Concepts
+
+- [Philosophy](/concepts/philosophy) - Learn about the principles behind state management
+- [Composability](/concepts/composability) - Understand how state works with composition
+- [Customization](/concepts/customization) - Style components based on state

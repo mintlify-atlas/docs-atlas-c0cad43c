@@ -1,0 +1,674 @@
+---
+title: "Internationalization"
+description: "Building globally accessible applications with RTL support, direction awareness, and locale considerations"
+---
+
+## Overview
+
+Radix UI Primitives are built with internationalization in mind, providing automatic support for right-to-left (RTL) languages and direction-aware interactions.
+
+<Note>
+Components automatically adapt keyboard navigation, positioning, and animations based on the reading direction of your application.
+</Note>
+
+---
+
+## Reading Direction (RTL/LTR)
+
+Reading direction affects how users interact with components. Radix components adapt automatically.
+
+### The Direction Provider
+
+Wrap your application with `DirectionProvider` to set the reading direction:
+
+```jsx
+import { DirectionProvider } from '@radix-ui/react-direction';
+import * as Accordion from '@radix-ui/react-accordion';
+
+function App() {
+  return (
+    <DirectionProvider dir="rtl">
+      <Accordion.Root type="single" collapsible>
+        {/* Components automatically adapt to RTL */}
+      </Accordion.Root>
+    </DirectionProvider>
+  );
+}
+```
+
+From `packages/react/direction/src/direction.tsx:14`:
+
+```tsx
+const DirectionProvider: React.FC<DirectionProviderProps> = (props) => {
+  const { dir, children } = props;
+  return <DirectionContext.Provider value={dir}>{children}</DirectionContext.Provider>;
+};
+```
+
+### Supported Values
+
+- `"ltr"` - Left-to-right (English, Spanish, French, etc.)
+- `"rtl"` - Right-to-left (Arabic, Hebrew, Persian, etc.)
+
+### Using the Direction Hook
+
+Components use the `useDirection` hook internally to adapt behavior:
+
+```tsx
+import { useDirection } from '@radix-ui/react-direction';
+
+function MyComponent({ dir }) {
+  const direction = useDirection(dir);
+  // direction is 'ltr' or 'rtl'
+  
+  return (
+    <div style={{ textAlign: direction === 'rtl' ? 'right' : 'left' }}>
+      Content
+    </div>
+  );
+}
+```
+
+From `packages/react/direction/src/direction.tsx:21`:
+
+```tsx
+function useDirection(localDir?: Direction) {
+  const globalDir = React.useContext(DirectionContext);
+  return localDir || globalDir || 'ltr';
+}
+```
+
+<Tip>
+The hook respects component-level `dir` props over global context, and defaults to `"ltr"` if neither is provided.
+</Tip>
+
+---
+
+## Direction-Aware Keyboard Navigation
+
+Components automatically adjust keyboard navigation based on reading direction.
+
+### Example: Accordion
+
+In `packages/react/accordion/src/accordion.tsx:230`, the Accordion component adapts arrow key behavior:
+
+```tsx
+const AccordionImpl = React.forwardRef<AccordionImplElement, AccordionImplProps>(
+  (props, forwardedRef) => {
+    const { dir, orientation = 'vertical', ...accordionProps } = props;
+    const direction = useDirection(dir);
+    const isDirectionLTR = direction === 'ltr';
+
+    const handleKeyDown = composeEventHandlers(props.onKeyDown, (event) => {
+      // ... trigger collection logic ...
+
+      switch (event.key) {
+        case 'ArrowRight':
+          if (orientation === 'horizontal') {
+            if (isDirectionLTR) {
+              moveNext(); // LTR: right = next
+            } else {
+              movePrev(); // RTL: right = previous
+            }
+          }
+          break;
+        case 'ArrowLeft':
+          if (orientation === 'horizontal') {
+            if (isDirectionLTR) {
+              movePrev(); // LTR: left = previous
+            } else {
+              moveNext(); // RTL: left = next
+            }
+          }
+          break;
+        // ...
+      }
+    });
+
+    return (
+      <Primitive.div
+        {...accordionProps}
+        data-orientation={orientation}
+        ref={composedRefs}
+        onKeyDown={disabled ? undefined : handleKeyDown}
+      />
+    );
+  },
+);
+```
+
+### What Gets Adapted
+
+**LTR (left-to-right):**
+- Arrow Right → Move forward/next
+- Arrow Left → Move backward/previous
+
+**RTL (right-to-left):**
+- Arrow Right → Move backward/previous
+- Arrow Left → Move forward/next
+
+<Note>
+This happens automatically. You don't need to write conditional logic for RTL support.
+</Note>
+
+---
+
+## Per-Component Direction
+
+You can override the global direction for individual components:
+
+```jsx
+import { DirectionProvider } from '@radix-ui/react-direction';
+import * as Accordion from '@radix-ui/react-accordion';
+
+function App() {
+  return (
+    <DirectionProvider dir="ltr">
+      <div>
+        {/* This accordion uses LTR (from provider) */}
+        <Accordion.Root type="single" collapsible>
+          {/* ... */}
+        </Accordion.Root>
+
+        {/* This accordion overrides to RTL */}
+        <Accordion.Root type="single" collapsible dir="rtl">
+          {/* ... */}
+        </Accordion.Root>
+      </div>
+    </DirectionProvider>
+  );
+}
+```
+
+### Components Supporting `dir` Prop
+
+These components accept a `dir` prop:
+
+- Accordion
+- ContextMenu
+- DropdownMenu
+- HoverCard
+- Menubar
+- NavigationMenu
+- Popover
+- Select
+- Tooltip
+
+Check component documentation for specifics.
+
+---
+
+## Styling for RTL
+
+### Logical Properties
+
+Use CSS logical properties for automatic RTL support:
+
+```css
+/* Bad: Fixed directional properties */
+.element {
+  margin-left: 16px;
+  padding-right: 8px;
+  border-left: 1px solid gray;
+}
+
+/* Good: Logical properties */
+.element {
+  margin-inline-start: 16px;
+  padding-inline-end: 8px;
+  border-inline-start: 1px solid gray;
+}
+```
+
+**Logical property mappings:**
+
+| Physical | Logical | LTR | RTL |
+|----------|---------|-----|-----|
+| `margin-left` | `margin-inline-start` | left | right |
+| `margin-right` | `margin-inline-end` | right | left |
+| `padding-left` | `padding-inline-start` | left | right |
+| `padding-right` | `padding-inline-end` | right | left |
+| `left` | `inset-inline-start` | left | right |
+| `right` | `inset-inline-end` | right | left |
+
+### Direction Attribute Selectors
+
+Use `[dir]` attribute in CSS:
+
+```css
+/* LTR-specific styles */
+[dir="ltr"] .element {
+  text-align: left;
+}
+
+/* RTL-specific styles */
+[dir="rtl"] .element {
+  text-align: right;
+}
+```
+
+### Transforms and Animations
+
+Flip transforms for RTL:
+
+```css
+.icon {
+  transition: transform 200ms;
+}
+
+[dir="ltr"] .icon[data-state="open"] {
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .icon[data-state="open"] {
+  transform: rotate(-180deg);
+}
+```
+
+### Tailwind CSS
+
+Tailwind supports RTL with the `rtl:` modifier:
+
+```jsx
+<div className="ml-4 rtl:mr-4 rtl:ml-0">
+  Content
+</div>
+```
+
+Or enable RTL mode globally:
+
+```js
+// tailwind.config.js
+module.exports = {
+  theme: {
+    // ...
+  },
+  plugins: [
+    require('tailwindcss-rtl'),
+  ],
+}
+```
+
+---
+
+## Complete RTL Example
+
+Here's a fully RTL-aware component:
+
+```jsx
+import { DirectionProvider } from '@radix-ui/react-direction';
+import * as Accordion from '@radix-ui/react-accordion';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
+import './styles.css';
+
+function App() {
+  const [locale, setLocale] = useState('en');
+  const dir = locale === 'ar' ? 'rtl' : 'ltr';
+
+  return (
+    <DirectionProvider dir={dir}>
+      <div dir={dir}>
+        <header>
+          <select value={locale} onChange={(e) => setLocale(e.target.value)}>
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+            <option value="he">עברית</option>
+          </select>
+        </header>
+
+        <Accordion.Root type="single" collapsible className="accordion">
+          <Accordion.Item value="item-1" className="accordion-item">
+            <Accordion.Header>
+              <Accordion.Trigger className="accordion-trigger">
+                <span>{locale === 'ar' ? 'هل يمكن الوصول إليه؟' : 'Is it accessible?'}</span>
+                <ChevronDownIcon className="accordion-chevron" aria-hidden />
+              </Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Content className="accordion-content">
+              {locale === 'ar'
+                ? 'نعم. إنه يلتزم بأنماط تصميم WAI-ARIA.'
+                : 'Yes. It adheres to the WAI-ARIA design patterns.'}
+            </Accordion.Content>
+          </Accordion.Item>
+        </Accordion.Root>
+      </div>
+    </DirectionProvider>
+  );
+}
+```
+
+With RTL-aware CSS:
+
+```css
+/* styles.css */
+.accordion {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.accordion-item {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.accordion-item:last-child {
+  border-bottom: none;
+}
+
+.accordion-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.accordion-trigger:hover {
+  background-color: #f9fafb;
+}
+
+.accordion-chevron {
+  transition: transform 200ms;
+}
+
+[dir="ltr"] .accordion-chevron[data-state="open"] {
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .accordion-chevron[data-state="open"] {
+  transform: rotate(-180deg);
+}
+
+.accordion-content {
+  padding: 16px;
+  /* Use logical properties */
+  padding-inline-start: 24px;
+  padding-inline-end: 24px;
+}
+
+/* Animation */
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+.accordion-content[data-state="open"] {
+  animation: slideDown 300ms ease-out;
+}
+```
+
+---
+
+## Locale Considerations
+
+### Text Alignment
+
+Match text alignment to reading direction:
+
+```jsx
+import { useDirection } from '@radix-ui/react-direction';
+
+function LocalizedText({ children }) {
+  const direction = useDirection();
+  
+  return (
+    <p style={{ textAlign: direction === 'rtl' ? 'right' : 'left' }}>
+      {children}
+    </p>
+  );
+}
+```
+
+### Date and Number Formatting
+
+Use `Intl` APIs for locale-aware formatting:
+
+```jsx
+function LocalizedDate({ date, locale }) {
+  const formatted = new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(date);
+
+  return <time>{formatted}</time>;
+}
+
+// Usage
+<LocalizedDate date={new Date()} locale="ar-EG" />
+// Output: ٤ مارس ٢٠٢٦
+```
+
+### String Translation
+
+Integrate with i18n libraries:
+
+```jsx
+import { useTranslation } from 'react-i18next';
+import * as Dialog from '@radix-ui/react-dialog';
+
+function LocalizedDialog() {
+  const { t, i18n } = useTranslation();
+  const dir = i18n.dir(); // 'ltr' or 'rtl'
+
+  return (
+    <DirectionProvider dir={dir}>
+      <Dialog.Root>
+        <Dialog.Trigger>{t('dialog.open')}</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay />
+          <Dialog.Content>
+            <Dialog.Title>{t('dialog.title')}</Dialog.Title>
+            <Dialog.Description>{t('dialog.description')}</Dialog.Description>
+            <Dialog.Close>{t('dialog.close')}</Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </DirectionProvider>
+  );
+}
+```
+
+---
+
+## HTML Direction Attribute
+
+Always set the `dir` attribute on your HTML:
+
+```jsx
+function App() {
+  const [locale, setLocale] = useState('en');
+  const dir = ['ar', 'he', 'fa'].includes(locale) ? 'rtl' : 'ltr';
+
+  useEffect(() => {
+    document.documentElement.dir = dir;
+  }, [dir]);
+
+  return (
+    <DirectionProvider dir={dir}>
+      {/* App content */}
+    </DirectionProvider>
+  );
+}
+```
+
+Or in your HTML template:
+
+```html
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+```
+
+<Note>
+Setting `dir` on the `<html>` element ensures the entire document respects the reading direction, including browser UI like scrollbars.
+</Note>
+
+---
+
+## Testing RTL Support
+
+### Manual Testing
+
+1. Add the DirectionProvider with `dir="rtl"`
+2. Verify visual layout mirrors correctly
+3. Test keyboard navigation (arrow keys)
+4. Check text alignment and spacing
+5. Test on actual RTL content (Arabic, Hebrew)
+
+### Automated Testing
+
+```jsx
+import { render, screen } from '@testing-library/react';
+import { DirectionProvider } from '@radix-ui/react-direction';
+import * as Accordion from '@radix-ui/react-accordion';
+
+test('accordion adapts to RTL', () => {
+  render(
+    <DirectionProvider dir="rtl">
+      <Accordion.Root type="single" collapsible>
+        <Accordion.Item value="item-1">
+          <Accordion.Header>
+            <Accordion.Trigger>Trigger</Accordion.Trigger>
+          </Accordion.Header>
+          <Accordion.Content>Content</Accordion.Content>
+        </Accordion.Item>
+      </Accordion.Root>
+    </DirectionProvider>
+  );
+
+  // Test that component received RTL context
+  // (implementation-specific tests)
+});
+```
+
+---
+
+## Common RTL Pitfalls
+
+### 1. Hardcoded Directional Styles
+
+❌ **Avoid:**
+```css
+.element {
+  margin-left: 16px; /* Won't flip in RTL */
+}
+```
+
+✅ **Use:**
+```css
+.element {
+  margin-inline-start: 16px; /* Automatically flips */
+}
+```
+
+### 2. Missing `dir` Attribute
+
+❌ **Avoid:**
+```jsx
+<DirectionProvider dir="rtl">
+  {/* Missing dir on DOM */}
+  <div>
+    <Accordion.Root>{/* ... */}</Accordion.Root>
+  </div>
+</DirectionProvider>
+```
+
+✅ **Include:**
+```jsx
+<DirectionProvider dir="rtl">
+  <div dir="rtl">
+    <Accordion.Root>{/* ... */}</Accordion.Root>
+  </div>
+</DirectionProvider>
+```
+
+### 3. Asymmetric Layouts
+
+Be careful with custom layouts that assume LTR:
+
+❌ **Avoid:**
+```jsx
+<div style={{ paddingLeft: 40, paddingRight: 16 }}>
+  {/* Won't mirror correctly */}
+</div>
+```
+
+✅ **Use:**
+```jsx
+<div style={{ paddingInlineStart: 40, paddingInlineEnd: 16 }}>
+  {/* Mirrors correctly */}
+</div>
+```
+
+### 4. Icons and Images
+
+Flip directional icons in RTL:
+
+```jsx
+import { ChevronRightIcon } from '@radix-ui/react-icons';
+import { useDirection } from '@radix-ui/react-direction';
+
+function DirectionalChevron() {
+  const direction = useDirection();
+  
+  return (
+    <ChevronRightIcon
+      style={{
+        transform: direction === 'rtl' ? 'scaleX(-1)' : undefined,
+      }}
+    />
+  );
+}
+```
+
+---
+
+## Browser Support
+
+RTL features are well-supported:
+
+- **CSS logical properties**: All modern browsers
+- **`dir` attribute**: All browsers
+- **DirectionProvider**: Works everywhere React works
+
+<Tip>
+For older browsers, consider adding a PostCSS plugin to transform logical properties to physical ones with `[dir]` selectors.
+</Tip>
+
+---
+
+## Summary
+
+Radix UI internationalization provides:
+
+- **Automatic RTL support** via DirectionProvider
+- **Direction-aware keyboard navigation**
+- **Per-component direction overrides**
+- **Works with any i18n library**
+- **No extra configuration needed**
+
+<Note>
+Just wrap your app with `DirectionProvider` and Radix components automatically adapt to the reading direction.
+</Note>
+
+---
+
+## Related Concepts
+
+- [Philosophy](/concepts/philosophy) - Learn about the principles behind i18n support
+- [Customization](/concepts/customization) - Style components for different locales
+- [State Management](/concepts/state-management) - Manage locale-aware state

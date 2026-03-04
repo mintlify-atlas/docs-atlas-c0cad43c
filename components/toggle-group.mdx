@@ -1,0 +1,260 @@
+---
+title: "Toggle Group"
+description: "A set of two-state buttons that can be toggled on or off."
+---
+
+## Overview
+
+Toggle Group provides a set of toggle buttons that work together. It supports both single and multiple selection modes, making it useful for toolbar buttons, formatting options, or filter selections.
+
+## Features
+
+- Supports single or multiple selection
+- Can be controlled or uncontrolled
+- Full keyboard navigation with roving focus
+- Supports horizontal/vertical orientation
+- Accessible by default with proper ARIA attributes
+
+## Installation
+
+```bash
+npm install @radix-ui/react-toggle-group
+```
+
+## Anatomy
+
+```jsx
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
+
+export default () => (
+  <ToggleGroup.Root>
+    <ToggleGroup.Item />
+  </ToggleGroup.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the toggle group items.
+
+<ParamField path="type" type="'single' | 'multiple'" required>
+  Determines whether a single or multiple items can be pressed at a time.
+</ParamField>
+
+**When `type="single"`:**
+
+<ParamField path="value" type="string">
+  The controlled value of the pressed item.
+</ParamField>
+
+<ParamField path="defaultValue" type="string">
+  The value of the item to show as pressed when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Event handler called when the pressed state changes.
+</ParamField>
+
+**When `type="multiple"`:**
+
+<ParamField path="value" type="string[]">
+  The controlled value of the pressed items.
+</ParamField>
+
+<ParamField path="defaultValue" type="string[]">
+  The values of the items to show as pressed when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string[]) => void">
+  Event handler called when the pressed state changes.
+</ParamField>
+
+**Common props:**
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the toggle group and all its items.
+</ParamField>
+
+<ParamField path="rovingFocus" type="boolean" default="true">
+  When false, navigating through the items using arrow keys will be disabled.
+</ParamField>
+
+<ParamField path="orientation" type="'horizontal' | 'vertical'" default="'horizontal'">
+  The orientation of the component.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction of the toggle group. If omitted, inherits from the parent.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="true">
+  When loop and rovingFocus are true, keyboard navigation will loop from last item to first, and vice versa.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Item
+
+An item in the toggle group.
+
+<ParamField path="value" type="string" required>
+  A unique value for the item.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Single Selection
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import {
+  TextAlignLeftIcon,
+  TextAlignCenterIcon,
+  TextAlignRightIcon,
+} from '@radix-ui/react-icons';
+import './styles.css';
+
+export default () => (
+  <ToggleGroup.Root
+    className="ToggleGroup"
+    type="single"
+    defaultValue="center"
+    aria-label="Text alignment"
+  >
+    <ToggleGroup.Item className="ToggleGroupItem" value="left" aria-label="Left aligned">
+      <TextAlignLeftIcon />
+    </ToggleGroup.Item>
+    <ToggleGroup.Item className="ToggleGroupItem" value="center" aria-label="Center aligned">
+      <TextAlignCenterIcon />
+    </ToggleGroup.Item>
+    <ToggleGroup.Item className="ToggleGroupItem" value="right" aria-label="Right aligned">
+      <TextAlignRightIcon />
+    </ToggleGroup.Item>
+  </ToggleGroup.Root>
+);
+```
+
+```jsx Multiple Selection
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import { FontBoldIcon, FontItalicIcon, UnderlineIcon } from '@radix-ui/react-icons';
+import './styles.css';
+
+export default () => (
+  <ToggleGroup.Root
+    className="ToggleGroup"
+    type="multiple"
+    defaultValue={['bold', 'italic']}
+    aria-label="Text formatting"
+  >
+    <ToggleGroup.Item className="ToggleGroupItem" value="bold" aria-label="Bold">
+      <FontBoldIcon />
+    </ToggleGroup.Item>
+    <ToggleGroup.Item className="ToggleGroupItem" value="italic" aria-label="Italic">
+      <FontItalicIcon />
+    </ToggleGroup.Item>
+    <ToggleGroup.Item className="ToggleGroupItem" value="underline" aria-label="Underline">
+      <UnderlineIcon />
+    </ToggleGroup.Item>
+  </ToggleGroup.Root>
+);
+```
+
+```jsx Controlled Single
+import { useState } from 'react';
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
+
+export default () => {
+  const [value, setValue] = useState('left');
+
+  return (
+    <div>
+      <ToggleGroup.Root
+        type="single"
+        value={value}
+        onValueChange={(value) => {
+          if (value) setValue(value);
+        }}
+      >
+        <ToggleGroup.Item value="left">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="center">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="right">Right</ToggleGroup.Item>
+      </ToggleGroup.Root>
+      <p>Alignment: {value}</p>
+    </div>
+  );
+};
+```
+
+```jsx Controlled Multiple
+import { useState } from 'react';
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
+
+export default () => {
+  const [value, setValue] = useState(['bold']);
+
+  return (
+    <div>
+      <ToggleGroup.Root type="multiple" value={value} onValueChange={setValue}>
+        <ToggleGroup.Item value="bold">Bold</ToggleGroup.Item>
+        <ToggleGroup.Item value="italic">Italic</ToggleGroup.Item>
+        <ToggleGroup.Item value="underline">Underline</ToggleGroup.Item>
+      </ToggleGroup.Root>
+      <p>Active: {value.join(', ')}</p>
+    </div>
+  );
+};
+```
+
+```jsx Vertical
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
+
+export default () => (
+  <ToggleGroup.Root type="single" orientation="vertical">
+    <ToggleGroup.Item value="a">A</ToggleGroup.Item>
+    <ToggleGroup.Item value="b">B</ToggleGroup.Item>
+    <ToggleGroup.Item value="c">C</ToggleGroup.Item>
+  </ToggleGroup.Root>
+);
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Uses [roving tabindex](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/#kbd_roving_tabindex) to manage focus movement among items.
+</Note>
+
+### Keyboard Interactions
+
+- **Tab** - Moves focus to either the pressed item or the first item in the group.
+- **Space** - Activates/deactivates the item.
+- **Enter** - Activates/deactivates the item.
+- **ArrowDown** - Moves focus to the next item in the group (vertical orientation).
+- **ArrowRight** - Moves focus to the next item in the group (horizontal orientation).
+- **ArrowUp** - Moves focus to the previous item in the group (vertical orientation).
+- **ArrowLeft** - Moves focus to the previous item in the group (horizontal orientation).
+- **Home** - Moves focus to the first item.
+- **End** - Moves focus to the last item.
+
+### Data Attributes
+
+**Root**
+
+- `[data-orientation]` - "horizontal" or "vertical"
+
+**Item**
+
+- `[data-state]` - "on" or "off"
+- `[data-disabled]` - Present when disabled
+- `[data-orientation]` - "horizontal" or "vertical"

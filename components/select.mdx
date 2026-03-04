@@ -1,0 +1,425 @@
+---
+title: "Select"
+description: "Displays a list of options for the user to pick from—triggered by a button."
+---
+
+## Overview
+
+Select provides a dropdown menu for selecting a value from a list of options. It's similar to a native `<select>` element but with enhanced customization, keyboard navigation, and accessibility features.
+
+## Features
+
+- Full keyboard navigation
+- Can be controlled or uncontrolled
+- Supports custom placeholder
+- Supports grouping of items
+- Supports labels and separators
+- Focus automatically managed
+- Typeahead support
+- Works inside forms
+- Customizable positioning and collision detection
+- Scrollable content area with scroll buttons
+
+## Installation
+
+```bash
+npm install @radix-ui/react-select
+```
+
+## Anatomy
+
+```jsx
+import * as Select from '@radix-ui/react-select';
+
+export default () => (
+  <Select.Root>
+    <Select.Trigger>
+      <Select.Value />
+      <Select.Icon />
+    </Select.Trigger>
+    <Select.Portal>
+      <Select.Content>
+        <Select.ScrollUpButton />
+        <Select.Viewport>
+          <Select.Item>
+            <Select.ItemText />
+            <Select.ItemIndicator />
+          </Select.Item>
+
+          <Select.Group>
+            <Select.Label />
+            <Select.Item>
+              <Select.ItemText />
+              <Select.ItemIndicator />
+            </Select.Item>
+          </Select.Group>
+
+          <Select.Separator />
+        </Select.Viewport>
+        <Select.ScrollDownButton />
+        <Select.Arrow />
+      </Select.Content>
+    </Select.Portal>
+  </Select.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the select component parts.
+
+<ParamField path="value" type="string">
+  The controlled value of the select.
+</ParamField>
+
+<ParamField path="defaultValue" type="string">
+  The value of the select when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Event handler called when the value changes.
+</ParamField>
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the select.
+</ParamField>
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state changes.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction. If omitted, inherits from the parent.
+</ParamField>
+
+<ParamField path="name" type="string">
+  The name of the select. Submitted with its owning form as part of a name/value pair.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the select.
+</ParamField>
+
+<ParamField path="required" type="boolean">
+  When true, indicates that the user must select a value before the form can be submitted.
+</ParamField>
+
+### Trigger
+
+The button that toggles the select.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Value
+
+The part that reflects the selected value. By default it will render the selected item's text. Use the `placeholder` prop for when there is no value.
+
+<ParamField path="placeholder" type="React.ReactNode">
+  The content that will be rendered when no value is selected.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Icon
+
+A small icon often displayed next to the value as a visual affordance for the fact it can be opened.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Portal
+
+When used, portals the content part into the body.
+
+<ParamField path="container" type="HTMLElement">
+  Specify a container element to portal the content into.
+</ParamField>
+
+### Content
+
+The component that pops out when the select is open.
+
+<ParamField path="onCloseAutoFocus" type="(event: Event) => void">
+  Event handler called when focus moves back after closing.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is down.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer event occurs outside the bounds of the component.
+</ParamField>
+
+<ParamField path="position" type="'item-aligned' | 'popper'" default="'item-aligned'">
+  The positioning mode to use.
+  - **item-aligned**: Positions content aligned with the selected item
+  - **popper**: Positions content using a positioning engine
+</ParamField>
+
+<ParamField path="side" type="'top' | 'right' | 'bottom' | 'left'" default="'bottom'">
+  The preferred side of the trigger to render against when open (only available when position is set to `popper`).
+</ParamField>
+
+<ParamField path="sideOffset" type="number" default="0">
+  The distance in pixels from the trigger (only available when position is set to `popper`).
+</ParamField>
+
+<ParamField path="align" type="'start' | 'center' | 'end'" default="'start'">
+  The preferred alignment against the trigger (only available when position is set to `popper`).
+</ParamField>
+
+<ParamField path="alignOffset" type="number" default="0">
+  An offset in pixels from the "start" or "end" alignment options (only available when position is set to `popper`).
+</ParamField>
+
+<ParamField path="avoidCollisions" type="boolean" default="true">
+  When true, overrides the side and align preferences to prevent collisions (only available when position is set to `popper`).
+</ParamField>
+
+<ParamField path="collisionBoundary" type="Element | Element[]" default="[]">
+  The element(s) used as collision boundary (only available when position is set to `popper`).
+</ParamField>
+
+<ParamField path="collisionPadding" type="number | Partial<Record<Side, number>>" default="0">
+  The distance in pixels from the boundary edges (only available when position is set to `popper`).
+</ParamField>
+
+<ParamField path="arrowPadding" type="number" default="0">
+  The padding between the arrow and the edges of the content (only available when position is set to `popper`).
+</ParamField>
+
+<ParamField path="sticky" type="'partial' | 'always'" default="'partial'">
+  The sticky behavior on the align axis (only available when position is set to `popper`).
+</ParamField>
+
+<ParamField path="hideWhenDetached" type="boolean" default="false">
+  Whether to hide the content when the trigger becomes fully occluded (only available when position is set to `popper`).
+</ParamField>
+
+### Viewport
+
+The scrolling viewport that contains all of the items.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Item
+
+The component that contains the select items.
+
+<ParamField path="value" type="string" required>
+  The value given as data when submitted with a name.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes. By default the typeahead behavior will use the text content.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### ItemText
+
+The textual part of the item. It should only contain the text you want to announce to assistive technology when the item is selected.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### ItemIndicator
+
+Renders when the item is selected. You can style this element directly, or you can use it as a wrapper to put an icon into.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### ScrollUpButton
+
+An optional button used to indicate when the viewport can be scrolled up.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### ScrollDownButton
+
+An optional button used to indicate when the viewport can be scrolled down.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Group
+
+Used to group multiple items. Use in conjunction with Label to ensure good accessibility via automatic labelling.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Label
+
+Used to render the label of a group. It won't be focusable using arrow keys.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Separator
+
+Used to visually separate items in the select.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Arrow
+
+An optional arrow element to render alongside the content.
+
+<ParamField path="width" type="number" default="10">
+  The width of the arrow in pixels.
+</ParamField>
+
+<ParamField path="height" type="number" default="5">
+  The height of the arrow in pixels.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as Select from '@radix-ui/react-select';
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
+import './styles.css';
+
+export default () => (
+  <Select.Root>
+    <Select.Trigger className="SelectTrigger" aria-label="Food">
+      <Select.Value placeholder="Select a fruit…" />
+      <Select.Icon className="SelectIcon">
+        <ChevronDownIcon />
+      </Select.Icon>
+    </Select.Trigger>
+    <Select.Portal>
+      <Select.Content className="SelectContent">
+        <Select.ScrollUpButton className="SelectScrollButton">
+          <ChevronUpIcon />
+        </Select.ScrollUpButton>
+        <Select.Viewport className="SelectViewport">
+          <Select.Group>
+            <Select.Label className="SelectLabel">Fruits</Select.Label>
+            <Select.Item value="apple" className="SelectItem">
+              <Select.ItemText>Apple</Select.ItemText>
+              <Select.ItemIndicator className="SelectItemIndicator">
+                <CheckIcon />
+              </Select.ItemIndicator>
+            </Select.Item>
+            <Select.Item value="banana" className="SelectItem">
+              <Select.ItemText>Banana</Select.ItemText>
+              <Select.ItemIndicator className="SelectItemIndicator">
+                <CheckIcon />
+              </Select.ItemIndicator>
+            </Select.Item>
+            <Select.Item value="blueberry" className="SelectItem">
+              <Select.ItemText>Blueberry</Select.ItemText>
+              <Select.ItemIndicator className="SelectItemIndicator">
+                <CheckIcon />
+              </Select.ItemIndicator>
+            </Select.Item>
+          </Select.Group>
+
+          <Select.Separator className="SelectSeparator" />
+
+          <Select.Group>
+            <Select.Label className="SelectLabel">Vegetables</Select.Label>
+            <Select.Item value="carrot" className="SelectItem">
+              <Select.ItemText>Carrot</Select.ItemText>
+              <Select.ItemIndicator className="SelectItemIndicator">
+                <CheckIcon />
+              </Select.ItemIndicator>
+            </Select.Item>
+            <Select.Item value="potato" className="SelectItem">
+              <Select.ItemText>Potato</Select.ItemText>
+              <Select.ItemIndicator className="SelectItemIndicator">
+                <CheckIcon />
+              </Select.ItemIndicator>
+            </Select.Item>
+          </Select.Group>
+        </Select.Viewport>
+        <Select.ScrollDownButton className="SelectScrollButton">
+          <ChevronDownIcon />
+        </Select.ScrollDownButton>
+      </Select.Content>
+    </Select.Portal>
+  </Select.Root>
+);
+```
+
+```jsx Controlled
+import { useState } from 'react';
+import * as Select from '@radix-ui/react-select';
+
+export default () => {
+  const [value, setValue] = useState('apple');
+
+  return (
+    <Select.Root value={value} onValueChange={setValue}>
+      <Select.Trigger>
+        <Select.Value />
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Content>
+          <Select.Viewport>
+            <Select.Item value="apple">
+              <Select.ItemText>Apple</Select.ItemText>
+            </Select.Item>
+            <Select.Item value="banana">
+              <Select.ItemText>Banana</Select.ItemText>
+            </Select.Item>
+          </Select.Viewport>
+        </Select.Content>
+      </Select.Portal>
+    </Select.Root>
+  );
+};
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Adheres to the [ListBox WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/listbox/).
+</Note>
+
+### Keyboard Interactions
+
+- **Space** - When focus is on the trigger, opens the select and focuses the selected item.
+- **Enter** - When focus is on the trigger, opens the select and focuses the first item.
+- **ArrowDown** - When focus is on the trigger, opens the select. When focus is on an item, moves focus to the next item.
+- **ArrowUp** - When focus is on the trigger, opens the select. When focus is on an item, moves focus to the previous item.
+- **Esc** - Closes the select and moves focus to the trigger.
+- **A-Z** - When focus is on the trigger or an item, opens the select (if closed) and focuses the first item starting with that letter.

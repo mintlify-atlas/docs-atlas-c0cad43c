@@ -1,0 +1,369 @@
+---
+title: Presence
+description: Animates components when they mount and unmount, waiting for CSS animations to complete before unmounting.
+---
+
+`Presence` is a component that helps you animate elements in and out of the DOM. It keeps elements mounted during exit animations and provides a `present` state to child components, enabling smooth mount and unmount animations.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-presence
+```
+
+## Component
+
+### Presence
+
+```tsx
+interface PresenceProps {
+  children: React.ReactElement | ((props: { present: boolean }) => React.ReactElement);
+  present: boolean;
+}
+```
+
+## Props
+
+<ParamField path="present" type="boolean" required>
+  Whether the component should be present (mounted) in the DOM. When `false`, the component remains mounted until exit animations complete.
+</ParamField>
+
+<ParamField path="children" type="React.ReactElement | ((props: { present: boolean }) => React.ReactElement)" required>
+  The element to animate. Can be a React element or a render function that receives `present` state.
+</ParamField>
+
+## Usage
+
+### Basic Fade Animation
+
+```tsx
+import { Presence } from '@radix-ui/react-presence';
+import { useState } from 'react';
+import './animations.css';
+
+function FadeExample() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(!isOpen)}>Toggle</button>
+      
+      <Presence present={isOpen}>
+        <div className="fade">
+          I fade in and out!
+        </div>
+      </Presence>
+    </>
+  );
+}
+```
+
+```css
+/* animations.css */
+.fade {
+  animation: fadeIn 200ms ease-out;
+}
+
+.fade[data-state='closed'] {
+  animation: fadeOut 200ms ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+```
+
+### Using Render Function
+
+```tsx
+import { Presence } from '@radix-ui/react-presence';
+import { useState } from 'react';
+
+function RenderFunctionExample() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(!isOpen)}>Toggle</button>
+      
+      <Presence present={isOpen}>
+        {({ present }) => (
+          <div data-state={present ? 'open' : 'closed'}>
+            {present ? 'Visible' : 'Exiting...'}
+          </div>
+        )}
+      </Presence>
+    </>
+  );
+}
+```
+
+### Slide Animation
+
+```tsx
+import { Presence } from '@radix-ui/react-presence';
+import { useState } from 'react';
+
+function SlideExample() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(!isOpen)}>Toggle Drawer</button>
+      
+      <Presence present={isOpen}>
+        <div className="drawer" data-state={isOpen ? 'open' : 'closed'}>
+          <h2>Drawer Content</h2>
+          <button onClick={() => setIsOpen(false)}>Close</button>
+        </div>
+      </Presence>
+    </>
+  );
+}
+```
+
+```css
+.drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 300px;
+  background: white;
+  animation: slideIn 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawer[data-state='closed'] {
+  animation: slideOut 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+```
+
+### Scale Animation
+
+```tsx
+import { Presence } from '@radix-ui/react-presence';
+import { useState } from 'react';
+
+function ScaleExample() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(!isOpen)}>Toggle Modal</button>
+      
+      {isOpen && (
+        <div className="overlay">
+          <Presence present={isOpen}>
+            <div className="modal" data-state={isOpen ? 'open' : 'closed'}>
+              <h2>Modal</h2>
+              <button onClick={() => setIsOpen(false)}>Close</button>
+            </div>
+          </Presence>
+        </div>
+      )}
+    </>
+  );
+}
+```
+
+```css
+.modal {
+  animation: scaleIn 200ms ease-out;
+}
+
+.modal[data-state='closed'] {
+  animation: scaleOut 200ms ease-in;
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleOut {
+  from { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  to { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+```
+
+### Multiple Animations
+
+```tsx
+import { Presence } from '@radix-ui/react-presence';
+import { useState } from 'react';
+
+function Toast() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const showToast = () => {
+    setIsVisible(true);
+    setTimeout(() => setIsVisible(false), 3000);
+  };
+
+  return (
+    <>
+      <button onClick={showToast}>Show Toast</button>
+      
+      <Presence present={isVisible}>
+        <div className="toast">
+          Success! Item saved.
+        </div>
+      </Presence>
+    </>
+  );
+}
+```
+
+```css
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 24px;
+  background: #000;
+  color: #fff;
+  border-radius: 6px;
+  animation: slideUp 300ms ease-out;
+}
+
+.toast[data-state='closed'] {
+  animation: slideDown 300ms ease-in;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to { 
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+```
+
+### Conditional Content Based on State
+
+```tsx
+import { Presence } from '@radix-ui/react-presence';
+import { useState } from 'react';
+
+function ConditionalExample() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(!isOpen)}>Toggle</button>
+      
+      <Presence present={isOpen}>
+        {({ present }) => (
+          <div className="panel">
+            {present ? (
+              <div>Content is visible</div>
+            ) : (
+              <div>Animating out...</div>
+            )}
+          </div>
+        )}
+      </Presence>
+    </>
+  );
+}
+```
+
+## How It Works
+
+`Presence` uses a state machine with three states:
+
+1. **mounted**: Component is present and visible
+2. **unmountSuspended**: Component is animating out (exit animation)
+3. **unmounted**: Component is removed from DOM
+
+### State Transitions
+
+- When `present` changes from `false` to `true`: `unmounted` → `mounted`
+- When `present` changes from `true` to `false`:
+  - If CSS animation detected: `mounted` → `unmountSuspended`
+  - When animation ends: `unmountSuspended` → `unmounted`
+  - If no animation: `mounted` → `unmounted` (immediate)
+
+### Animation Detection
+
+The component:
+- Reads computed styles to detect CSS animations
+- Listens to `animationend`, `animationcancel`, and `animationstart` events
+- Waits for animations to complete before unmounting
+- Handles animation interruptions (e.g., when `present` changes mid-animation)
+
+## Important Notes
+
+<Note>
+  The component detects CSS animations by reading the `animation-name` computed style. Make sure your exit animations have a different `animation-name` than entry animations.
+</Note>
+
+<Note>
+  If the element has `display: none` or no animation defined, it will unmount immediately when `present` becomes `false`.
+</Note>
+
+<Note>
+  The component uses `useLayoutEffect` to synchronously detect animation changes before the browser paints, preventing flashing.
+</Note>
+
+<Note>
+  When using the render function pattern, the `present` prop lets you conditionally render content or apply different styles during entry and exit.
+</Note>
+
+## Best Practices
+
+1. **Always define exit animations** - Without them, the component unmounts immediately
+2. **Use different animation names** - Entry and exit animations should have distinct names
+3. **Set animation-fill-mode** - The component sets `forwards` during exit to prevent flashing
+4. **Test animation timing** - Ensure animations complete before state changes occur
+
+## Browser Compatibility
+
+The component relies on:
+- CSS Animations API
+- `getComputedStyle()`
+- Animation events (`animationend`, `animationcancel`, `animationstart`)
+
+These are supported in all modern browsers.

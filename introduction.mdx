@@ -1,0 +1,152 @@
+---
+title: Introduction
+description: An overview of Radix UI Primitives, an open-source React component library for building high-quality, accessible design systems and web applications.
+---
+
+## What is Radix UI Primitives?
+
+Radix UI Primitives is a low-level UI component library with a focus on accessibility, customization and developer experience. You can use these components either as the base layer of your design system, or adopt them incrementally.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Accessible" icon="universal-access">
+    Components adhere to WAI-ARIA design patterns and are tested with assistive technologies.
+  </Card>
+  <Card title="Unstyled" icon="paintbrush">
+    No opinionated styles - bring your own styling solution or use inline styles, CSS, CSS-in-JS, or Tailwind.
+  </Card>
+  <Card title="Composable" icon="layer-group">
+    Components are designed with a composable API, mapping 1-to-1 with DOM elements for maximum flexibility.
+  </Card>
+  <Card title="Developer Experience" icon="code">
+    Built with TypeScript, with intuitive APIs and comprehensive documentation.
+  </Card>
+</CardGroup>
+
+## Philosophy
+
+Most of us share similar definitions for common UI patterns like accordion, checkbox, dialog, dropdown, select, slider, and tooltip. These UI patterns are [documented by WAI-ARIA](https://www.w3.org/TR/wai-aria-practices/#aria_ex) and generally understood by the community.
+
+However, the implementations provided to us by the web platform are inadequate. They're either non-existent, lacking in functionality, or cannot be customised sufficiently.
+
+As a result, developers are forced to build custom components—an incredibly difficult task. Most components on the web end up being inaccessible, non-performant, and lacking important features.
+
+**Our goal is to create a well-funded open-source component library that the community can use to build accessible design systems.**
+
+## Core Principles
+
+Radix UI Primitives are built with these guiding principles:
+
+### 1. Accessible
+
+- Components adhere to [WAI-ARIA guidelines](https://www.w3.org/WAI/ARIA/apg/) and are tested regularly in modern browsers and assistive technologies
+- Keyboard navigation, focus management, and screen reader support are built-in
+- ARIA attributes are properly implemented and managed automatically
+
+### 2. Functional
+
+- Feature-rich components with support for keyboard interaction, collision detection, focus trapping, dynamic resizing, scroll locking, and more
+- Edge cases and complex interactions are handled for you
+
+### 3. Composable
+
+- Components provide direct access to underlying DOM nodes
+- 1-to-1 mapping between components and DOM elements (one component renders one DOM element)
+- Full control over DOM event handlers and refs
+
+### 4. Customizable
+
+- Zero presentational styles applied by default
+- Compatible with any styling solution: CSS, CSS-in-JS, Tailwind, or utility-first frameworks
+- Full control over markup and styling
+
+### 5. Interoperable
+
+- Works with your existing React setup
+- Supports controlled and uncontrolled modes
+- Integrates with form libraries and state management solutions
+
+## Who is this for?
+
+<AccordionGroup>
+  <Accordion title="Building a design system">
+    Radix Primitives provide the perfect foundation for your design system. Start with accessible, unstyled components and apply your brand's design language.
+  </Accordion>
+  
+  <Accordion title="Need accessible components quickly">
+    Instead of spending weeks building and testing accessible components, start with battle-tested primitives that handle accessibility for you.
+  </Accordion>
+  
+  <Accordion title="Want full styling control">
+    If you're tired of fighting opinionated component libraries and overriding styles, Radix gives you complete control with no default styles to override.
+  </Accordion>
+  
+  <Accordion title="Building complex interactions">
+    Components handle complex patterns like keyboard navigation, focus management, collision detection, and portal rendering out of the box.
+  </Accordion>
+</AccordionGroup>
+
+## What's included?
+
+<Steps>
+  <Step title="30+ Components">
+    A comprehensive set of UI primitives covering overlays, navigation, forms, layout, and data display.
+  </Step>
+  
+  <Step title="Utility Hooks">
+    Reusable hooks for common patterns like controllable state, callback refs, and escape key handling.
+  </Step>
+  
+  <Step title="TypeScript Support">
+    Full TypeScript definitions with excellent IDE autocomplete and type safety.
+  </Step>
+  
+  <Step title="Framework Agnostic Styling">
+    Works with any styling solution - CSS Modules, styled-components, Emotion, Tailwind, or plain CSS.
+  </Step>
+</Steps>
+
+## Browser Support
+
+Radix UI Primitives are tested and supported in all modern browsers:
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+<Note>
+  Components are built for modern browsers and do not include polyfills. For older browser support, you'll need to provide your own polyfills.
+</Note>
+
+## Open Source
+
+Radix UI is open source and MIT licensed. You can find the source code on [GitHub](https://github.com/radix-ui/primitives).
+
+Contributions are welcome! Read our [contributing guidelines](https://github.com/radix-ui/primitives/blob/main/CONTRIBUTING.md) to get started.
+
+## Community
+
+Join the Radix UI community to get help, share feedback, and connect with other developers:
+
+- [Discord](https://discord.com/invite/7Xb99uG) - Chat with the community
+- [Twitter](https://twitter.com/radix_ui) - Follow for updates
+- [GitHub](https://github.com/radix-ui/primitives) - Report issues and contribute
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install Radix UI Primitives and set up your first component
+  </Card>
+  <Card title="Styling" icon="palette" href="/styling">
+    Learn how to style components with your preferred approach
+  </Card>
+  <Card title="Composition" icon="cubes" href="/composition">
+    Understand the composable API design pattern
+  </Card>
+  <Card title="Accessibility" icon="universal-access" href="/accessibility">
+    Explore accessibility features and best practices
+  </Card>
+</CardGroup>

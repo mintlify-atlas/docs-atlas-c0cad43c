@@ -1,0 +1,282 @@
+---
+title: Focus Scope
+description: Constrains focus navigation within a specific area of your application, essential for modals and dialogs.
+---
+
+`FocusScope` is a component that manages focus containment and focus trapping. It's commonly used in modal dialogs, popovers, and other overlay components to ensure keyboard focus remains within a specific area.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-focus-scope
+```
+
+## Component
+
+### FocusScope
+
+```tsx
+interface FocusScopeProps extends PrimitiveDivProps {
+  loop?: boolean;
+  trapped?: boolean;
+  onMountAutoFocus?: (event: Event) => void;
+  onUnmountAutoFocus?: (event: Event) => void;
+}
+```
+
+## Props
+
+<ParamField path="loop" type="boolean">
+  When `true`, tabbing from the last focusable element will focus the first element, and shift+tab from the first element will focus the last. Creates a circular focus loop.
+  
+  Default: `false`
+</ParamField>
+
+<ParamField path="trapped" type="boolean">
+  When `true`, focus cannot escape the scope via keyboard, pointer, or programmatic focus. This creates a "focus trap" essential for modal dialogs.
+  
+  Default: `false`
+</ParamField>
+
+<ParamField path="onMountAutoFocus" type="(event: Event) => void">
+  Event handler called when the component mounts and attempts to auto-focus. Call `event.preventDefault()` to prevent the default auto-focus behavior.
+</ParamField>
+
+<ParamField path="onUnmountAutoFocus" type="(event: Event) => void">
+  Event handler called when the component unmounts and attempts to restore focus. Call `event.preventDefault()` to prevent restoring focus to the previously focused element.
+</ParamField>
+
+## Usage
+
+### Basic Modal Dialog
+
+```tsx
+import { FocusScope } from '@radix-ui/react-focus-scope';
+import { useState } from 'react';
+
+function Modal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <FocusScope trapped>
+        <div className="modal">
+          <h2>Modal Title</h2>
+          <p>This is a modal dialog. Focus is trapped inside.</p>
+          <button onClick={onClose}>Close</button>
+        </div>
+      </FocusScope>
+    </div>
+  );
+}
+```
+
+### Focus Loop without Trapping
+
+```tsx
+import { FocusScope } from '@radix-ui/react-focus-scope';
+
+function Toolbar() {
+  return (
+    <FocusScope loop>
+      <div className="toolbar">
+        <button>Cut</button>
+        <button>Copy</button>
+        <button>Paste</button>
+        {/* Tab from Paste will loop back to Cut */}
+      </div>
+    </FocusScope>
+  );
+}
+```
+
+### Prevent Auto-focus
+
+```tsx
+import { FocusScope } from '@radix-ui/react-focus-scope';
+
+function Dialog({ initialFocusRef }: { initialFocusRef: React.RefObject<HTMLElement> }) {
+  return (
+    <FocusScope 
+      trapped 
+      onMountAutoFocus={(event) => {
+        event.preventDefault();
+        initialFocusRef.current?.focus();
+      }}
+    >
+      <div>
+        <h2>Dialog</h2>
+        <input placeholder="Not auto-focused" />
+        <button ref={initialFocusRef}>Focus me instead</button>
+      </div>
+    </FocusScope>
+  );
+}
+```
+
+### Prevent Focus Restore
+
+```tsx
+import { FocusScope } from '@radix-ui/react-focus-scope';
+
+function Popover({ triggerRef }: { triggerRef: React.RefObject<HTMLButtonElement> }) {
+  return (
+    <FocusScope 
+      trapped
+      onUnmountAutoFocus={(event) => {
+        // Don't restore focus when closing
+        event.preventDefault();
+      }}
+    >
+      <div className="popover">
+        <input placeholder="Type something" />
+        <button>Submit</button>
+      </div>
+    </FocusScope>
+  );
+}
+```
+
+### Nested Focus Scopes
+
+```tsx
+import { FocusScope } from '@radix-ui/react-focus-scope';
+import { useState } from 'react';
+
+function NestedDialogs() {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  return (
+    <FocusScope trapped>
+      <div className="dialog">
+        <h2>Main Dialog</h2>
+        <button onClick={() => setConfirmOpen(true)}>Delete</button>
+        
+        {confirmOpen && (
+          <FocusScope trapped>
+            <div className="confirmation-dialog">
+              <h3>Are you sure?</h3>
+              <button onClick={() => setConfirmOpen(false)}>Cancel</button>
+              <button>Confirm</button>
+            </div>
+          </FocusScope>
+        )}
+      </div>
+    </FocusScope>
+  );
+}
+```
+
+### Custom Focus Priority
+
+```tsx
+import { FocusScope } from '@radix-ui/react-focus-scope';
+
+function SearchDialog() {
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <FocusScope 
+      trapped
+      onMountAutoFocus={(event) => {
+        event.preventDefault();
+        // Focus search input specifically
+        searchInputRef.current?.focus();
+      }}
+    >
+      <div>
+        <h2>Search</h2>
+        <input 
+          ref={searchInputRef}
+          type="search" 
+          placeholder="Search..." 
+        />
+        <button>Close</button>
+      </div>
+    </FocusScope>
+  );
+}
+```
+
+### Form with Focus Management
+
+```tsx
+import { FocusScope } from '@radix-ui/react-focus-scope';
+
+function FormDialog({ onSubmit, onCancel }: {
+  onSubmit: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <FocusScope trapped loop>
+      <form onSubmit={onSubmit}>
+        <label>
+          Name:
+          <input type="text" name="name" required />
+        </label>
+        <label>
+          Email:
+          <input type="email" name="email" required />
+        </label>
+        <div>
+          <button type="button" onClick={onCancel}>Cancel</button>
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </FocusScope>
+  );
+}
+```
+
+## Behavior
+
+### Auto-focus on Mount
+
+By default, `FocusScope` will:
+1. Remember the currently focused element
+2. Focus the first focusable element inside the scope
+3. Can be prevented with `onMountAutoFocus`
+
+### Auto-focus on Unmount
+
+By default, `FocusScope` will:
+1. Restore focus to the element that was focused before mounting
+2. Can be prevented with `onUnmountAutoFocus`
+
+### Focus Trapping
+
+When `trapped={true}`:
+- Tab and Shift+Tab are contained within the scope
+- Clicking outside cannot move focus out
+- Programmatic focus changes to elements outside are prevented
+
+### Focus Looping
+
+When `loop={true}`:
+- Tab from the last element focuses the first element
+- Shift+Tab from the first element focuses the last element
+- Works independently of trapping
+
+## Accessibility
+
+<Note>
+  Focus trapping is essential for modal dialogs to meet WCAG 2.1 success criterion 2.4.3 (Focus Order). It ensures keyboard users can navigate the modal without accidentally leaving it.
+</Note>
+
+<Note>
+  Always provide a clear way to dismiss focus-trapped components (like a close button or Escape key handler) to prevent keyboard users from getting stuck.
+</Note>
+
+## Notes
+
+<Note>
+  `FocusScope` works by listening to focus events and programmatically managing focus when needed. It respects native browser behavior while adding focus containment.
+</Note>
+
+<Note>
+  The component uses `focusScope.pause()` and `focusScope.resume()` internally to temporarily disable focus trapping when needed. This is useful for nested focus scopes.
+</Note>
+
+<Note>
+  Focus guards (from `@radix-ui/react-focus-guards`) may be needed alongside `FocusScope` to ensure focus events are properly captured in all scenarios.
+</Note>

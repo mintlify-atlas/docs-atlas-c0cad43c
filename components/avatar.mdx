@@ -1,0 +1,164 @@
+---
+title: Avatar
+description: An image element with a fallback for representing the user.
+---
+
+## Overview
+
+Avatar is an image element with a fallback for representing a user or entity. It automatically handles loading states and can show initials or an icon when an image is unavailable.
+
+## Features
+
+- Automatic and manual control over when the image renders
+- Fallback part accepts any children
+- Optionally delay fallback rendering to avoid content flashing
+
+## Installation
+
+```bash
+npm install @radix-ui/react-avatar
+```
+
+## Anatomy
+
+```tsx
+import * as Avatar from '@radix-ui/react-avatar';
+
+export default () => (
+  <Avatar.Root>
+    <Avatar.Image />
+    <Avatar.Fallback />
+  </Avatar.Root>
+)
+```
+
+## API Reference
+
+### Root
+
+Contains all the parts of an avatar.
+
+### Image
+
+The image to render. By default it will only render when it has loaded.
+
+<ParamField path="src" type="string">
+  The source of the image.
+</ParamField>
+
+<ParamField path="alt" type="string">
+  Alternative text description of the image.
+</ParamField>
+
+<ParamField path="onLoadingStatusChange" type="(status: 'idle' | 'loading' | 'loaded' | 'error') => void">
+  Callback fired when the loading status changes.
+</ParamField>
+
+### Fallback
+
+An element that renders when the image hasn't loaded. This means whilst it's loading, or if there was an error.
+
+<ParamField path="delayMs" type="number">
+  Useful for delaying rendering so it only appears for those with slower connections.
+</ParamField>
+
+## Examples
+
+### Basic Usage
+
+<CodeGroup>
+```tsx Basic
+import * as Avatar from '@radix-ui/react-avatar';
+
+export default () => (
+  <Avatar.Root
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      verticalAlign: 'middle',
+      width: 45,
+      height: 45,
+      borderRadius: '100%',
+      overflow: 'hidden',
+    }}
+  >
+    <Avatar.Image
+      src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb"
+      alt="John Doe"
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+    />
+    <Avatar.Fallback
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'lightgray',
+        color: 'white',
+        fontSize: 15,
+        fontWeight: 500,
+      }}
+    >
+      JD
+    </Avatar.Fallback>
+  </Avatar.Root>
+);
+```
+</CodeGroup>
+
+### Delayed Fallback
+
+<CodeGroup>
+```tsx Delayed
+import * as Avatar from '@radix-ui/react-avatar';
+
+export default () => (
+  <Avatar.Root>
+    <Avatar.Image
+      src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb"
+      alt="John Doe"
+    />
+    <Avatar.Fallback delayMs={600}>
+      JD
+    </Avatar.Fallback>
+  </Avatar.Root>
+);
+```
+</CodeGroup>
+
+<Note>
+The `delayMs` prop is useful for preventing the fallback from flashing on screen for users with fast connections.
+</Note>
+
+### With Loading Status
+
+<CodeGroup>
+```tsx Loading Status
+import * as Avatar from '@radix-ui/react-avatar';
+import { useState } from 'react';
+
+export default () => {
+  const [status, setStatus] = useState('idle');
+
+  return (
+    <div>
+      <Avatar.Root>
+        <Avatar.Image
+          src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb"
+          alt="John Doe"
+          onLoadingStatusChange={setStatus}
+        />
+        <Avatar.Fallback>JD</Avatar.Fallback>
+      </Avatar.Root>
+      <p>Image status: {status}</p>
+    </div>
+  );
+};
+```
+</CodeGroup>
+
+## Accessibility
+
+Adheres to the `img` role requirements. The `Image` component should always have `alt` text to describe the image for screen reader users.

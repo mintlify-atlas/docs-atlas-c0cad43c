@@ -1,0 +1,156 @@
+---
+title: useSize
+description: A hook that observes and returns the size of an HTML element using ResizeObserver.
+---
+
+`useSize` is a hook that tracks the dimensions of an HTML element, automatically updating when the element is resized. It uses the ResizeObserver API to efficiently monitor size changes.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-use-size
+```
+
+## Function Signature
+
+```tsx
+function useSize(
+  element: HTMLElement | null
+): { width: number; height: number } | undefined
+```
+
+## Parameters
+
+<ParamField path="element" type="HTMLElement | null" required>
+  The HTML element to observe for size changes. When `null`, the hook returns `undefined`.
+</ParamField>
+
+## Return Value
+
+<ResponseField name="size" type="{ width: number; height: number } | undefined">
+  An object containing the element's `width` and `height` in pixels, or `undefined` if no element is provided.
+</ResponseField>
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useSize } from '@radix-ui/react-use-size';
+import { useState } from 'react';
+
+function ResizableBox() {
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
+  const size = useSize(element);
+
+  return (
+    <div>
+      <div 
+        ref={setElement}
+        style={{ resize: 'both', overflow: 'auto', border: '1px solid' }}
+      >
+        Resize me!
+      </div>
+      {size && (
+        <p>
+          Width: {size.width}px, Height: {size.height}px
+        </p>
+      )}
+    </div>
+  );
+}
+```
+
+### With useRef
+
+```tsx
+import { useSize } from '@radix-ui/react-use-size';
+import { useRef } from 'react';
+
+function Component() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const size = useSize(containerRef.current);
+
+  return (
+    <div ref={containerRef}>
+      {size ? `${size.width} x ${size.height}` : 'Measuring...'}
+    </div>
+  );
+}
+```
+
+### Responsive Component
+
+```tsx
+import { useSize } from '@radix-ui/react-use-size';
+import { useState } from 'react';
+
+function ResponsiveCard() {
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
+  const size = useSize(element);
+  
+  const isCompact = size && size.width < 400;
+
+  return (
+    <div ref={setElement} className={isCompact ? 'compact' : 'expanded'}>
+      <h2>Responsive Card</h2>
+      <p>Layout changes based on width</p>
+    </div>
+  );
+}
+```
+
+### Tracking Container Changes
+
+```tsx
+import { useSize } from '@radix-ui/react-use-size';
+import { useState, useEffect } from 'react';
+
+function Container() {
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
+  const size = useSize(element);
+
+  useEffect(() => {
+    if (size) {
+      console.log('Container resized:', size);
+      // Perform actions based on size changes
+    }
+  }, [size]);
+
+  return (
+    <div ref={setElement} style={{ width: '100%', height: '100vh' }}>
+      Content
+    </div>
+  );
+}
+```
+
+## Implementation Details
+
+The hook:
+
+1. Provides the initial size immediately using `offsetWidth` and `offsetHeight`
+2. Creates a `ResizeObserver` to watch for size changes
+3. Uses the `borderBoxSize` API when available for more accurate measurements
+4. Falls back to `offsetWidth/offsetHeight` for older browsers
+5. Observes the element with `box: 'border-box'` to include borders and padding
+6. Cleans up the observer when the element changes or component unmounts
+7. Returns `undefined` when the element becomes `null`
+
+## Browser Compatibility
+
+This hook uses the [ResizeObserver API](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver), which is supported in all modern browsers. For older browsers, you may need a polyfill.
+
+## Notes
+
+<Note>
+  The hook uses `useLayoutEffect` to set the initial size as early as possible and set up the ResizeObserver, ensuring measurements are taken before the browser paints.
+</Note>
+
+<Note>
+  The size is measured using the border box, which includes the element's content, padding, and border, but not its margin.
+</Note>
+
+<Note>
+  The hook handles browser inconsistencies by checking for `borderBoxSize` support and falling back to `offsetWidth/offsetHeight` when necessary.
+</Note>

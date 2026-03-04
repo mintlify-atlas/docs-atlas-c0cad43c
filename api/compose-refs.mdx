@@ -1,0 +1,212 @@
+---
+title: composeRefs
+description: Utilities for composing multiple React refs into a single ref callback.
+---
+
+`composeRefs` provides utilities to compose multiple React refs together, allowing you to forward refs to multiple destinations. This is essential when building reusable components that need to manage both internal refs and forward refs from parent components.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-compose-refs
+```
+
+## Functions
+
+### composeRefs
+
+Composes multiple refs into a single ref callback function.
+
+```tsx
+function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T>
+```
+
+### useComposedRefs
+
+A React hook that composes multiple refs with proper memoization.
+
+```tsx
+function useComposedRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T>
+```
+
+## Type Definitions
+
+```tsx
+type PossibleRef<T> = React.Ref<T> | undefined;
+```
+
+## Usage
+
+### Basic Composition with useComposedRefs
+
+```tsx
+import { useComposedRefs } from '@radix-ui/react-compose-refs';
+import { useRef, forwardRef } from 'react';
+
+const Input = forwardRef<HTMLInputElement, { onChange?: () => void }>(
+  (props, forwardedRef) => {
+    const internalRef = useRef<HTMLInputElement>(null);
+    const composedRefs = useComposedRefs(forwardedRef, internalRef);
+
+    return <input ref={composedRefs} {...props} />;
+  }
+);
+```
+
+### Multiple Internal Refs
+
+```tsx
+import { useComposedRefs } from '@radix-ui/react-compose-refs';
+import { useRef, forwardRef, useEffect } from 'react';
+
+const FocusableDiv = forwardRef<HTMLDivElement>((props, forwardedRef) => {
+  const focusRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<HTMLDivElement>(null);
+  const composedRefs = useComposedRefs(forwardedRef, focusRef, observerRef);
+
+  useEffect(() => {
+    // Use focusRef for focus management
+    focusRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    // Use observerRef for intersection observer
+    const observer = new IntersectionObserver((entries) => {
+      console.log('Visibility changed:', entries);
+    });
+    
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, []);
+
+  return <div ref={composedRefs} {...props} />;
+});
+```
+
+### With Callback Refs
+
+```tsx
+import { useComposedRefs } from '@radix-ui/react-compose-refs';
+import { useState, forwardRef } from 'react';
+
+const MeasuredDiv = forwardRef<HTMLDivElement>((props, forwardedRef) => {
+  const [width, setWidth] = useState(0);
+  
+  const measureRef = (node: HTMLDivElement | null) => {
+    if (node) {
+      setWidth(node.offsetWidth);
+    }
+  };
+  
+  const composedRefs = useComposedRefs(forwardedRef, measureRef);
+
+  return (
+    <div ref={composedRefs} {...props}>
+      Width: {width}px
+    </div>
+  );
+});
+```
+
+### Direct composeRefs Usage
+
+```tsx
+import { composeRefs } from '@radix-ui/react-compose-refs';
+import { useRef } from 'react';
+
+function Component() {
+  const ref1 = useRef<HTMLDivElement>(null);
+  const ref2 = useRef<HTMLDivElement>(null);
+  
+  // Compose refs without memoization
+  const composedRef = composeRefs(ref1, ref2);
+
+  return <div ref={composedRef}>Content</div>;
+}
+```
+
+### With React 19 Ref Cleanup
+
+```tsx
+import { useComposedRefs } from '@radix-ui/react-compose-refs';
+import { forwardRef, useCallback } from 'react';
+
+const Component = forwardRef<HTMLDivElement>((props, forwardedRef) => {
+  const refWithCleanup = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      console.log('Node attached:', node);
+      
+      // Return cleanup function (React 19+)
+      return () => {
+        console.log('Node detached:', node);
+      };
+    }
+  }, []);
+  
+  const composedRefs = useComposedRefs(forwardedRef, refWithCleanup);
+
+  return <div ref={composedRefs} {...props} />;
+});
+```
+
+### Building a Reusable Button
+
+```tsx
+import { useComposedRefs } from '@radix-ui/react-compose-refs';
+import { forwardRef, useRef, useImperativeHandle } from 'react';
+
+interface ButtonHandle {
+  focus: () => void;
+  blur: () => void;
+}
+
+const Button = forwardRef<ButtonHandle, React.ComponentPropsWithoutRef<'button'>>(
+  (props, forwardedRef) => {
+    const buttonRef = useRef<HTMLButtonElement>(null);
+
+    useImperativeHandle(forwardedRef, () => ({
+      focus: () => buttonRef.current?.focus(),
+      blur: () => buttonRef.current?.blur(),
+    }));
+
+    return <button ref={buttonRef} {...props} />;
+  }
+);
+```
+
+## Implementation Details
+
+The utilities handle:
+
+1. **Callback refs**: Functions that receive the element as an argument
+2. **RefObject**: Objects with a `current` property
+3. **Cleanup functions**: React 19's ref cleanup return values
+4. **Undefined refs**: Gracefully handles `undefined` refs
+
+Key features:
+- Automatically detects and calls cleanup functions (React 19+)
+- Safely handles null/undefined refs
+- Works with both mutable ref objects and callback refs
+- Properly memoized in `useComposedRefs` to avoid unnecessary re-renders
+
+## Differences Between composeRefs and useComposedRefs
+
+- **`composeRefs`**: Returns a new ref callback every time. Use when you don't need memoization.
+- **`useComposedRefs`**: Returns a memoized ref callback using `useCallback`. Use in components to avoid unnecessary re-renders.
+
+## Notes
+
+<Note>
+  `useComposedRefs` automatically memoizes the composed ref based on the input refs, preventing unnecessary re-renders when passed as props.
+</Note>
+
+<Note>
+  The utilities support React 19's ref cleanup feature. When a callback ref returns a function, that function will be called when the ref is detached or replaced.
+</Note>
+
+<Note>
+  Both utilities handle the differences between callback refs and RefObject refs transparently, so you can mix and match different ref types.
+</Note>

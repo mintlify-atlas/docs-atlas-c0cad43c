@@ -1,0 +1,241 @@
+---
+title: "Radio Group"
+description: "A set of checkable buttons where no more than one can be checked at a time."
+---
+
+## Overview
+
+Radio Group provides a set of radio buttons where only one option can be selected at a time. It handles keyboard navigation, focus management, and proper ARIA attributes automatically.
+
+## Features
+
+- Full keyboard navigation
+- Supports horizontal/vertical orientation
+- Can be controlled or uncontrolled
+- Works inside forms
+- Roving focus management
+- Accessible by default with proper ARIA attributes
+
+## Installation
+
+```bash
+npm install @radix-ui/react-radio-group
+```
+
+## Anatomy
+
+```jsx
+import * as RadioGroup from '@radix-ui/react-radio-group';
+
+export default () => (
+  <RadioGroup.Root>
+    <RadioGroup.Item>
+      <RadioGroup.Indicator />
+    </RadioGroup.Item>
+  </RadioGroup.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the radio group component parts.
+
+<ParamField path="value" type="string">
+  The controlled value of the radio item to check.
+</ParamField>
+
+<ParamField path="defaultValue" type="string">
+  The value of the radio item that should be checked when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Event handler called when the value changes.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with radio items.
+</ParamField>
+
+<ParamField path="name" type="string">
+  The name of the group. Submitted with its owning form as part of a name/value pair.
+</ParamField>
+
+<ParamField path="required" type="boolean">
+  When true, indicates that the user must check a radio item before the form can be submitted.
+</ParamField>
+
+<ParamField path="orientation" type="'horizontal' | 'vertical'" default="'vertical'">
+  The orientation of the component. Mainly affects keyboard navigation.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction of the radio group. If omitted, inherits from the parent.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="true">
+  When true, keyboard navigation will loop from last item to first, and vice versa.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Item
+
+An item in the group that can be checked. An `input` will also render when used within a `form` to ensure events propagate correctly.
+
+<ParamField path="value" type="string" required>
+  The unique value of the item.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the radio item.
+</ParamField>
+
+<ParamField path="required" type="boolean">
+  When true, indicates that the user must check the radio item before the form can be submitted.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Indicator
+
+Renders when the radio item is in a checked state. You can style this element directly, or you can use it as a wrapper to put an icon into, or both.
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as RadioGroup from '@radix-ui/react-radio-group';
+import './styles.css';
+
+export default () => (
+  <form>
+    <RadioGroup.Root className="RadioGroupRoot" defaultValue="default" aria-label="View density">
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <RadioGroup.Item className="RadioGroupItem" value="default" id="r1">
+          <RadioGroup.Indicator className="RadioGroupIndicator" />
+        </RadioGroup.Item>
+        <label className="Label" htmlFor="r1">
+          Default
+        </label>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <RadioGroup.Item className="RadioGroupItem" value="comfortable" id="r2">
+          <RadioGroup.Indicator className="RadioGroupIndicator" />
+        </RadioGroup.Item>
+        <label className="Label" htmlFor="r2">
+          Comfortable
+        </label>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <RadioGroup.Item className="RadioGroupItem" value="compact" id="r3">
+          <RadioGroup.Indicator className="RadioGroupIndicator" />
+        </RadioGroup.Item>
+        <label className="Label" htmlFor="r3">
+          Compact
+        </label>
+      </div>
+    </RadioGroup.Root>
+  </form>
+);
+```
+
+```jsx Controlled
+import { useState } from 'react';
+import * as RadioGroup from '@radix-ui/react-radio-group';
+
+export default () => {
+  const [value, setValue] = useState('apple');
+
+  return (
+    <RadioGroup.Root value={value} onValueChange={setValue}>
+      <div>
+        <RadioGroup.Item value="apple" id="apple">
+          <RadioGroup.Indicator />
+        </RadioGroup.Item>
+        <label htmlFor="apple">Apple</label>
+      </div>
+      <div>
+        <RadioGroup.Item value="orange" id="orange">
+          <RadioGroup.Indicator />
+        </RadioGroup.Item>
+        <label htmlFor="orange">Orange</label>
+      </div>
+      <div>
+        <RadioGroup.Item value="banana" id="banana">
+          <RadioGroup.Indicator />
+        </RadioGroup.Item>
+        <label htmlFor="banana">Banana</label>
+      </div>
+    </RadioGroup.Root>
+  );
+};
+```
+
+```jsx Horizontal
+import * as RadioGroup from '@radix-ui/react-radio-group';
+
+export default () => (
+  <RadioGroup.Root defaultValue="1" orientation="horizontal">
+    <RadioGroup.Item value="1" id="r1">
+      <RadioGroup.Indicator />
+    </RadioGroup.Item>
+    <label htmlFor="r1">Option 1</label>
+
+    <RadioGroup.Item value="2" id="r2">
+      <RadioGroup.Indicator />
+    </RadioGroup.Item>
+    <label htmlFor="r2">Option 2</label>
+
+    <RadioGroup.Item value="3" id="r3">
+      <RadioGroup.Indicator />
+    </RadioGroup.Item>
+    <label htmlFor="r3">Option 3</label>
+  </RadioGroup.Root>
+);
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Adheres to the [Radio Group WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/radio/) and uses [roving tabindex](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/#kbd_roving_tabindex) to manage focus movement among radio items.
+</Note>
+
+### Keyboard Interactions
+
+- **Tab** - Moves focus to either the checked radio item or the first radio item in the group.
+- **Space** - When focus is on an unchecked radio item, checks it.
+- **ArrowDown** - Moves focus to the next radio item in the group.
+- **ArrowRight** - Moves focus to the next radio item in the group.
+- **ArrowUp** - Moves focus to the previous radio item in the group.
+- **ArrowLeft** - Moves focus to the previous radio item in the group.
+
+### Data Attributes
+
+**Root**
+
+- `[data-disabled]` - Present when disabled
+
+**Item**
+
+- `[data-state]` - "checked" or "unchecked"
+- `[data-disabled]` - Present when disabled
+
+**Indicator**
+
+- `[data-state]` - "checked" or "unchecked"
+- `[data-disabled]` - Present when disabled

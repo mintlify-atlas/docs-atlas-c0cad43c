@@ -1,0 +1,134 @@
+---
+title: useControllableState
+description: A hook for managing controlled and uncontrolled state patterns in React components.
+---
+
+`useControllableState` is a hook that manages both controlled and uncontrolled state patterns, allowing components to work flexibly in either mode. It handles the complexity of switching between controlled and uncontrolled modes and provides warnings in development when incorrect patterns are detected.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-use-controllable-state
+```
+
+## Function Signature
+
+```tsx
+function useControllableState<T>({
+  prop,
+  defaultProp,
+  onChange,
+  caller,
+}: UseControllableStateParams<T>): [T, SetStateFn<T>]
+```
+
+## Parameters
+
+<ParamField path="prop" type="T | undefined">
+  The controlled value from props. When provided, the component operates in controlled mode.
+</ParamField>
+
+<ParamField path="defaultProp" type="T" required>
+  The default value for uncontrolled mode. This is required and serves as the initial state when `prop` is undefined.
+</ParamField>
+
+<ParamField path="onChange" type="(state: T) => void">
+  Callback function invoked when the state changes. Called in both controlled and uncontrolled modes.
+  
+  Default: `() => {}`
+</ParamField>
+
+<ParamField path="caller" type="string">
+  Component name for debugging purposes. Used in development warnings when the component switches between controlled and uncontrolled modes.
+</ParamField>
+
+## Return Value
+
+<ResponseField name="value" type="T">
+  The current state value. Either the controlled `prop` value or the internal uncontrolled state.
+</ResponseField>
+
+<ResponseField name="setValue" type="React.Dispatch<React.SetStateAction<T>>">
+  Function to update the state. Handles both controlled and uncontrolled patterns automatically.
+</ResponseField>
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useControllableState } from '@radix-ui/react-use-controllable-state';
+
+interface ToggleProps {
+  value?: boolean;
+  defaultValue?: boolean;
+  onValueChange?: (value: boolean) => void;
+}
+
+function Toggle({ value: valueProp, defaultValue = false, onValueChange }: ToggleProps) {
+  const [value, setValue] = useControllableState({
+    prop: valueProp,
+    defaultProp: defaultValue,
+    onChange: onValueChange,
+    caller: 'Toggle',
+  });
+
+  return (
+    <button onClick={() => setValue((prev) => !prev)}>
+      {value ? 'On' : 'Off'}
+    </button>
+  );
+}
+```
+
+### Controlled Mode
+
+```tsx
+function App() {
+  const [isOn, setIsOn] = useState(false);
+  
+  return (
+    <Toggle 
+      value={isOn} 
+      onValueChange={setIsOn}
+    />
+  );
+}
+```
+
+### Uncontrolled Mode
+
+```tsx
+function App() {
+  return (
+    <Toggle 
+      defaultValue={false}
+      onValueChange={(value) => console.log('Changed to:', value)}
+    />
+  );
+}
+```
+
+## Type Definitions
+
+```tsx
+type ChangeHandler<T> = (state: T) => void;
+type SetStateFn<T> = React.Dispatch<React.SetStateAction<T>>;
+
+interface UseControllableStateParams<T> {
+  prop?: T | undefined;
+  defaultProp: T;
+  onChange?: ChangeHandler<T>;
+  caller?: string;
+}
+```
+
+## Notes
+
+<Note>
+  In development mode, the hook will warn you if a component switches between controlled and uncontrolled modes. This helps catch common bugs where state management patterns change unexpectedly.
+</Note>
+
+<Note>
+  The `onChange` callback is stored in a ref and updated using `useInsertionEffect` (or `useLayoutEffect` as a fallback) to ensure it doesn't cause unnecessary re-renders when passed as a dependency.
+</Note>

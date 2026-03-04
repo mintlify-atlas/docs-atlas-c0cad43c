@@ -1,0 +1,335 @@
+---
+title: "Philosophy"
+description: "Understanding the core principles and guiding philosophy behind Radix UI Primitives"
+---
+
+## Vision
+
+Most of us share similar definitions for common UI patterns like accordion, checkbox, combobox, dialog, dropdown, select, slider, and tooltip. These UI patterns are [documented by WAI-ARIA](https://www.w3.org/TR/wai-aria-practices/#aria_ex) and generally understood by the community.
+
+However, the implementations provided to us by the web platform are inadequate. They're either non-existent, lacking in functionality, or cannot be customised sufficiently.
+
+As a result, developers are forced to build custom components—an incredibly difficult task. As a result, most components on the web are inaccessible, non-performant, and lacking important features.
+
+**Our goal is to create a well-funded open-source component library that the community can use to build accessible design systems.**
+
+## Core Principles
+
+Radix UI Primitives is built on five fundamental principles that guide every design decision:
+
+1. **Accessible** - Components work for everyone
+2. **Functional** - Feature-rich with comprehensive behavior
+3. **Composable** - Direct DOM access with 1-to-1 mapping
+4. **Customizable** - Zero styles, infinite possibilities
+5. **Interoperable** - Works with your existing tools
+
+---
+
+## Accessible
+
+Accessibility is not an afterthought—it's built into the foundation of every component.
+
+<Note>
+Components adhere to WAI-ARIA guidelines and are tested regularly in a wide selection of modern browsers and assistive technologies.
+</Note>
+
+### Design Approach
+
+- **Standards-based**: Where WAI-ARIA guidelines exist, we follow them meticulously
+- **Research-driven**: When guidelines don't cover a use case, we research similar native solutions to capture important nuances
+- **Abstracted complexity**: Most accessibility-related behavior and markup is handled automatically
+- **Learning opportunity**: We name things as closely to `aria` and `html` as possible, making our API a bridge for understanding accessibility
+
+### Testing Coverage
+
+Components are thoroughly tested across:
+
+- **Screen readers**: VoiceOver, JAWS, NVDA
+- **Platforms**: Desktop, mobile, and tablet devices
+- **Browsers**: All major modern browsers
+- **Input methods**: Keyboard, mouse, touch, and assistive technologies
+
+<Tip>
+You should know about accessibility, but you shouldn't have to spend too much time implementing accessible patterns. Radix handles the complexity for you.
+</Tip>
+
+---
+
+## Functional
+
+Components are feature-complete, not minimal wrappers.
+
+### Built-in Features
+
+- **Keyboard interaction** - Full keyboard navigation support
+- **Collision detection** - Smart positioning that avoids viewport edges
+- **Focus trapping** - Manage focus within modal contexts
+- **Dynamic resizing** - Components respond to content changes
+- **Scroll locking** - Prevent body scroll when needed
+- **Native fallbacks** - Graceful degradation where appropriate
+
+<Note>
+Every component includes the features you'd expect in a production-ready implementation, not just the basics.
+</Note>
+
+---
+
+## Composable
+
+Components provide direct access to the underlying DOM with a transparent, predictable API.
+
+### 1-to-1 DOM Mapping
+
+Each component renders a single DOM element (unless clearly documented otherwise). This means:
+
+```jsx
+<Dialog.Trigger>
+  <button>Open</button>
+</Dialog.Trigger>
+```
+
+The `Dialog.Trigger` component renders exactly one DOM node, giving you complete control over the structure.
+
+### Ref Forwarding
+
+Refs work exactly as you'd expect—they're forwarded to the correct underlying DOM node:
+
+```jsx
+const triggerRef = useRef(null);
+
+<Accordion.Trigger ref={triggerRef}>
+  Toggle
+</Accordion.Trigger>
+
+// triggerRef.current is the actual button element
+```
+
+See the [Composability](/concepts/composability) page for detailed examples.
+
+### Event Handler Composition
+
+Just as DOM nodes are composable, so are event handlers. You can pass your own handlers and control whether internal handlers fire:
+
+```jsx
+<Dialog.Trigger
+  onClick={(e) => {
+    console.log('Custom handler');
+    // Internal handler will still run unless you stop propagation
+  }}
+>
+  Open
+</Dialog.Trigger>
+```
+
+<Tip>
+Event handlers compose automatically, so you never lose built-in functionality when adding your own logic.
+</Tip>
+
+---
+
+## Customizable
+
+Style components however you want—no CSS to override, no opinions to fight.
+
+### Zero Styles by Default
+
+<Warning>
+Radix UI Primitives ship with **zero presentational styles**. This is intentional.
+</Warning>
+
+Components render unstyled by default, providing a clean slate:
+
+- No need to override opinionated styles
+- No specificity battles
+- No unwanted CSS bloat
+- Complete freedom over visual design
+
+### Style How You Want
+
+Use any styling solution:
+
+```jsx
+// CSS Modules
+<Accordion.Trigger className={styles.trigger}>
+
+// Tailwind
+<Accordion.Trigger className="px-4 py-2 hover:bg-gray-100">
+
+// CSS-in-JS
+<Accordion.Trigger css={{ padding: 16 }}>
+
+// Inline styles
+<Accordion.Trigger style={{ padding: 16 }}>
+```
+
+### State-based Styling
+
+Components expose their state via data attributes:
+
+```css
+/* Style based on component state */
+[data-state="open"] { /* ... */ }
+[data-state="closed"] { /* ... */ }
+[data-disabled] { /* ... */ }
+[data-orientation="vertical"] { /* ... */ }
+```
+
+Learn more in the [Customization](/concepts/customization) guide.
+
+---
+
+## Interoperable
+
+Radix UI Primitives work seamlessly with your existing tools and patterns.
+
+### Framework Agnostic
+
+While built with React, the principles and patterns work with:
+
+- Any React version (16.8+)
+- Next.js, Remix, and other React frameworks
+- Your existing component libraries
+- Your preferred styling solution
+
+### Composition-First
+
+Components can be wrapped, extended, or composed:
+
+```jsx
+// Wrap with your own components
+const MyButton = (props) => (
+  <Dialog.Trigger asChild>
+    <button className="my-button" {...props} />
+  </Dialog.Trigger>
+);
+
+// Compose with other libraries
+<Dialog.Trigger asChild>
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+  />
+</Dialog.Trigger>
+```
+
+<Note>
+The `asChild` prop merges Radix functionality with your own elements, giving you complete control over rendering.
+</Note>
+
+---
+
+## Additional Principles
+
+### Controlled and Uncontrolled
+
+All stateful components support both controlled and uncontrolled usage:
+
+```jsx
+// Uncontrolled (internal state)
+<Accordion defaultValue="item-1">
+
+// Controlled (you manage state)
+<Accordion value={value} onValueChange={setValue}>
+```
+
+Learn more about [State Management](/concepts/state-management).
+
+### Finite State Machines
+
+Component states are explicit and predictable:
+
+- States are predetermined during design
+- Expressed as enumerated strings, not booleans
+- Transitions are deterministic
+- Exposed via `data-state` attributes
+
+```jsx
+// Not: isOpen (boolean)
+// But: data-state="open" | data-state="closed"
+```
+
+### Internationalization
+
+Components adapt to different languages and reading directions:
+
+- RTL support built-in
+- Direction-aware keyboard navigation
+- Locale-appropriate string formatting
+
+See [Internationalization](/concepts/internationalization) for details.
+
+---
+
+## Design Tradeoffs
+
+When principles conflict, we follow these guidelines:
+
+1. **Composition over configuration** - Prefer flexible composition to complex props
+2. **Clarity over terseness** - Readable code matters more than bundle size (within reason)
+3. **Smart abstractions over exposed internals** - Hide complexity, expose power
+
+---
+
+## Developer Experience
+
+We prioritize developer experience in several ways:
+
+### Intuitive APIs
+
+Component APIs are declarative and follow familiar React patterns:
+
+```jsx
+<Dialog open={isOpen} onOpenChange={setIsOpen}>
+  <Dialog.Trigger>Open</Dialog.Trigger>
+  <Dialog.Portal>
+    <Dialog.Overlay />
+    <Dialog.Content>
+      <Dialog.Title>Title</Dialog.Title>
+      <Dialog.Description>Description</Dialog.Description>
+    </Dialog.Content>
+  </Dialog.Portal>
+</Dialog>
+```
+
+### Helpful Error Messages
+
+<Tip>
+Radix provides thorough console warnings in development, with links back to documentation.
+</Tip>
+
+Example warnings:
+
+- Missing required accessibility attributes
+- Controlled/uncontrolled switching
+- Invalid prop combinations
+- Component composition errors
+
+### Type Safety
+
+Full TypeScript support with comprehensive type definitions:
+
+- IntelliSense autocompletion
+- Compile-time error checking
+- Prop documentation in your editor
+
+---
+
+## What Radix Is Not
+
+To clarify the scope:
+
+- **Not a design system** - We provide behavior, not visual design
+- **Not layout components** - No `Box`, `Stack`, `Grid` components
+- **Not styled components** - No `Button`, `Card`, `Badge` with built-in styles
+
+Radix focuses on the hard parts—accessibility, behavior, and interaction patterns—so you can focus on design.
+
+---
+
+## Next Steps
+
+Dive deeper into specific aspects of the philosophy:
+
+- [Composability](/concepts/composability) - Learn about 1-to-1 DOM mapping and composition patterns
+- [Customization](/concepts/customization) - Explore styling approaches and data attributes
+- [State Management](/concepts/state-management) - Understand controlled vs uncontrolled patterns
+- [Internationalization](/concepts/internationalization) - Implement RTL support and localization

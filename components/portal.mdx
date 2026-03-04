@@ -1,0 +1,169 @@
+---
+title: Portal
+description: Renders content outside of the main DOM hierarchy.
+---
+
+## Overview
+
+Portal renders its children into a different part of the DOM, outside of the parent component's DOM hierarchy. This is useful for rendering modals, dropdowns, tooltips, and other overlays.
+
+## Features
+
+- Renders content outside the parent DOM hierarchy
+- Can specify a custom container element
+- Automatically handles mounting/unmounting
+- Works with React portals under the hood
+
+## Installation
+
+```bash
+npm install @radix-ui/react-portal
+```
+
+## Anatomy
+
+```tsx
+import * as Portal from '@radix-ui/react-portal';
+
+export default () => (
+  <Portal.Root>
+    Content rendered in a portal
+  </Portal.Root>
+)
+```
+
+## API Reference
+
+### Root
+
+Portals content to a different part of the DOM.
+
+<ParamField path="container" type="HTMLElement | null">
+  An optional container where the portaled content should be appended. If not provided, content is rendered to `document.body`.
+</ParamField>
+
+<ParamField path="children" type="React.ReactNode">
+  The content to be portaled.
+</ParamField>
+
+## Examples
+
+### Basic Usage
+
+<CodeGroup>
+```tsx Basic
+import * as Portal from '@radix-ui/react-portal';
+
+export default () => (
+  <div style={{ position: 'relative', overflow: 'hidden' }}>
+    <p>This content is inside the parent</p>
+    <Portal.Root>
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          padding: 20,
+          backgroundColor: 'white',
+          border: '1px solid gray',
+        }}
+      >
+        This content is portaled to document.body
+      </div>
+    </Portal.Root>
+  </div>
+);
+```
+</CodeGroup>
+
+### Custom Container
+
+<CodeGroup>
+```tsx Custom Container
+import * as Portal from '@radix-ui/react-portal';
+import { useRef } from 'react';
+
+export default () => {
+  const containerRef = useRef(null);
+
+  return (
+    <div>
+      <div ref={containerRef} />
+      <Portal.Root container={containerRef.current}>
+        <div>This content is portaled to the custom container</div>
+      </Portal.Root>
+    </div>
+  );
+};
+```
+</CodeGroup>
+
+### Modal Example
+
+<CodeGroup>
+```tsx Modal
+import * as Portal from '@radix-ui/react-portal';
+import { useState } from 'react';
+
+export default () => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div>
+      <button onClick={() => setOpen(true)}>Open Modal</button>
+
+      {open && (
+        <Portal.Root>
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onClick={() => setOpen(false)}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: 20,
+                borderRadius: 8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2>Modal Title</h2>
+              <p>This modal is rendered in a portal.</p>
+              <button onClick={() => setOpen(false)}>Close</button>
+            </div>
+          </div>
+        </Portal.Root>
+      )}
+    </div>
+  );
+};
+```
+</CodeGroup>
+
+## When to Use
+
+Use Portal when you need to:
+
+- Render modals and dialogs that should appear above all other content
+- Create dropdowns and menus that shouldn't be clipped by parent overflow
+- Build tooltips that need to escape parent containers
+- Render notifications at the document root level
+- Create overlays that span the entire viewport
+
+## How It Works
+
+Portal uses React's `createPortal` API to render children into a DOM node that exists outside the parent component's DOM hierarchy. This is particularly useful for:
+
+- **Avoiding z-index issues**: Content portaled to the body can be easily stacked above other content
+- **Escaping overflow clipping**: Parent containers with `overflow: hidden` won't clip portaled content
+- **Managing focus**: Modals and dialogs can manage focus independently of their parent
+
+## Server-Side Rendering
+
+Portal is compatible with server-side rendering. It waits until the component is mounted on the client before rendering its children, preventing hydration mismatches.

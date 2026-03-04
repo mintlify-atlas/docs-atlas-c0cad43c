@@ -1,0 +1,162 @@
+---
+title: Visually Hidden
+description: Hides content from the screen in an accessible way.
+---
+
+## Overview
+
+Visually Hidden hides content visually while keeping it accessible to screen readers. This is useful for providing additional context or labels that don't need to be visible but should be announced by assistive technologies.
+
+## Features
+
+- Hides content visually using CSS
+- Content remains accessible to screen readers
+- Content remains in the document flow
+
+## Installation
+
+```bash
+npm install @radix-ui/react-visually-hidden
+```
+
+## Anatomy
+
+```tsx
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+
+export default () => (
+  <VisuallyHidden.Root>
+    Hidden content
+  </VisuallyHidden.Root>
+)
+```
+
+## API Reference
+
+### Root
+
+Hides content visually while keeping it accessible to screen readers.
+
+<ParamField path="children" type="React.ReactNode">
+  The content to be visually hidden.
+</ParamField>
+
+## Examples
+
+### Form Label
+
+<CodeGroup>
+```tsx Form Label
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+
+export default () => (
+  <div>
+    <VisuallyHidden.Root>
+      <label htmlFor="search">Search</label>
+    </VisuallyHidden.Root>
+    <input
+      id="search"
+      type="text"
+      placeholder="Search..."
+    />
+  </div>
+);
+```
+</CodeGroup>
+
+### Skip to Content Link
+
+<CodeGroup>
+```tsx Skip Link
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+
+export default () => (
+  <div>
+    <a
+      href="#main-content"
+      style={{
+        position: 'absolute',
+        left: '-10000px',
+        width: '1px',
+        height: '1px',
+        overflow: 'hidden',
+      }}
+      onFocus={(e) => {
+        e.target.style.position = 'static';
+        e.target.style.width = 'auto';
+        e.target.style.height = 'auto';
+      }}
+      onBlur={(e) => {
+        e.target.style.position = 'absolute';
+        e.target.style.left = '-10000px';
+        e.target.style.width = '1px';
+        e.target.style.height = '1px';
+      }}
+    >
+      Skip to content
+    </a>
+    <main id="main-content">
+      {/* Main content */}
+    </main>
+  </div>
+);
+```
+</CodeGroup>
+
+### Icon Button Label
+
+<CodeGroup>
+```tsx Icon Button
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+
+export default () => (
+  <button>
+    <svg width="15" height="15" viewBox="0 0 15 15">
+      {/* SVG icon content */}
+    </svg>
+    <VisuallyHidden.Root>Close</VisuallyHidden.Root>
+  </button>
+);
+```
+</CodeGroup>
+
+## Using VISUALLY_HIDDEN_STYLES
+
+The component also exports the CSS styles used to visually hide content, which you can use directly:
+
+<CodeGroup>
+```tsx Styles Export
+import { VISUALLY_HIDDEN_STYLES } from '@radix-ui/react-visually-hidden';
+
+export default () => (
+  <span style={VISUALLY_HIDDEN_STYLES}>
+    This content is visually hidden
+  </span>
+);
+```
+</CodeGroup>
+
+## How It Works
+
+The component uses a combination of CSS properties to hide content visually:
+
+- `position: absolute` - Removes from normal document flow
+- `width: 1px` and `height: 1px` - Makes element nearly invisible
+- `padding: 0` and `margin: -1px` - Minimizes space
+- `overflow: hidden` - Hides any overflow
+- `clip: rect(0, 0, 0, 0)` - Clips the element
+- `whiteSpace: nowrap` - Prevents wrapping
+
+## When to Use
+
+Use Visually Hidden when you need to:
+
+- Provide additional context for screen readers
+- Add labels to form inputs that don't need to be visible
+- Include descriptive text for icon-only buttons
+- Create skip links for keyboard navigation
+- Provide status messages that are announced but not shown
+
+## Accessibility
+
+This technique is widely used and recommended for hiding content visually while keeping it accessible. It's based on the approach used by Bootstrap and other accessibility-focused libraries.

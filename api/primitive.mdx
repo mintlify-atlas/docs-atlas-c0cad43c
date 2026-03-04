@@ -1,0 +1,199 @@
+---
+title: Primitive
+description: Low-level building blocks that render basic HTML elements with optional slot composition.
+---
+
+`Primitive` is a collection of low-level components that render basic HTML elements. Each primitive supports an `asChild` prop for composition using the Slot pattern, allowing you to merge props and refs with a child element.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-primitive
+```
+
+## Available Primitives
+
+The following primitive elements are available:
+
+- `Primitive.a`
+- `Primitive.button`
+- `Primitive.div`
+- `Primitive.form`
+- `Primitive.h2`
+- `Primitive.h3`
+- `Primitive.img`
+- `Primitive.input`
+- `Primitive.label`
+- `Primitive.li`
+- `Primitive.nav`
+- `Primitive.ol`
+- `Primitive.p`
+- `Primitive.select`
+- `Primitive.span`
+- `Primitive.svg`
+- `Primitive.ul`
+
+## Props
+
+Each primitive accepts all standard HTML attributes for its element type, plus:
+
+<ParamField path="asChild" type="boolean">
+  When `true`, the primitive will merge its props and ref with its immediate child element instead of rendering its own element. This enables powerful composition patterns.
+  
+  Default: `false`
+</ParamField>
+
+## Usage
+
+### Basic Usage
+
+```tsx
+import { Primitive } from '@radix-ui/react-primitive';
+
+function Button() {
+  return (
+    <Primitive.button
+      type="button"
+      onClick={() => console.log('clicked')}
+    >
+      Click me
+    </Primitive.button>
+  );
+}
+```
+
+### Using asChild for Composition
+
+```tsx
+import { Primitive } from '@radix-ui/react-primitive';
+import Link from 'next/link';
+
+function NavigationItem({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Primitive.a asChild>
+      <Link href={href}>
+        {children}
+      </Link>
+    </Primitive.a>
+  );
+}
+```
+
+### Custom Button Component
+
+```tsx
+import { Primitive } from '@radix-ui/react-primitive';
+
+interface ButtonProps extends React.ComponentPropsWithRef<typeof Primitive.button> {
+  variant?: 'primary' | 'secondary';
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ variant = 'primary', className, ...props }, ref) => {
+    return (
+      <Primitive.button
+        ref={ref}
+        className={`button button-${variant} ${className}`}
+        {...props}
+      />
+    );
+  }
+);
+```
+
+### Polymorphic Component Pattern
+
+```tsx
+import { Primitive } from '@radix-ui/react-primitive';
+
+interface TextProps extends React.ComponentPropsWithRef<typeof Primitive.span> {
+  asChild?: boolean;
+}
+
+const Text = React.forwardRef<HTMLSpanElement, TextProps>(
+  ({ asChild, ...props }, ref) => {
+    return (
+      <Primitive.span asChild={asChild} ref={ref} {...props} />
+    );
+  }
+);
+
+// Use as span
+<Text>Hello</Text>
+
+// Use as heading
+<Text asChild>
+  <h1>Hello</h1>
+</Text>
+
+// Use as link
+<Text asChild>
+  <a href="/home">Hello</a>
+</Text>
+```
+
+## Type Definitions
+
+```tsx
+type PrimitivePropsWithRef<E extends React.ElementType> = 
+  React.ComponentPropsWithRef<E> & {
+    asChild?: boolean;
+  }
+
+interface PrimitiveForwardRefComponent<E extends React.ElementType>
+  extends React.ForwardRefExoticComponent<PrimitivePropsWithRef<E>> {}
+```
+
+## Utilities
+
+### dispatchDiscreteCustomEvent
+
+A utility function for dispatching custom events within discrete React events while ensuring proper batching behavior.
+
+```tsx
+function dispatchDiscreteCustomEvent<E extends CustomEvent>(
+  target: E['target'], 
+  event: E
+): void
+```
+
+#### Usage
+
+```tsx
+import { dispatchDiscreteCustomEvent } from '@radix-ui/react-primitive';
+
+function Component() {
+  const handlePointerDown = (event: React.PointerEvent) => {
+    // Dispatch custom event with proper React batching
+    dispatchDiscreteCustomEvent(
+      event.currentTarget,
+      new CustomEvent('customEvent', { detail: { value: 'data' } })
+    );
+  };
+
+  return <div onPointerDown={handlePointerDown}>Interactive element</div>;
+}
+```
+
+## When to Use
+
+Use Primitives when:
+
+- Building component libraries with consistent base elements
+- You need the `asChild` composition pattern
+- Creating polymorphic components that can render as different elements
+- Building accessible components that merge props and refs correctly
+
+## Notes
+
+<Note>
+  The `asChild` prop uses the Slot pattern from `@radix-ui/react-slot`. When enabled, the Primitive merges its props and ref with the immediate child element instead of rendering its own DOM node.
+</Note>
+
+<Note>
+  Primitives automatically set a symbol on the window object (`window[Symbol.for('radix-ui')]`) to help with debugging and detecting Radix UI components in the browser.
+</Note>
+
+<Note>
+  The `dispatchDiscreteCustomEvent` utility uses `ReactDOM.flushSync` to ensure custom events dispatched within discrete events (like clicks) are properly batched by React. This prevents unexpected batching behavior in React 18+.
+</Note>

@@ -1,0 +1,130 @@
+---
+title: "Label"
+description: "A label element that can be associated with a form control."
+---
+
+## Overview
+
+Label provides an accessible label that can be associated with form controls. It automatically handles the association when wrapping a control or using the `htmlFor` prop.
+
+## Features
+
+- Supports nested controls
+- Supports custom controls
+- Accessible text for screen readers
+- Works with all form inputs
+
+## Installation
+
+```bash
+npm install @radix-ui/react-label
+```
+
+## Anatomy
+
+```jsx
+import * as Label from '@radix-ui/react-label';
+
+export default () => <Label.Root />;
+```
+
+## API Reference
+
+### Root
+
+The label component.
+
+<ParamField path="htmlFor" type="string">
+  The id of the element the label is associated with.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx With htmlFor
+import * as Label from '@radix-ui/react-label';
+import './styles.css';
+
+export default () => (
+  <div style={{ display: 'flex', padding: '0 20px', flexWrap: 'wrap', gap: 15, alignItems: 'center' }}>
+    <Label.Root className="Label" htmlFor="firstName">
+      First name
+    </Label.Root>
+    <input className="Input" type="text" id="firstName" defaultValue="Pedro Duarte" />
+  </div>
+);
+```
+
+```jsx Wrapping Control
+import * as Label from '@radix-ui/react-label';
+import './styles.css';
+
+export default () => (
+  <Label.Root className="Label">
+    Email
+    <input className="Input" type="email" />
+  </Label.Root>
+);
+```
+
+```jsx With Checkbox
+import * as Label from '@radix-ui/react-label';
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { CheckIcon } from '@radix-ui/react-icons';
+
+export default () => (
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <Checkbox.Root id="terms" defaultChecked>
+      <Checkbox.Indicator>
+        <CheckIcon />
+      </Checkbox.Indicator>
+    </Checkbox.Root>
+    <Label.Root htmlFor="terms" style={{ paddingLeft: 8 }}>
+      Accept terms and conditions
+    </Label.Root>
+  </div>
+);
+```
+
+```jsx With Radio Group
+import * as Label from '@radix-ui/react-label';
+import * as RadioGroup from '@radix-ui/react-radio-group';
+
+export default () => (
+  <RadioGroup.Root defaultValue="1">
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <RadioGroup.Item value="1" id="r1">
+        <RadioGroup.Indicator />
+      </RadioGroup.Item>
+      <Label.Root htmlFor="r1" style={{ paddingLeft: 8 }}>
+        Option 1
+      </Label.Root>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <RadioGroup.Item value="2" id="r2">
+        <RadioGroup.Indicator />
+      </RadioGroup.Item>
+      <Label.Root htmlFor="r2" style={{ paddingLeft: 8 }}>
+        Option 2
+      </Label.Root>
+    </div>
+  </RadioGroup.Root>
+);
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+This component is based on the native `label` element and follows the same accessibility guidelines. It will automatically trigger the associated control when clicked.
+</Note>
+
+### Features
+
+- Clicking the label focuses or activates the associated control
+- Screen readers announce the label when the control is focused
+- Supports both explicit (`htmlFor`) and implicit (wrapping) associations

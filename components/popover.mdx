@@ -1,0 +1,303 @@
+---
+title: Popover
+description: Displays rich content in a portal, triggered by a button.
+---
+
+## Overview
+
+A popover is a floating container that displays rich content anchored to a trigger element.
+
+## Features
+
+- Can be controlled or uncontrolled
+- Customize side, alignment, offsets, collision handling
+- Optionally render in a Portal
+- Focus management and restoration
+- Supports modal or non-modal mode
+- Esc key closes the popover
+- Clicking outside closes the popover
+
+## Installation
+
+```bash
+npm install @radix-ui/react-popover
+```
+
+## Anatomy
+
+Import all parts and piece them together.
+
+```tsx
+import * as Popover from '@radix-ui/react-popover';
+
+export default () => (
+  <Popover.Root>
+    <Popover.Trigger />
+    <Popover.Anchor />
+    <Popover.Portal>
+      <Popover.Content>
+        <Popover.Close />
+        <Popover.Arrow />
+      </Popover.Content>
+    </Popover.Portal>
+  </Popover.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the parts of a popover.
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the popover. Must be used in conjunction with `onOpenChange`.
+</ParamField>
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state of the popover when it is initially rendered. Use when you do not need to control its open state.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state of the popover changes.
+</ParamField>
+
+<ParamField path="modal" type="boolean" default="false">
+  The modality of the popover. When set to `true`, interaction with outside elements will be disabled and only popover content will be visible to screen readers.
+</ParamField>
+
+### Trigger
+
+The button that toggles the popover.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<Note>
+Supports all standard HTML button attributes.
+</Note>
+
+### Anchor
+
+An optional element to position the popover against. If not set, will position against the trigger.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+### Portal
+
+When used, portals the content part into the `body`.
+
+<ParamField path="container" type="HTMLElement" default="document.body">
+  Specify a container element to portal the content into.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+### Content
+
+The component that pops out when the popover is open.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="side" type="'top' | 'right' | 'bottom' | 'left'" default="'bottom'">
+  The preferred side of the trigger to render against when open.
+</ParamField>
+
+<ParamField path="sideOffset" type="number" default="0">
+  The distance in pixels from the trigger.
+</ParamField>
+
+<ParamField path="align" type="'start' | 'center' | 'end'" default="'center'">
+  The preferred alignment against the trigger. May change when collisions occur.
+</ParamField>
+
+<ParamField path="alignOffset" type="number" default="0">
+  An offset in pixels from the "start" or "end" alignment options.
+</ParamField>
+
+<ParamField path="avoidCollisions" type="boolean" default="true">
+  When `true`, overrides the `side` and `align` preferences to prevent collisions with boundary edges.
+</ParamField>
+
+<ParamField path="collisionBoundary" type="Element | Element[]" default="[]">
+  The element used as the collision boundary. By default this is the viewport.
+</ParamField>
+
+<ParamField path="collisionPadding" type="number | Padding" default="0">
+  The distance in pixels from the boundary edges where collision detection should occur.
+</ParamField>
+
+<ParamField path="sticky" type="'partial' | 'always'" default="'partial'">
+  The sticky behavior on the align axis. `partial` will keep the content in the boundary as long as the trigger is at least partially in the boundary whilst `always` will keep the content in the boundary regardless.
+</ParamField>
+
+<ParamField path="hideWhenDetached" type="boolean" default="false">
+  Whether to hide the content when the trigger becomes fully occluded.
+</ParamField>
+
+<ParamField path="onOpenAutoFocus" type="(event: Event) => void">
+  Event handler called when focus moves into the component after opening. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onCloseAutoFocus" type="(event: Event) => void">
+  Event handler called when focus moves to the trigger after closing. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is down. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer event occurs outside the bounds of the component. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onInteractOutside" type="(event: PointerDownOutsideEvent | FocusOutsideEvent) => void">
+  Event handler called when an interaction happens outside the bounds of the component. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+### Close
+
+The button that closes the popover.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+### Arrow
+
+An optional arrow element to render alongside the popover.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="width" type="number" default="10">
+  The width of the arrow in pixels.
+</ParamField>
+
+<ParamField path="height" type="number" default="5">
+  The height of the arrow in pixels.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+
+```tsx Basic Usage
+import * as Popover from '@radix-ui/react-popover';
+
+function PopoverDemo() {
+  return (
+    <Popover.Root>
+      <Popover.Trigger>Open Popover</Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content className="popover-content">
+          <div>
+            <h3>Dimensions</h3>
+            <p>Width: 100%</p>
+            <p>Height: auto</p>
+          </div>
+          <Popover.Close>Close</Popover.Close>
+          <Popover.Arrow className="popover-arrow" />
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+```
+
+```tsx With Positioning
+import * as Popover from '@radix-ui/react-popover';
+
+function PositionedPopover() {
+  return (
+    <Popover.Root>
+      <Popover.Trigger>Show Info</Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          side="top"
+          align="start"
+          sideOffset={5}
+          className="popover-content"
+        >
+          <p>This popover appears above and starts at the left.</p>
+          <Popover.Arrow />
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+```
+
+```tsx Controlled
+import { useState } from 'react';
+import * as Popover from '@radix-ui/react-popover';
+
+function ControlledPopover() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger>Settings</Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content>
+          <div>
+            <label>
+              <input type="checkbox" />
+              Enable notifications
+            </label>
+            <label>
+              <input type="checkbox" />
+              Auto-save
+            </label>
+          </div>
+          <button onClick={() => setOpen(false)}>Done</button>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+```
+
+```tsx With Custom Anchor
+import * as Popover from '@radix-ui/react-popover';
+
+function AnchoredPopover() {
+  return (
+    <Popover.Root>
+      <Popover.Trigger>Open</Popover.Trigger>
+      <Popover.Anchor asChild>
+        <div className="custom-anchor">
+          Popover will position relative to this element
+        </div>
+      </Popover.Anchor>
+      <Popover.Portal>
+        <Popover.Content>
+          <p>Anchored to the div above, not the trigger.</p>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+```
+
+</CodeGroup>
+
+## Accessibility
+
+Closes when the user presses the Esc key or interacts outside of the popover.
+
+### Keyboard Interactions
+
+- `Space` - Opens/closes the popover
+- `Enter` - Opens/closes the popover
+- `Tab` - Moves focus to the next focusable element
+- `Shift + Tab` - Moves focus to the previous focusable element
+- `Esc` - Closes the popover and moves focus to trigger

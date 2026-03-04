@@ -1,0 +1,104 @@
+---
+title: Separator
+description: Visually or semantically separates content.
+---
+
+## Overview
+
+Separator is used to visually or semantically separate content. It renders a semantic `separator` role by default.
+
+## Features
+
+- Supports horizontal and vertical orientations
+- Can be purely decorative or semantic
+
+## Installation
+
+```bash
+npm install @radix-ui/react-separator
+```
+
+## Anatomy
+
+```tsx
+import * as Separator from '@radix-ui/react-separator';
+
+export default () => <Separator.Root />
+```
+
+## API Reference
+
+### Root
+
+The separator component.
+
+<ParamField path="orientation" type="'horizontal' | 'vertical'" default="'horizontal'">
+  The orientation of the separator.
+</ParamField>
+
+<ParamField path="decorative" type="boolean">
+  When `true`, indicates the separator is purely visual and does not convey semantic meaning. This will set `role="none"` and remove it from the accessibility tree.
+</ParamField>
+
+## Examples
+
+### Horizontal
+
+<CodeGroup>
+```tsx Horizontal
+import * as Separator from '@radix-ui/react-separator';
+
+export default () => (
+  <div>
+    <div>Section 1</div>
+    <Separator.Root style={{ margin: '15px 0' }} />
+    <div>Section 2</div>
+  </div>
+);
+```
+</CodeGroup>
+
+### Vertical
+
+<CodeGroup>
+```tsx Vertical
+import * as Separator from '@radix-ui/react-separator';
+
+export default () => (
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <span>Item 1</span>
+    <Separator.Root
+      orientation="vertical"
+      style={{ margin: '0 15px', height: 20 }}
+    />
+    <span>Item 2</span>
+  </div>
+);
+```
+</CodeGroup>
+
+### Decorative
+
+<CodeGroup>
+```tsx Decorative
+import * as Separator from '@radix-ui/react-separator';
+
+export default () => (
+  <div>
+    <div>Visual section 1</div>
+    <Separator.Root decorative style={{ margin: '15px 0' }} />
+    <div>Visual section 2</div>
+  </div>
+);
+```
+</CodeGroup>
+
+## Data Attributes
+
+### Root
+
+- `data-orientation` - `"horizontal"` or `"vertical"`
+
+## Accessibility
+
+By default, Separator has `role="separator"` which means it will be announced by screen readers. If the separator is purely decorative, use the `decorative` prop to remove it from the accessibility tree.

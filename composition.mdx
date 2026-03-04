@@ -1,0 +1,558 @@
+---
+title: Composition
+description: Understand Radix UI's composable API design and how components map 1-to-1 with DOM elements for maximum flexibility.
+---
+
+## What is Composition?
+
+Radix UI Primitives are built with a **composable API** design. This means components are designed to be combined and nested to create complex UI patterns while maintaining full control over the rendered markup.
+
+The key principle: **one component renders one DOM element** (or no DOM element at all).
+
+## The Composable API
+
+Instead of a single component with many props, Radix provides multiple sub-components that work together:
+
+<CodeGroup>
+
+```tsx Radix Approach (Composable)
+import * as Dialog from '@radix-ui/react-dialog';
+
+function MyDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger>Open</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay />
+        <Dialog.Content>
+          <Dialog.Title>Dialog Title</Dialog.Title>
+          <Dialog.Description>Dialog description</Dialog.Description>
+          <Dialog.Close>Close</Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+```tsx Traditional Approach (Props-based)
+// This is NOT how Radix works
+<Dialog
+  trigger={<button>Open</button>}
+  title="Dialog Title"
+  description="Dialog description"
+  closeButton={<button>Close</button>}
+/>
+```
+
+</CodeGroup>
+
+## Benefits of Composition
+
+<CardGroup cols={2}>
+  <Card title="Flexibility" icon="arrows-maximize">
+    Insert your own elements anywhere in the component tree. Add wrappers, change order, or customize markup.
+  </Card>
+  
+  <Card title="Control" icon="sliders">
+    Direct access to each DOM element means full control over styling, event handlers, and attributes.
+  </Card>
+  
+  <Card title="Predictability" icon="chart-line">
+    Easy to understand what HTML will be rendered. One component = one DOM element.
+  </Card>
+  
+  <Card title="Simplicity" icon="puzzle-piece">
+    No complex prop configurations. Compose the pieces you need like building blocks.
+  </Card>
+</CardGroup>
+
+## 1-to-1 Mapping
+
+Each Radix component maps directly to a single DOM element:
+
+```tsx
+// Switch.Root renders a <button>
+<Switch.Root className="my-switch">
+  {/* Switch.Thumb renders a <span> */}
+  <Switch.Thumb className="my-thumb" />
+</Switch.Root>
+
+// Resulting HTML:
+// <button class="my-switch">
+//   <span class="my-thumb"></span>
+// </button>
+```
+
+This 1-to-1 mapping means:
+
+- **Refs work as expected** - Forward a ref to a Radix component, and it points to the actual DOM node
+- **Event handlers work naturally** - Add `onClick`, `onMouseEnter`, etc., directly to components
+- **Styling is straightforward** - Apply classes or styles exactly where you need them
+- **Inspection is easy** - The React component tree matches the DOM tree
+
+<Note>
+  Some components like `Dialog.Root` and `Accordion.Root` don't render any DOM element - they only manage state and context.
+</Note>
+
+## Composition Patterns
+
+### Basic Composition
+
+Nest components to build the structure you need:
+
+```tsx
+import * as Accordion from '@radix-ui/react-accordion';
+
+function FAQ() {
+  return (
+    <Accordion.Root type="single" collapsible>
+      <Accordion.Item value="item-1">
+        <Accordion.Header>
+          <Accordion.Trigger>
+            What is Radix UI?
+          </Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content>
+          A collection of accessible, unstyled React components.
+        </Accordion.Content>
+      </Accordion.Item>
+      
+      <Accordion.Item value="item-2">
+        <Accordion.Header>
+          <Accordion.Trigger>
+            How do I install it?
+          </Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content>
+          Use npm install @radix-ui/react-accordion
+        </Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+### Adding Custom Elements
+
+You can add your own elements anywhere:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+function CustomDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger>Open</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay />
+        <Dialog.Content>
+          {/* Add a custom header wrapper */}
+          <div className="dialog-header">
+            <Dialog.Title>Settings</Dialog.Title>
+            <Dialog.Close>
+              <CloseIcon />
+            </Dialog.Close>
+          </div>
+          
+          {/* Add a custom body wrapper */}
+          <div className="dialog-body">
+            <Dialog.Description>
+              Configure your application settings.
+            </Dialog.Description>
+            
+            {/* Your custom form or content */}
+            <SettingsForm />
+          </div>
+          
+          {/* Add a custom footer */}
+          <div className="dialog-footer">
+            <button>Cancel</button>
+            <button>Save</button>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+### Conditional Rendering
+
+Components work naturally with conditional rendering:
+
+```tsx
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+
+function DeleteDialog({ showCancel = true }) {
+  return (
+    <AlertDialog.Root>
+      <AlertDialog.Trigger>Delete</AlertDialog.Trigger>
+      <AlertDialog.Portal>
+        <AlertDialog.Overlay />
+        <AlertDialog.Content>
+          <AlertDialog.Title>Are you sure?</AlertDialog.Title>
+          <AlertDialog.Description>
+            This action cannot be undone.
+          </AlertDialog.Description>
+          <div className="actions">
+            {showCancel && (
+              <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+            )}
+            <AlertDialog.Action>Delete</AlertDialog.Action>
+          </div>
+        </AlertDialog.Content>
+      </AlertDialog.Portal>
+    </AlertDialog.Root>
+  );
+}
+```
+
+### Mapping Over Data
+
+Easily create dynamic lists:
+
+```tsx
+import * as Tabs from '@radix-ui/react-tabs';
+
+const tabs = [
+  { id: 'account', label: 'Account', content: <AccountPanel /> },
+  { id: 'password', label: 'Password', content: <PasswordPanel /> },
+  { id: 'billing', label: 'Billing', content: <BillingPanel /> },
+];
+
+function Settings() {
+  return (
+    <Tabs.Root defaultValue="account">
+      <Tabs.List>
+        {tabs.map(tab => (
+          <Tabs.Trigger key={tab.id} value={tab.id}>
+            {tab.label}
+          </Tabs.Trigger>
+        ))}
+      </Tabs.List>
+      
+      {tabs.map(tab => (
+        <Tabs.Content key={tab.id} value={tab.id}>
+          {tab.content}
+        </Tabs.Content>
+      ))}
+    </Tabs.Root>
+  );
+}
+```
+
+## The `asChild` Prop
+
+One of the most powerful composition features is the `asChild` prop. It allows you to merge Radix's functionality with your own elements.
+
+### Without `asChild`
+
+By default, Radix components render their own element:
+
+```tsx
+<Dialog.Trigger>
+  Open Dialog
+</Dialog.Trigger>
+
+// Renders:
+// <button type="button">Open Dialog</button>
+```
+
+### With `asChild`
+
+Use `asChild` to merge functionality into your own element:
+
+```tsx
+<Dialog.Trigger asChild>
+  <button className="my-custom-button">
+    <Icon />Open Dialog
+  </button>
+</Dialog.Trigger>
+
+// Renders:
+// <button type="button" class="my-custom-button">
+//   <svg>...</svg>Open Dialog
+// </button>
+```
+
+<Tip>
+  The `asChild` prop uses the [Slot component](/components/slot) under the hood to merge props, refs, and event handlers.
+</Tip>
+
+### Using with Custom Components
+
+You can use `asChild` with your own components:
+
+```tsx
+import { Link } from 'react-router-dom';
+
+<NavigationMenu.Link asChild>
+  <Link to="/about">About</Link>
+</NavigationMenu.Link>
+
+// Radix's functionality is merged with your Link component
+```
+
+### Using with Icons and Wrappers
+
+```tsx
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { CheckIcon } from '@radix-ui/react-icons';
+
+function CustomCheckbox() {
+  return (
+    <Checkbox.Root className="checkbox-root">
+      <Checkbox.Indicator asChild>
+        <CheckIcon />
+      </Checkbox.Indicator>
+    </Checkbox.Root>
+  );
+}
+```
+
+## Accessing DOM Refs
+
+Since components map 1-to-1 with DOM elements, refs work naturally:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { useRef, useEffect } from 'react';
+
+function MyDialog() {
+  const contentRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    // Access the actual DOM node
+    if (contentRef.current) {
+      console.log('Dialog content element:', contentRef.current);
+    }
+  }, []);
+  
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger>Open</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Content ref={contentRef}>
+          <Dialog.Title>My Dialog</Dialog.Title>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+## Event Handler Composition
+
+You can add your own event handlers, and they'll be composed with Radix's internal handlers:
+
+```tsx
+import * as Switch from '@radix-ui/react-switch';
+
+function TrackedSwitch() {
+  return (
+    <Switch.Root
+      onCheckedChange={(checked) => {
+        console.log('Switch changed:', checked);
+        // Your logic here
+        trackEvent('switch_toggled', { value: checked });
+      }}
+      onClick={(event) => {
+        console.log('Switch clicked:', event);
+        // This runs alongside Radix's internal click handler
+      }}
+    >
+      <Switch.Thumb />
+    </Switch.Root>
+  );
+}
+```
+
+<Note>
+  Event handlers are composed, not replaced. Both your handler and Radix's internal handler will run.
+</Note>
+
+## Controlled vs Uncontrolled
+
+Composition works with both controlled and uncontrolled patterns:
+
+### Uncontrolled (Internal State)
+
+```tsx
+import * as Collapsible from '@radix-ui/react-collapsible';
+
+function UncontrolledCollapsible() {
+  return (
+    <Collapsible.Root defaultOpen={true}>
+      <Collapsible.Trigger>
+        Toggle
+      </Collapsible.Trigger>
+      <Collapsible.Content>
+        Content that can be collapsed
+      </Collapsible.Content>
+    </Collapsible.Root>
+  );
+}
+```
+
+### Controlled (External State)
+
+```tsx
+import * as Collapsible from '@radix-ui/react-collapsible';
+import { useState } from 'react';
+
+function ControlledCollapsible() {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <div>
+      <p>Currently: {open ? 'Open' : 'Closed'}</p>
+      <Collapsible.Root open={open} onOpenChange={setOpen}>
+        <Collapsible.Trigger>
+          Toggle
+        </Collapsible.Trigger>
+        <Collapsible.Content>
+          Content that can be collapsed
+        </Collapsible.Content>
+      </Collapsible.Root>
+    </div>
+  );
+}
+```
+
+## Building Wrapper Components
+
+You can create your own wrapper components while maintaining composability:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+interface ConfirmDialogProps {
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  onCancel?: () => void;
+  children: React.ReactNode;
+}
+
+export function ConfirmDialog({
+  title,
+  description,
+  onConfirm,
+  onCancel,
+  children
+}: ConfirmDialogProps) {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger asChild>
+        {children}
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="overlay" />
+        <Dialog.Content className="content">
+          <Dialog.Title>{title}</Dialog.Title>
+          <Dialog.Description>{description}</Dialog.Description>
+          <div className="actions">
+            <Dialog.Close onClick={onCancel}>
+              Cancel
+            </Dialog.Close>
+            <Dialog.Close onClick={onConfirm}>
+              Confirm
+            </Dialog.Close>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
+// Usage:
+<ConfirmDialog
+  title="Delete Account"
+  description="This action is permanent"
+  onConfirm={deleteAccount}
+>
+  <button>Delete My Account</button>
+</ConfirmDialog>
+```
+
+<Warning>
+  When building wrapper components, make sure to forward refs and preserve accessibility props.
+</Warning>
+
+## Composition Anti-Patterns
+
+Avoid these common mistakes:
+
+### Don't Skip Required Parts
+
+```tsx
+// ❌ Bad: Missing required components
+<Dialog.Root>
+  <Dialog.Trigger>Open</Dialog.Trigger>
+  {/* Missing Portal, Content */}
+</Dialog.Root>
+
+// ✅ Good: Include all required components
+<Dialog.Root>
+  <Dialog.Trigger>Open</Dialog.Trigger>
+  <Dialog.Portal>
+    <Dialog.Content>
+      <Dialog.Title>Title</Dialog.Title>
+    </Dialog.Content>
+  </Dialog.Portal>
+</Dialog.Root>
+```
+
+### Don't Break Component Hierarchy
+
+```tsx
+// ❌ Bad: Components in wrong order
+<Accordion.Root>
+  <Accordion.Trigger>Click me</Accordion.Trigger>
+  <Accordion.Item value="item-1">
+    <Accordion.Content>Content</Accordion.Content>
+  </Accordion.Item>
+</Accordion.Root>
+
+// ✅ Good: Correct hierarchy
+<Accordion.Root>
+  <Accordion.Item value="item-1">
+    <Accordion.Trigger>Click me</Accordion.Trigger>
+    <Accordion.Content>Content</Accordion.Content>
+  </Accordion.Item>
+</Accordion.Root>
+```
+
+## Composition vs Configuration
+
+Radix favors composition over configuration:
+
+| Approach | Example |
+|----------|----------|
+| **Configuration** (props) | `<Dialog title="My Dialog" showClose={true} size="large" />` |
+| **Composition** (components) | `<Dialog.Root><Dialog.Content><Dialog.Title>My Dialog</Dialog.Title></Dialog.Content></Dialog.Root>` |
+
+Composition wins because:
+
+- More flexible - you control the markup
+- More predictable - you see exactly what renders
+- Better TypeScript support - each component has specific types
+- Easier to customize - no need to learn complex prop APIs
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Accessibility" icon="universal-access" href="/accessibility">
+    Learn about accessibility features
+  </Card>
+  <Card title="Slot Component" icon="puzzle-piece" href="/components/slot">
+    Deep dive into the Slot utility
+  </Card>
+  <Card title="Components" icon="grid" href="/components/dialog">
+    Browse all available components
+  </Card>
+  <Card title="Styling" icon="palette" href="/styling">
+    Learn about styling approaches
+  </Card>
+</CardGroup>

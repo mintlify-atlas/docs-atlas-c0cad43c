@@ -1,0 +1,266 @@
+---
+title: "Navigation Menu"
+description: "A collection of links for site navigation."
+---
+
+## Overview
+
+Navigation Menu provides a collection of links for navigating through your website. It features keyboard navigation, delayed interactions, and automatic viewport management for dropdown content.
+
+## Features
+
+- Full keyboard navigation with arrow keys
+- Automatic focus management
+- Flexible orientation (horizontal or vertical)
+- Configurable hover delay and skip delay durations
+- Animated content transitions with viewport
+- Optional indicators for active items
+- Screen reader friendly with proper ARIA attributes
+- Supports nested sub-menus
+
+## Installation
+
+```bash
+npm install @radix-ui/react-navigation-menu
+```
+
+## Anatomy
+
+```jsx
+import * as NavigationMenu from '@radix-ui/react-navigation-menu';
+
+export default () => (
+  <NavigationMenu.Root>
+    <NavigationMenu.List>
+      <NavigationMenu.Item>
+        <NavigationMenu.Trigger />
+        <NavigationMenu.Content>
+          <NavigationMenu.Link />
+        </NavigationMenu.Content>
+      </NavigationMenu.Item>
+
+      <NavigationMenu.Item>
+        <NavigationMenu.Link />
+      </NavigationMenu.Item>
+
+      <NavigationMenu.Indicator />
+    </NavigationMenu.List>
+
+    <NavigationMenu.Viewport />
+  </NavigationMenu.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+The root component of the navigation menu.
+
+<ParamField path="value" type="string">
+  The controlled value of the menu item to expand.
+</ParamField>
+
+<ParamField path="defaultValue" type="string">
+  The value of the menu item to expand by default (uncontrolled).
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Callback fired when the expanded item changes.
+</ParamField>
+
+<ParamField path="orientation" type="'horizontal' | 'vertical'" default="'horizontal'">
+  The orientation of the menu.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction. If omitted, inherits from the parent.
+</ParamField>
+
+<ParamField path="delayDuration" type="number" default="200">
+  The duration from when the pointer enters the trigger until the content opens (in milliseconds).
+</ParamField>
+
+<ParamField path="skipDelayDuration" type="number" default="300">
+  How much time a user has to enter another trigger without incurring a delay again (in milliseconds).
+</ParamField>
+
+### List
+
+Contains the navigation menu items and indicators.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Item
+
+A top-level menu item, containing a trigger with content combination or a link.
+
+<ParamField path="value" type="string">
+  A unique value that associates the item with a content.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Trigger
+
+The button that toggles the content.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Content
+
+Contains the content associated with a trigger.
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Link
+
+A navigational link.
+
+<ParamField path="active" type="boolean">
+  Used to identify the link as the currently active page.
+</ParamField>
+
+<ParamField path="onSelect" type="(event: Event) => void">
+  Callback fired when the link is selected.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Indicator
+
+An optional animated indicator that highlights the currently active trigger.
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Viewport
+
+The viewport where expanded content is rendered. Automatically sizes itself to the content.
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Sub
+
+Signifies a submenu. Inherits context from the root.
+
+<ParamField path="value" type="string">
+  A unique value that associates the item with a content.
+</ParamField>
+
+<ParamField path="defaultValue" type="string">
+  The value of the menu item to expand by default.
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Callback fired when the expanded item changes.
+</ParamField>
+
+<ParamField path="orientation" type="'horizontal' | 'vertical'" default="'horizontal'">
+  The orientation of the submenu.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as NavigationMenu from '@radix-ui/react-navigation-menu';
+import './styles.css';
+
+export default () => (
+  <NavigationMenu.Root className="NavigationMenuRoot">
+    <NavigationMenu.List className="NavigationMenuList">
+      <NavigationMenu.Item>
+        <NavigationMenu.Trigger className="NavigationMenuTrigger">
+          Products
+        </NavigationMenu.Trigger>
+        <NavigationMenu.Content className="NavigationMenuContent">
+          <NavigationMenu.Link href="/product-1" className="NavigationMenuLink">
+            Product 1
+          </NavigationMenu.Link>
+          <NavigationMenu.Link href="/product-2" className="NavigationMenuLink">
+            Product 2
+          </NavigationMenu.Link>
+        </NavigationMenu.Content>
+      </NavigationMenu.Item>
+
+      <NavigationMenu.Item>
+        <NavigationMenu.Link href="/about" className="NavigationMenuLink">
+          About
+        </NavigationMenu.Link>
+      </NavigationMenu.Item>
+
+      <NavigationMenu.Indicator className="NavigationMenuIndicator" />
+    </NavigationMenu.List>
+
+    <NavigationMenu.Viewport className="NavigationMenuViewport" />
+  </NavigationMenu.Root>
+);
+```
+
+```jsx Controlled
+import { useState } from 'react';
+import * as NavigationMenu from '@radix-ui/react-navigation-menu';
+
+export default () => {
+  const [value, setValue] = useState('');
+
+  return (
+    <NavigationMenu.Root value={value} onValueChange={setValue}>
+      <NavigationMenu.List>
+        <NavigationMenu.Item value="products">
+          <NavigationMenu.Trigger>Products</NavigationMenu.Trigger>
+          <NavigationMenu.Content>
+            <NavigationMenu.Link href="/product-1">Product 1</NavigationMenu.Link>
+            <NavigationMenu.Link href="/product-2">Product 2</NavigationMenu.Link>
+          </NavigationMenu.Content>
+        </NavigationMenu.Item>
+      </NavigationMenu.List>
+      <NavigationMenu.Viewport />
+    </NavigationMenu.Root>
+  );
+};
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Adheres to the [Navigation WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/).
+</Note>
+
+### Keyboard Interactions
+
+- **Space/Enter** - Opens/closes the content.
+- **Tab** - Moves focus to the next focusable element.
+- **Shift + Tab** - Moves focus to the previous focusable element.
+- **ArrowDown** - When horizontal, moves focus to the next trigger. When vertical, opens the content.
+- **ArrowUp** - When horizontal, moves focus to the previous trigger. When vertical, closes the content.
+- **ArrowRight** - When horizontal, opens the content. When vertical, moves focus to the next trigger.
+- **ArrowLeft** - When horizontal, closes the content. When vertical, moves focus to the previous trigger.
+- **Home/End** - Moves focus to the first/last trigger.

@@ -1,0 +1,285 @@
+---
+title: Hover Card
+description: For sighted users to preview content available behind a link.
+---
+
+## Overview
+
+A hover card displays rich content in a popup when hovering over or focusing a trigger element.
+
+## Features
+
+- Can be controlled or uncontrolled
+- Customize side, alignment, offsets, collision handling
+- Optionally render in a Portal
+- Supports custom open and close delays
+- Opens on hover or focus
+- Ignores hovering on touch devices
+
+## Installation
+
+```bash
+npm install @radix-ui/react-hover-card
+```
+
+## Anatomy
+
+Import all parts and piece them together.
+
+```tsx
+import * as HoverCard from '@radix-ui/react-hover-card';
+
+export default () => (
+  <HoverCard.Root>
+    <HoverCard.Trigger />
+    <HoverCard.Portal>
+      <HoverCard.Content>
+        <HoverCard.Arrow />
+      </HoverCard.Content>
+    </HoverCard.Portal>
+  </HoverCard.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the parts of a hover card.
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the hover card. Must be used in conjunction with `onOpenChange`.
+</ParamField>
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state of the hover card when it is initially rendered. Use when you do not need to control its open state.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state of the hover card changes.
+</ParamField>
+
+<ParamField path="openDelay" type="number" default="700">
+  The duration from when the mouse enters the trigger until the hover card opens.
+</ParamField>
+
+<ParamField path="closeDelay" type="number" default="300">
+  The duration from when the mouse leaves the trigger or content until the hover card closes.
+</ParamField>
+
+### Trigger
+
+The link that opens the hover card when hovered.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<Note>
+By default, renders as an anchor element (`<a>`).
+</Note>
+
+### Portal
+
+When used, portals the content part into the `body`.
+
+<ParamField path="container" type="HTMLElement" default="document.body">
+  Specify a container element to portal the content into.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+### Content
+
+The component that pops out when the hover card is open.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="side" type="'top' | 'right' | 'bottom' | 'left'" default="'bottom'">
+  The preferred side of the trigger to render against when open.
+</ParamField>
+
+<ParamField path="sideOffset" type="number" default="0">
+  The distance in pixels from the trigger.
+</ParamField>
+
+<ParamField path="align" type="'start' | 'center' | 'end'" default="'center'">
+  The preferred alignment against the trigger. May change when collisions occur.
+</ParamField>
+
+<ParamField path="alignOffset" type="number" default="0">
+  An offset in pixels from the "start" or "end" alignment options.
+</ParamField>
+
+<ParamField path="avoidCollisions" type="boolean" default="true">
+  When `true`, overrides the `side` and `align` preferences to prevent collisions with boundary edges.
+</ParamField>
+
+<ParamField path="collisionBoundary" type="Element | Element[]" default="[]">
+  The element used as the collision boundary. By default this is the viewport.
+</ParamField>
+
+<ParamField path="collisionPadding" type="number | Padding" default="0">
+  The distance in pixels from the boundary edges where collision detection should occur.
+</ParamField>
+
+<ParamField path="sticky" type="'partial' | 'always'" default="'partial'">
+  The sticky behavior on the align axis. `partial` will keep the content in the boundary as long as the trigger is at least partially in the boundary whilst `always` will keep the content in the boundary regardless.
+</ParamField>
+
+<ParamField path="hideWhenDetached" type="boolean" default="false">
+  Whether to hide the content when the trigger becomes fully occluded.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is down. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer event occurs outside the bounds of the component. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+### Arrow
+
+An optional arrow element to render alongside the hover card.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="width" type="number" default="10">
+  The width of the arrow in pixels.
+</ParamField>
+
+<ParamField path="height" type="number" default="5">
+  The height of the arrow in pixels.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+
+```tsx Basic Usage
+import * as HoverCard from '@radix-ui/react-hover-card';
+
+function HoverCardDemo() {
+  return (
+    <HoverCard.Root>
+      <HoverCard.Trigger href="https://twitter.com/radix_ui">
+        @radix_ui
+      </HoverCard.Trigger>
+      <HoverCard.Portal>
+        <HoverCard.Content className="hover-card-content">
+          <img
+            src="https://pbs.twimg.com/profile_images/radix.jpg"
+            alt="Radix UI"
+          />
+          <div>
+            <h3>Radix UI</h3>
+            <p>Components, icons, and colors for building high-quality web apps.</p>
+          </div>
+          <HoverCard.Arrow className="hover-card-arrow" />
+        </HoverCard.Content>
+      </HoverCard.Portal>
+    </HoverCard.Root>
+  );
+}
+```
+
+```tsx Custom Delays
+import * as HoverCard from '@radix-ui/react-hover-card';
+
+function CustomDelayHoverCard() {
+  return (
+    <HoverCard.Root openDelay={200} closeDelay={100}>
+      <HoverCard.Trigger href="#">
+        Quick preview
+      </HoverCard.Trigger>
+      <HoverCard.Portal>
+        <HoverCard.Content>
+          <p>Opens quickly (200ms), closes slowly (100ms)</p>
+        </HoverCard.Content>
+      </HoverCard.Portal>
+    </HoverCard.Root>
+  );
+}
+```
+
+```tsx User Profile Card
+import * as HoverCard from '@radix-ui/react-hover-card';
+
+function UserProfileCard({ username }) {
+  return (
+    <HoverCard.Root>
+      <HoverCard.Trigger
+        href={`/users/${username}`}
+        className="user-link"
+      >
+        @{username}
+      </HoverCard.Trigger>
+      <HoverCard.Portal>
+        <HoverCard.Content
+          className="hover-card-content"
+          sideOffset={5}
+        >
+          <div className="profile-preview">
+            <img
+              className="avatar"
+              src={`/avatars/${username}.jpg`}
+              alt={username}
+            />
+            <div className="info">
+              <h4>{username}</h4>
+              <p className="bio">Software engineer and open source contributor</p>
+              <div className="stats">
+                <span>1,234 followers</span>
+                <span>567 following</span>
+              </div>
+            </div>
+          </div>
+          <HoverCard.Arrow />
+        </HoverCard.Content>
+      </HoverCard.Portal>
+    </HoverCard.Root>
+  );
+}
+```
+
+```tsx Controlled
+import { useState } from 'react';
+import * as HoverCard from '@radix-ui/react-hover-card';
+
+function ControlledHoverCard() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div>
+      <button onClick={() => setOpen(true)}>Show preview</button>
+      <HoverCard.Root open={open} onOpenChange={setOpen}>
+        <HoverCard.Trigger href="#">Hover target</HoverCard.Trigger>
+        <HoverCard.Portal>
+          <HoverCard.Content>
+            <p>Controlled hover card content</p>
+          </HoverCard.Content>
+        </HoverCard.Portal>
+      </HoverCard.Root>
+    </div>
+  );
+}
+```
+
+</CodeGroup>
+
+## Accessibility
+
+Uses a heuristic to determine when to display the hover card. Opens on hover when the user is using a mouse, and on focus when using keyboard.
+
+### Keyboard Interactions
+
+- `Tab` - Opens the hover card when focus moves to the trigger
+- `Shift + Tab` - Opens the hover card when focus moves to the trigger
+- `Esc` - Closes the hover card when it is open

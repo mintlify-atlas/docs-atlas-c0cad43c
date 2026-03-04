@@ -1,0 +1,457 @@
+---
+title: Context Menu
+description: Displays a menu located at the pointer, triggered by a right-click or long-press.
+---
+
+## Overview
+
+A context menu is displayed when the user right-clicks or long-presses on a trigger element, providing contextual actions.
+
+## Features
+
+- Supports submenus with configurable reading direction
+- Supports items, labels, groups of items
+- Supports checkable items (single or multiple)
+- Customize side, alignment, offsets, collision handling
+- Focus is fully managed
+- Full keyboard navigation
+- Typeahead support
+- Optional modal or non-modal mode
+
+## Installation
+
+```bash
+npm install @radix-ui/react-context-menu
+```
+
+## Anatomy
+
+Import all parts and piece them together.
+
+```tsx
+import * as ContextMenu from '@radix-ui/react-context-menu';
+
+export default () => (
+  <ContextMenu.Root>
+    <ContextMenu.Trigger />
+    <ContextMenu.Portal>
+      <ContextMenu.Content>
+        <ContextMenu.Label />
+        <ContextMenu.Item />
+
+        <ContextMenu.Group>
+          <ContextMenu.Item />
+        </ContextMenu.Group>
+
+        <ContextMenu.CheckboxItem>
+          <ContextMenu.ItemIndicator />
+        </ContextMenu.CheckboxItem>
+
+        <ContextMenu.RadioGroup>
+          <ContextMenu.RadioItem>
+            <ContextMenu.ItemIndicator />
+          </ContextMenu.RadioItem>
+        </ContextMenu.RadioGroup>
+
+        <ContextMenu.Sub>
+          <ContextMenu.SubTrigger />
+          <ContextMenu.Portal>
+            <ContextMenu.SubContent />
+          </ContextMenu.Portal>
+        </ContextMenu.Sub>
+
+        <ContextMenu.Separator />
+        <ContextMenu.Arrow />
+      </ContextMenu.Content>
+    </ContextMenu.Portal>
+  </ContextMenu.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the parts of a context menu.
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state of the context menu changes.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction of submenus when applicable. If omitted, inherits globally from DirectionProvider or assumes LTR (left-to-right) reading mode.
+</ParamField>
+
+<ParamField path="modal" type="boolean" default="true">
+  The modality of the context menu. When set to `true`, interaction with outside elements will be disabled and only menu content will be visible to screen readers.
+</ParamField>
+
+### Trigger
+
+The area that opens the context menu. Wrap it around the target you want the context menu to open from when right-clicking.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, the context menu won't open and will show the browser's default context menu.
+</ParamField>
+
+### Portal
+
+When used, portals the content part into the `body`.
+
+<ParamField path="container" type="HTMLElement" default="document.body">
+  Specify a container element to portal the content into.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+### Content
+
+The component that pops out when the context menu is open.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="false">
+  When `true`, keyboard navigation will loop from last item to first, and vice versa.
+</ParamField>
+
+<ParamField path="onCloseAutoFocus" type="(event: Event) => void">
+  Event handler called when focus moves back to the trigger after closing. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is down. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer event occurs outside the bounds of the component. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onInteractOutside" type="(event: PointerDownOutsideEvent | FocusOutsideEvent) => void">
+  Event handler called when an interaction happens outside the bounds of the component. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+### Item
+
+The component that contains the context menu items.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="onSelect" type="(event: Event) => void">
+  Event handler called when the user selects an item (via mouse or keyboard). Calling `event.preventDefault` in this handler will prevent the context menu from closing when selecting that item.
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes. By default, the typeahead behavior will use the `.textContent` of the item. Use this when the content is complex, or you have non-textual content inside.
+</ParamField>
+
+### Group
+
+Used to group multiple items. Use in conjunction with `ContextMenu.Label` to ensure good accessibility via automatic labelling.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+### Label
+
+Used to render a label. It won't be focusable using arrow keys.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+### CheckboxItem
+
+An item that can be controlled and rendered like a checkbox.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="checked" type="boolean | 'indeterminate'">
+  The controlled checked state of the item. Must be used in conjunction with `onCheckedChange`.
+</ParamField>
+
+<ParamField path="onCheckedChange" type="(checked: boolean) => void">
+  Event handler called when the checked state changes.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="onSelect" type="(event: Event) => void">
+  Event handler called when the user selects an item (via mouse or keyboard). Calling `event.preventDefault` in this handler will prevent the context menu from closing when selecting that item.
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes.
+</ParamField>
+
+### RadioGroup
+
+Used to group multiple `ContextMenu.RadioItem`s.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="value" type="string">
+  The value of the selected item in the group.
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Event handler called when the value changes.
+</ParamField>
+
+### RadioItem
+
+An item that can be controlled and rendered like a radio.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="value" type="string" required>
+  The unique value of the item.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="onSelect" type="(event: Event) => void">
+  Event handler called when the user selects an item (via mouse or keyboard).
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes.
+</ParamField>
+
+### ItemIndicator
+
+Renders when the parent `ContextMenu.CheckboxItem` or `ContextMenu.RadioItem` is checked. You can style this element directly, or you can use it as a wrapper to put an icon into, or both.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+### Separator
+
+Used to visually separate items in the context menu.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+### Sub
+
+Contains all the parts of a submenu.
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the submenu. Must be used in conjunction with `onOpenChange`.
+</ParamField>
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state of the submenu when it is initially rendered. Use when you do not need to control its open state.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state of the submenu changes.
+</ParamField>
+
+### SubTrigger
+
+An item that opens a submenu. Must be rendered inside `ContextMenu.Sub`.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes.
+</ParamField>
+
+### SubContent
+
+The component that pops out when a submenu is open. Must be rendered inside `ContextMenu.Sub`.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="false">
+  When `true`, keyboard navigation will loop from last item to first, and vice versa.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is down.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer event occurs outside the bounds of the component.
+</ParamField>
+
+### Arrow
+
+An optional arrow element to render alongside the context menu.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="width" type="number" default="10">
+  The width of the arrow in pixels.
+</ParamField>
+
+<ParamField path="height" type="number" default="5">
+  The height of the arrow in pixels.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+
+```tsx Basic Usage
+import * as ContextMenu from '@radix-ui/react-context-menu';
+
+function ContextMenuDemo() {
+  return (
+    <ContextMenu.Root>
+      <ContextMenu.Trigger className="context-menu-trigger">
+        Right click here
+      </ContextMenu.Trigger>
+      <ContextMenu.Portal>
+        <ContextMenu.Content className="context-menu-content">
+          <ContextMenu.Item className="context-menu-item">
+            Back
+          </ContextMenu.Item>
+          <ContextMenu.Item className="context-menu-item">
+            Forward
+          </ContextMenu.Item>
+          <ContextMenu.Item className="context-menu-item">
+            Reload
+          </ContextMenu.Item>
+          <ContextMenu.Separator className="context-menu-separator" />
+          <ContextMenu.Item className="context-menu-item">
+            Save Page As...
+          </ContextMenu.Item>
+        </ContextMenu.Content>
+      </ContextMenu.Portal>
+    </ContextMenu.Root>
+  );
+}
+```
+
+```tsx With Checkboxes
+import { useState } from 'react';
+import * as ContextMenu from '@radix-ui/react-context-menu';
+import { CheckIcon } from '@radix-ui/react-icons';
+
+function ContextMenuWithCheckboxes() {
+  const [showBookmarks, setShowBookmarks] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
+
+  return (
+    <ContextMenu.Root>
+      <ContextMenu.Trigger>
+        Right click for options
+      </ContextMenu.Trigger>
+      <ContextMenu.Portal>
+        <ContextMenu.Content>
+          <ContextMenu.Label>View</ContextMenu.Label>
+          <ContextMenu.CheckboxItem
+            checked={showBookmarks}
+            onCheckedChange={setShowBookmarks}
+          >
+            <ContextMenu.ItemIndicator>
+              <CheckIcon />
+            </ContextMenu.ItemIndicator>
+            Show Bookmarks
+          </ContextMenu.CheckboxItem>
+          <ContextMenu.CheckboxItem
+            checked={showHistory}
+            onCheckedChange={setShowHistory}
+          >
+            <ContextMenu.ItemIndicator>
+              <CheckIcon />
+            </ContextMenu.ItemIndicator>
+            Show History
+          </ContextMenu.CheckboxItem>
+        </ContextMenu.Content>
+      </ContextMenu.Portal>
+    </ContextMenu.Root>
+  );
+}
+```
+
+```tsx With Submenu
+import * as ContextMenu from '@radix-ui/react-context-menu';
+
+function ContextMenuWithSubmenu() {
+  return (
+    <ContextMenu.Root>
+      <ContextMenu.Trigger>
+        Right click me
+      </ContextMenu.Trigger>
+      <ContextMenu.Portal>
+        <ContextMenu.Content>
+          <ContextMenu.Item>New Tab</ContextMenu.Item>
+          <ContextMenu.Item>New Window</ContextMenu.Item>
+          <ContextMenu.Separator />
+          <ContextMenu.Sub>
+            <ContextMenu.SubTrigger>
+              More Tools
+            </ContextMenu.SubTrigger>
+            <ContextMenu.Portal>
+              <ContextMenu.SubContent>
+                <ContextMenu.Item>Save Page As...</ContextMenu.Item>
+                <ContextMenu.Item>Create Shortcut...</ContextMenu.Item>
+                <ContextMenu.Item>Developer Tools</ContextMenu.Item>
+              </ContextMenu.SubContent>
+            </ContextMenu.Portal>
+          </ContextMenu.Sub>
+        </ContextMenu.Content>
+      </ContextMenu.Portal>
+    </ContextMenu.Root>
+  );
+}
+```
+
+</CodeGroup>
+
+## Accessibility
+
+Adheres to the [Menu WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/menu) and uses roving tabindex to manage focus movement among menu items.
+
+### Keyboard Interactions
+
+- `Space` - Activates the focused item
+- `Enter` - Activates the focused item
+- `ArrowDown` - Moves focus to the next item
+- `ArrowUp` - Moves focus to the previous item
+- `ArrowRight` - Opens a submenu or moves focus to the next item in a submenu
+- `ArrowLeft` - Closes a submenu or moves to the parent menu
+- `Esc` - Closes the context menu

@@ -1,0 +1,134 @@
+---
+title: useLayoutEffect
+description: A safe version of React's useLayoutEffect that doesn't emit warnings on the server.
+---
+
+`useLayoutEffect` is a drop-in replacement for React's `useLayoutEffect` that suppresses the warning emitted during server-side rendering by replacing the hook with a no-op function in non-browser environments.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-use-layout-effect
+```
+
+## Function Signature
+
+```tsx
+const useLayoutEffect: typeof React.useLayoutEffect
+```
+
+## Why Use This?
+
+React's `useLayoutEffect` emits a warning on the server because neither `useLayoutEffect` nor `useEffect` run during server-side rendering. This safe version suppresses the warning by using a no-op function when `document` is not available (i.e., in SSR environments).
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useLayoutEffect } from '@radix-ui/react-use-layout-effect';
+import { useState } from 'react';
+
+function Component() {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  useLayoutEffect(() => {
+    // This runs synchronously after DOM mutations, before paint
+    // No warning will be shown during SSR
+    const element = document.getElementById('my-element');
+    if (element) {
+      setDimensions({
+        width: element.offsetWidth,
+        height: element.offsetHeight,
+      });
+    }
+  }, []);
+
+  return <div id="my-element">Content</div>;
+}
+```
+
+### Measuring DOM Elements
+
+```tsx
+import { useLayoutEffect } from '@radix-ui/react-use-layout-effect';
+import { useRef, useState } from 'react';
+
+function MeasuredComponent() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    if (ref.current) {
+      setWidth(ref.current.offsetWidth);
+    }
+  }, []);
+
+  return (
+    <div ref={ref}>
+      Width: {width}px
+    </div>
+  );
+}
+```
+
+### Updating Refs Before Paint
+
+```tsx
+import { useLayoutEffect } from '@radix-ui/react-use-layout-effect';
+import { useRef } from 'react';
+
+function ScrollRestoration() {
+  const scrollPosRef = useRef(0);
+
+  useLayoutEffect(() => {
+    // Restore scroll position before browser paints
+    window.scrollTo(0, scrollPosRef.current);
+  }, []);
+
+  useLayoutEffect(() => {
+    // Save scroll position
+    const handleScroll = () => {
+      scrollPosRef.current = window.scrollY;
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return <div>Content</div>;
+}
+```
+
+## Implementation
+
+```tsx
+const useLayoutEffect = globalThis?.document ? React.useLayoutEffect : () => {};
+```
+
+The implementation is straightforward:
+- If `document` exists (browser environment), use React's `useLayoutEffect`
+- Otherwise (SSR environment), use a no-op function
+
+## When to Use
+
+Use `useLayoutEffect` when you need to:
+
+- Measure DOM elements before the browser paints
+- Make DOM mutations that need to be visible immediately
+- Read layout from the DOM and synchronously re-render
+- Avoid visual flashing that would occur with `useEffect`
+
+## Notes
+
+<Note>
+  This hook follows the same API as React's `useLayoutEffect`. The only difference is that it doesn't emit warnings during server-side rendering.
+</Note>
+
+<Note>
+  In SSR environments, the hook becomes a no-op (doesn't run at all). If you need your effect to run on the server, use `useEffect` instead, though keep in mind that `useEffect` also doesn't run on the server.
+</Note>
+
+<Note>
+  For more information about `useLayoutEffect`, see the [React documentation](https://reactjs.org/docs/hooks-reference.html#uselayouteffect).
+</Note>

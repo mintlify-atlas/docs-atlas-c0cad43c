@@ -1,0 +1,223 @@
+---
+title: Focus Guards
+description: Injects invisible elements at the edges of the DOM to ensure focus events can be reliably captured.
+---
+
+`FocusGuards` injects a pair of invisible, focusable elements at the start and end of the document body. These "guards" ensure that `focusin` and `focusout` events can be captured consistently, which is essential for focus management in complex UIs.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-focus-guards
+```
+
+## Components
+
+### FocusGuards
+
+A component that renders its children and ensures focus guards are present in the document.
+
+```tsx
+interface FocusGuardsProps {
+  children?: React.ReactNode;
+}
+```
+
+## Hook
+
+### useFocusGuards
+
+A hook that ensures focus guards are injected without needing to render a component.
+
+```tsx
+function useFocusGuards(): void
+```
+
+## Usage
+
+### Basic Component Usage
+
+```tsx
+import { FocusGuards } from '@radix-ui/react-focus-guards';
+import { FocusScope } from '@radix-ui/react-focus-scope';
+
+function Modal({ children }: { children: React.ReactNode }) {
+  return (
+    <FocusGuards>
+      <FocusScope trapped>
+        <div className="modal">
+          {children}
+        </div>
+      </FocusScope>
+    </FocusGuards>
+  );
+}
+```
+
+### Using the Hook
+
+```tsx
+import { useFocusGuards } from '@radix-ui/react-focus-guards';
+import { FocusScope } from '@radix-ui/react-focus-scope';
+
+function Dialog({ children }: { children: React.ReactNode }) {
+  useFocusGuards();
+
+  return (
+    <FocusScope trapped>
+      <div className="dialog">
+        {children}
+      </div>
+    </FocusScope>
+  );
+}
+```
+
+### App-level Setup
+
+```tsx
+import { FocusGuards } from '@radix-ui/react-focus-guards';
+
+function App() {
+  return (
+    <FocusGuards>
+      <Router>
+        <YourApp />
+      </Router>
+    </FocusGuards>
+  );
+}
+```
+
+### With Multiple Modals
+
+```tsx
+import { useFocusGuards } from '@radix-ui/react-focus-guards';
+import { FocusScope } from '@radix-ui/react-focus-scope';
+
+function ModalManager({ children }: { children: React.ReactNode }) {
+  // Only one set of focus guards needed for multiple modals
+  useFocusGuards();
+
+  return <>{children}</>;
+}
+
+function App() {
+  const [modal1Open, setModal1Open] = useState(false);
+  const [modal2Open, setModal2Open] = useState(false);
+
+  return (
+    <ModalManager>
+      <button onClick={() => setModal1Open(true)}>Open Modal 1</button>
+      <button onClick={() => setModal2Open(true)}>Open Modal 2</button>
+      
+      {modal1Open && (
+        <FocusScope trapped>
+          <div>Modal 1 Content</div>
+        </FocusScope>
+      )}
+      
+      {modal2Open && (
+        <FocusScope trapped>
+          <div>Modal 2 Content</div>
+        </FocusScope>
+      )}
+    </ModalManager>
+  );
+}
+```
+
+### Conditional Focus Management
+
+```tsx
+import { useFocusGuards } from '@radix-ui/react-focus-guards';
+
+function ConditionalDialog({ isOpen, children }: { 
+  isOpen: boolean; 
+  children: React.ReactNode;
+}) {
+  // Guards only injected when component is mounted
+  useFocusGuards();
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="dialog">
+      {children}
+    </div>
+  );
+}
+```
+
+## How It Works
+
+Focus guards are invisible `<span>` elements with these properties:
+
+- `data-radix-focus-guard` attribute for identification
+- `tabIndex={0}` to make them focusable
+- Positioned fixed with zero opacity (invisible but functional)
+- No pointer events
+- Inserted at `document.body` edges (afterbegin and beforeend)
+
+The guards ensure:
+- Focus events bubble correctly through the document
+- Focus trapping can detect when focus leaves the trapped area
+- Tab navigation at document boundaries works consistently
+
+## Reference Counting
+
+The implementation uses reference counting:
+
+- Each call to `useFocusGuards()` increments an internal counter
+- Guards are only removed when the counter reaches zero
+- Multiple components can safely use focus guards simultaneously
+- Guards are shared across all instances (only one pair exists)
+
+## Implementation Details
+
+```tsx
+function createFocusGuard() {
+  const element = document.createElement('span');
+  element.setAttribute('data-radix-focus-guard', '');
+  element.tabIndex = 0;
+  element.style.outline = 'none';
+  element.style.opacity = '0';
+  element.style.position = 'fixed';
+  element.style.pointerEvents = 'none';
+  return element;
+}
+```
+
+The hook:
+1. Checks for existing guards on mount
+2. Creates new guards if none exist
+3. Inserts them at document body edges
+4. Increments the reference counter
+5. Decrements counter and removes guards on unmount (if counter reaches 0)
+
+## When to Use
+
+Use focus guards when:
+
+- Implementing focus trapping (modals, dialogs)
+- Building focus management utilities
+- Working with `FocusScope` or similar components
+- Need reliable focus event capture across the document
+
+## Notes
+
+<Note>
+  Focus guards are automatically shared across all components that use them. You don't need to worry about duplicate guards - the implementation ensures only one pair exists in the document.
+</Note>
+
+<Note>
+  The guards are completely invisible and non-interactive to users. They exist purely to ensure browser focus events work correctly for JavaScript-based focus management.
+</Note>
+
+<Note>
+  If you're using `FocusScope` or other Radix UI components that handle focus, you typically need focus guards. Many Radix primitives handle this automatically.
+</Note>
+
+<Note>
+  The reference counting ensures guards remain in the document as long as any component needs them, and are only removed when no components require them anymore.
+</Note>

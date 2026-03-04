@@ -1,0 +1,419 @@
+---
+title: "Menubar"
+description: "A visually persistent menu common in desktop applications."
+---
+
+## Overview
+
+Menubar provides a horizontal menu bar with dropdown menus, similar to what you'd find in desktop applications. It supports submenus, keyboard navigation, and various item types including checkboxes and radio groups.
+
+## Features
+
+- Full keyboard navigation
+- Supports submenus with customizable alignments
+- Supports items, labels, groups of items
+- Supports checkable items (single or multiple)
+- Supports modal and non-modal modes
+- Customize side, alignment, offsets, collision handling
+- Focus automatically moved to first item when menu opens
+- Typeahead support
+- Dismissing and layering behavior highly customizable
+
+## Installation
+
+```bash
+npm install @radix-ui/react-menubar
+```
+
+## Anatomy
+
+```jsx
+import * as Menubar from '@radix-ui/react-menubar';
+
+export default () => (
+  <Menubar.Root>
+    <Menubar.Menu>
+      <Menubar.Trigger />
+      <Menubar.Portal>
+        <Menubar.Content>
+          <Menubar.Label />
+          <Menubar.Item />
+
+          <Menubar.Group>
+            <Menubar.Item />
+          </Menubar.Group>
+
+          <Menubar.CheckboxItem>
+            <Menubar.ItemIndicator />
+          </Menubar.CheckboxItem>
+
+          <Menubar.RadioGroup>
+            <Menubar.RadioItem>
+              <Menubar.ItemIndicator />
+            </Menubar.RadioItem>
+          </Menubar.RadioGroup>
+
+          <Menubar.Sub>
+            <Menubar.SubTrigger />
+            <Menubar.Portal>
+              <Menubar.SubContent />
+            </Menubar.Portal>
+          </Menubar.Sub>
+
+          <Menubar.Separator />
+          <Menubar.Arrow />
+        </Menubar.Content>
+      </Menubar.Portal>
+    </Menubar.Menu>
+  </Menubar.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the menu bar items.
+
+<ParamField path="value" type="string">
+  The controlled value of the menu to open.
+</ParamField>
+
+<ParamField path="defaultValue" type="string">
+  The value of the menu that should be open initially.
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Event handler called when the value changes.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction. If omitted, assumes LTR.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="true">
+  Whether keyboard navigation should loop from last item to first, and vice versa.
+</ParamField>
+
+### Menu
+
+A top level menu item, contains a trigger with content combination.
+
+<ParamField path="value" type="string">
+  A unique value that associates the item with a content.
+</ParamField>
+
+### Trigger
+
+The button that toggles the menu content. By default, the menu opens on click.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Portal
+
+When used, portals the content part into the body.
+
+<ParamField path="container" type="HTMLElement">
+  Specify a container element to portal the content into.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed.
+</ParamField>
+
+### Content
+
+The component that pops out when a menu is open.
+
+<ParamField path="loop" type="boolean" default="false">
+  Whether keyboard navigation should loop from last item to first, and vice versa.
+</ParamField>
+
+<ParamField path="onCloseAutoFocus" type="(event: Event) => void">
+  Event handler called when focus moves back after closing.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is down.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer event occurs outside the bounds of the component.
+</ParamField>
+
+<ParamField path="onFocusOutside" type="(event: FocusOutsideEvent) => void">
+  Event handler called when focus moves outside the bounds of the component.
+</ParamField>
+
+<ParamField path="onInteractOutside" type="(event: InteractOutsideEvent) => void">
+  Event handler called when an interaction happens outside the bounds of the component.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed.
+</ParamField>
+
+<ParamField path="side" type="'top' | 'right' | 'bottom' | 'left'" default="'bottom'">
+  The preferred side of the trigger to render against.
+</ParamField>
+
+<ParamField path="sideOffset" type="number" default="0">
+  The distance in pixels from the trigger.
+</ParamField>
+
+<ParamField path="align" type="'start' | 'center' | 'end'" default="'center'">
+  The preferred alignment against the trigger.
+</ParamField>
+
+<ParamField path="alignOffset" type="number" default="0">
+  An offset in pixels from the "start" or "end" alignment options.
+</ParamField>
+
+<ParamField path="avoidCollisions" type="boolean" default="true">
+  When true, overrides the side and align preferences to prevent collisions with boundary edges.
+</ParamField>
+
+<ParamField path="collisionBoundary" type="Element | Element[]" default="[]">
+  The element(s) used as collision boundary.
+</ParamField>
+
+<ParamField path="collisionPadding" type="number | Partial<Record<Side, number>>" default="0">
+  The distance in pixels from the boundary edges where collision detection should occur.
+</ParamField>
+
+<ParamField path="arrowPadding" type="number" default="0">
+  The padding between the arrow and the edges of the content.
+</ParamField>
+
+<ParamField path="sticky" type="'partial' | 'always'" default="'partial'">
+  The sticky behavior on the align axis.
+</ParamField>
+
+<ParamField path="hideWhenDetached" type="boolean" default="false">
+  Whether to hide the content when the trigger becomes fully occluded.
+</ParamField>
+
+### Item
+
+The component that contains the menu items.
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="onSelect" type="(event: Event) => void">
+  Event handler called when the user selects an item.
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes. By default the typeahead behavior will use the text content.
+</ParamField>
+
+### CheckboxItem
+
+An item that can be controlled and rendered like a checkbox.
+
+<ParamField path="checked" type="boolean | 'indeterminate'">
+  The controlled checked state of the item.
+</ParamField>
+
+<ParamField path="onCheckedChange" type="(checked: boolean) => void">
+  Event handler called when the checked state changes.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the item.
+</ParamField>
+
+### RadioGroup
+
+Used to group multiple RadioItems.
+
+<ParamField path="value" type="string">
+  The controlled value of the radio item to check.
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Event handler called when the value changes.
+</ParamField>
+
+### RadioItem
+
+An item that can be controlled and rendered like a radio.
+
+<ParamField path="value" type="string" required>
+  The unique value of the item.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the item.
+</ParamField>
+
+### ItemIndicator
+
+Renders when the parent CheckboxItem or RadioItem is checked. You can style this element directly, or use it as a wrapper to put an icon into.
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed.
+</ParamField>
+
+### Separator
+
+Used to visually separate items in the menu.
+
+### Sub
+
+Contains all the parts of a submenu.
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state of the submenu when it is initially rendered.
+</ParamField>
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the submenu.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state changes.
+</ParamField>
+
+### SubTrigger
+
+An item that opens a submenu.
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes.
+</ParamField>
+
+### SubContent
+
+The component that pops out when a submenu is open.
+
+<Note>
+Accepts all the same props as Content.
+</Note>
+
+### Group
+
+Used to group multiple items. Use in conjunction with Label to ensure good accessibility via automatic labelling.
+
+### Label
+
+Used to render a label. It won't be focusable using arrow keys.
+
+### Arrow
+
+An optional arrow element to render alongside the content.
+
+<ParamField path="width" type="number" default="10">
+  The width of the arrow in pixels.
+</ParamField>
+
+<ParamField path="height" type="number" default="5">
+  The height of the arrow in pixels.
+</ParamField>
+
+## Example
+
+```jsx
+import * as Menubar from '@radix-ui/react-menubar';
+import { CheckIcon } from '@radix-ui/react-icons';
+import './styles.css';
+
+export default () => {
+  const [checkedSelection, setCheckedSelection] = React.useState(['1']);
+  const [person, setPerson] = React.useState('pedro');
+
+  return (
+    <Menubar.Root className="MenubarRoot">
+      <Menubar.Menu>
+        <Menubar.Trigger className="MenubarTrigger">File</Menubar.Trigger>
+        <Menubar.Portal>
+          <Menubar.Content className="MenubarContent" sideOffset={5} align="start">
+            <Menubar.Item className="MenubarItem">New Tab</Menubar.Item>
+            <Menubar.Item className="MenubarItem">New Window</Menubar.Item>
+            <Menubar.Separator className="MenubarSeparator" />
+            <Menubar.Item className="MenubarItem">Share</Menubar.Item>
+            <Menubar.Separator className="MenubarSeparator" />
+            <Menubar.Item className="MenubarItem">Print</Menubar.Item>
+          </Menubar.Content>
+        </Menubar.Portal>
+      </Menubar.Menu>
+
+      <Menubar.Menu>
+        <Menubar.Trigger className="MenubarTrigger">Edit</Menubar.Trigger>
+        <Menubar.Portal>
+          <Menubar.Content className="MenubarContent" sideOffset={5} align="start">
+            <Menubar.Item className="MenubarItem">Undo</Menubar.Item>
+            <Menubar.Item className="MenubarItem">Redo</Menubar.Item>
+            <Menubar.Separator className="MenubarSeparator" />
+            <Menubar.Item className="MenubarItem">Cut</Menubar.Item>
+            <Menubar.Item className="MenubarItem">Copy</Menubar.Item>
+            <Menubar.Item className="MenubarItem">Paste</Menubar.Item>
+          </Menubar.Content>
+        </Menubar.Portal>
+      </Menubar.Menu>
+
+      <Menubar.Menu>
+        <Menubar.Trigger className="MenubarTrigger">View</Menubar.Trigger>
+        <Menubar.Portal>
+          <Menubar.Content className="MenubarContent" sideOffset={5} align="start">
+            <Menubar.CheckboxItem
+              className="MenubarCheckboxItem"
+              checked={checkedSelection.includes('1')}
+              onCheckedChange={(checked) =>
+                setCheckedSelection((prev) =>
+                  checked ? [...prev, '1'] : prev.filter((c) => c !== '1')
+                )
+              }
+            >
+              <Menubar.ItemIndicator className="MenubarItemIndicator">
+                <CheckIcon />
+              </Menubar.ItemIndicator>
+              Show Bookmarks Bar
+            </Menubar.CheckboxItem>
+            <Menubar.CheckboxItem
+              className="MenubarCheckboxItem"
+              checked={checkedSelection.includes('2')}
+              onCheckedChange={(checked) =>
+                setCheckedSelection((prev) =>
+                  checked ? [...prev, '2'] : prev.filter((c) => c !== '2')
+                )
+              }
+            >
+              <Menubar.ItemIndicator className="MenubarItemIndicator">
+                <CheckIcon />
+              </Menubar.ItemIndicator>
+              Show Full URLs
+            </Menubar.CheckboxItem>
+            <Menubar.Separator className="MenubarSeparator" />
+            <Menubar.Item className="MenubarItem" disabled>
+              Reload
+            </Menubar.Item>
+          </Menubar.Content>
+        </Menubar.Portal>
+      </Menubar.Menu>
+    </Menubar.Root>
+  );
+};
+```
+
+## Accessibility
+
+<Note>
+Adheres to the [Menu Button WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/) and uses roving tabindex to manage focus movement among menu items.
+</Note>
+
+### Keyboard Interactions
+
+- **Space/Enter** - Opens the menu and focuses the first item.
+- **ArrowDown** - Opens the menu and focuses the first item.
+- **ArrowUp** - Opens the menu and focuses the last item.
+- **ArrowRight/ArrowLeft** - When focus is on a trigger, moves focus to the next or previous trigger.
+- **Esc** - Closes the menu and moves focus to the trigger.

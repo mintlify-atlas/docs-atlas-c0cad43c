@@ -1,0 +1,397 @@
+---
+title: Migration Guide
+description: Guide for migrating between major versions of Radix UI Primitives
+---
+
+This guide covers strategies for upgrading Radix UI Primitives and handling breaking changes between versions.
+
+## Version Strategy
+
+Radix UI follows semantic versioning:
+
+- **Major versions** (1.x → 2.x): Breaking changes that may require code updates
+- **Minor versions** (1.1 → 1.2): New features, backward compatible
+- **Patch versions** (1.1.1 → 1.1.2): Bug fixes, backward compatible
+
+<Note>
+Radix Primitives is currently in v1.x and maintains a strong commitment to stability. Breaking changes are rare and well-documented.
+</Note>
+
+## General Upgrade Process
+
+<Steps>
+  <Step title="Check the changelog">
+    Review the changelog for the component you're upgrading:
+    
+    ```bash
+    # View changelogs in the repository
+    https://github.com/radix-ui/primitives/blob/main/packages/react/[component]/CHANGELOG.md
+    ```
+  </Step>
+
+  <Step title="Update dependencies">
+    Update to the latest version:
+    
+    ```bash
+    npm install @radix-ui/react-dialog@latest
+    # or update multiple packages
+    npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-popover
+    ```
+  </Step>
+
+  <Step title="Run TypeScript checks">
+    TypeScript will catch many breaking changes:
+    
+    ```bash
+    npm run typecheck
+    ```
+  </Step>
+
+  <Step title="Test your components">
+    Run your test suite and manually test components:
+    
+    ```bash
+    npm test
+    npm run dev
+    ```
+  </Step>
+</Steps>
+
+## Common Migration Patterns
+
+### Updating Multiple Packages
+
+When upgrading, it's often best to update all Radix packages together since they share internal dependencies:
+
+```bash
+# Update all @radix-ui packages to latest
+npm update @radix-ui/*
+
+# Or use a tool like npm-check-updates
+npx npm-check-updates "/@radix-ui/" -u
+npm install
+```
+
+### Handling Breaking Changes
+
+#### API Prop Changes
+
+If a prop is renamed or removed:
+
+```tsx
+// Before (v1.0)
+<Dialog.Root open={open} onOpenChange={setOpen}>
+  {/* content */}
+</Dialog.Root>
+
+// After (hypothetical v2.0 with renamed prop)
+<Dialog.Root isOpen={open} onIsOpenChange={setOpen}>
+  {/* content */}
+</Dialog.Root>
+```
+
+Create a wrapper to ease migration:
+
+```tsx
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+
+interface DialogProps {
+  open?: boolean; // Old API
+  onOpenChange?: (open: boolean) => void; // Old API
+  children: React.ReactNode;
+}
+
+// Adapter component for gradual migration
+function Dialog({ open, onOpenChange, children }: DialogProps) {
+  return (
+    <DialogPrimitive.Root isOpen={open} onIsOpenChange={onOpenChange}>
+      {children}
+    </DialogPrimitive.Root>
+  );
+}
+```
+
+#### Component Structure Changes
+
+If component structure changes:
+
+```tsx
+// Before: Content includes Overlay
+<Dialog.Root>
+  <Dialog.Content>
+    {/* content */}
+  </Dialog.Content>
+</Dialog.Root>
+
+// After: Overlay is separate
+<Dialog.Root>
+  <Dialog.Portal>
+    <Dialog.Overlay />
+    <Dialog.Content>
+      {/* content */}
+    </Dialog.Content>
+  </Dialog.Portal>
+</Dialog.Root>
+```
+
+### Type Changes
+
+TypeScript types may change between versions:
+
+```tsx
+import { ComponentPropsWithoutRef, ElementRef } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+
+// Use utility types to adapt to changes
+type DialogContentProps = ComponentPropsWithoutRef<typeof Dialog.Content>;
+type DialogContentElement = ElementRef<typeof Dialog.Content>;
+
+// Your wrapper component will automatically adapt
+const MyDialogContent = React.forwardRef<
+  DialogContentElement,
+  DialogContentProps
+>((props, ref) => <Dialog.Content ref={ref} {...props} />);
+```
+
+## Migration Checklist
+
+When upgrading major versions:
+
+<Steps>
+  <Step title="Read release notes">
+    Check the release notes and changelog:
+    - Breaking changes
+    - Deprecated features
+    - New features
+    - Bug fixes
+  </Step>
+
+  <Step title="Update peer dependencies">
+    Ensure React version compatibility:
+    
+    ```json filename="package.json"
+    {
+      "dependencies": {
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0"
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Search for deprecated usage">
+    ```bash
+    # Search your codebase for deprecated patterns
+    grep -r "deprecated-prop" src/
+    ```
+  </Step>
+
+  <Step title="Update styles">
+    Check if CSS selectors or data attributes have changed:
+    
+    ```css
+    /* Update data-* attribute selectors if needed */
+    [data-state="open"] { /* ... */ }
+    [data-radix-dialog-content] { /* ... */ }
+    ```
+  </Step>
+
+  <Step title="Test accessibility">
+    Ensure accessibility features still work:
+    - Keyboard navigation
+    - Screen reader announcements
+    - Focus management
+    - ARIA attributes
+  </Step>
+</Steps>
+
+## Backwards Compatibility
+
+Create compatibility layers for gradual migration:
+
+```tsx filename="components/compat/dialog.tsx"
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
+
+// V1 compatible wrapper
+export const Dialog = DialogPrimitive.Root;
+export const DialogTrigger = DialogPrimitive.Trigger;
+
+// Automatically include Portal and Overlay for v1 behavior
+export const DialogContent = forwardRef<
+  ElementRef<typeof DialogPrimitive.Content>,
+  ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>((props, ref) => (
+  <DialogPrimitive.Portal>
+    <DialogPrimitive.Overlay className="dialog-overlay" />
+    <DialogPrimitive.Content ref={ref} {...props} />
+  </DialogPrimitive.Portal>
+));
+
+DialogContent.displayName = 'DialogContent';
+```
+
+Use this wrapper during migration:
+
+```tsx
+// Import from your compatibility layer instead of directly from Radix
+import { Dialog, DialogTrigger, DialogContent } from '@/components/compat/dialog';
+
+function MyDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger>Open</DialogTrigger>
+      <DialogContent>
+        {/* Works with v1 code style */}
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## Codemods
+
+For large codebases, consider creating codemods to automate migrations:
+
+```javascript filename="codemods/dialog-v1-to-v2.js"
+// Example codemod using jscodeshift
+module.exports = function transformer(file, api) {
+  const j = api.jscodeshift;
+  const root = j(file.source);
+
+  // Find all Dialog.Content and wrap with Portal
+  root
+    .find(j.JSXElement, {
+      openingElement: {
+        name: { object: { name: 'Dialog' }, property: { name: 'Content' } },
+      },
+    })
+    .forEach((path) => {
+      // Transformation logic here
+    });
+
+  return root.toSource();
+};
+```
+
+## Handling Deprecation Warnings
+
+Radix may mark features as deprecated before removing them:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+// If you see deprecation warnings in console
+function MyDialog() {
+  return (
+    <Dialog.Root>
+      {/* ⚠️ Deprecated prop usage */}
+      <Dialog.Content deprecatedProp="value">
+        Content
+      </Dialog.Content>
+    </Dialog.Root>
+  );
+}
+
+// Fix by using the new API
+function MyDialogFixed() {
+  return (
+    <Dialog.Root>
+      <Dialog.Content newProp="value">
+        Content
+      </Dialog.Content>
+    </Dialog.Root>
+  );
+}
+```
+
+<Warning>
+Address deprecation warnings as soon as possible. Deprecated features will be removed in the next major version.
+</Warning>
+
+## Testing After Migration
+
+### Unit Tests
+
+```tsx
+import { render, screen } from '@testing-library/react';
+import { Dialog } from './dialog';
+
+test('dialog opens and closes', () => {
+  render(
+    <Dialog>
+      <Dialog.Trigger>Open</Dialog.Trigger>
+      <Dialog.Content>
+        <Dialog.Title>Title</Dialog.Title>
+      </Dialog.Content>
+    </Dialog>
+  );
+
+  // Test component behavior
+  const trigger = screen.getByText('Open');
+  expect(trigger).toBeInTheDocument();
+});
+```
+
+### Visual Regression Tests
+
+Use tools like Playwright or Chromatic to catch visual changes:
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('dialog appears correctly', async ({ page }) => {
+  await page.goto('/dialog-example');
+  await page.click('button:has-text("Open")');
+  
+  // Visual snapshot
+  await expect(page).toHaveScreenshot('dialog-open.png');
+});
+```
+
+## Getting Help
+
+If you encounter issues during migration:
+
+<Steps>
+  <Step title="Check documentation">
+    Review the component documentation at https://radix-ui.com/primitives
+  </Step>
+
+  <Step title="Search GitHub issues">
+    Search for similar issues: https://github.com/radix-ui/primitives/issues
+  </Step>
+
+  <Step title="Ask the community">
+    Join discussions on GitHub Discussions or Discord
+  </Step>
+
+  <Step title="Report bugs">
+    If you find a bug, report it with a minimal reproduction
+  </Step>
+</Steps>
+
+## Version-Specific Guides
+
+### Upgrading from v0.x to v1.x
+
+Major changes in v1.0:
+- Improved TypeScript types
+- Better SSR support
+- Refined API surface
+- Enhanced accessibility
+
+### Staying Current
+
+To stay informed about updates:
+
+- Watch the GitHub repository
+- Follow release notes
+- Check the changelog regularly
+- Subscribe to the Radix blog
+
+```bash
+# Enable GitHub notifications for releases only
+# Go to: https://github.com/radix-ui/primitives
+# Click "Watch" → "Custom" → "Releases"
+```

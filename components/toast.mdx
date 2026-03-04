@@ -1,0 +1,246 @@
+---
+title: Toast
+description: A succinct message that is displayed temporarily.
+---
+
+## Overview
+
+Toast displays a brief, temporary notification to the user. It's typically used to provide feedback about an operation or to communicate important information.
+
+## Features
+
+- Automatically closes after a configurable timeout
+- Supports closing via pointer, focus, or programmatically
+- Supports swipe gestures to dismiss
+- Exposes CSS variables for flexible animations
+- Manages focus within and across toasts
+- Respects `prefers-reduced-motion`
+
+## Installation
+
+```bash
+npm install @radix-ui/react-toast
+```
+
+## Anatomy
+
+```tsx
+import * as Toast from '@radix-ui/react-toast';
+
+export default () => (
+  <Toast.Provider>
+    <Toast.Root>
+      <Toast.Title />
+      <Toast.Description />
+      <Toast.Action />
+      <Toast.Close />
+    </Toast.Root>
+
+    <Toast.Viewport />
+  </Toast.Provider>
+)
+```
+
+## API Reference
+
+### Provider
+
+The provider that wraps your toasts and viewport. It usually wraps the application.
+
+<ParamField path="label" type="string" default="'Notification'">
+  An author-localized label for each toast. Used to help screen reader users associate the interruption with a toast.
+</ParamField>
+
+<ParamField path="duration" type="number" default="5000">
+  Time in milliseconds that each toast should remain visible for.
+</ParamField>
+
+<ParamField path="swipeDirection" type="'right' | 'left' | 'up' | 'down'" default="'right'">
+  Direction of pointer swipe that should close the toast.
+</ParamField>
+
+<ParamField path="swipeThreshold" type="number" default="50">
+  Distance in pixels that the swipe must pass before a close is triggered.
+</ParamField>
+
+### Viewport
+
+The fixed area where toasts appear. Users can jump to the viewport by pressing a hotkey.
+
+<ParamField path="hotkey" type="string[]" default="['F8']">
+  The keys to use as the keyboard shortcut that will move focus to the toast viewport.
+</ParamField>
+
+<ParamField path="label" type="string" default="'Notifications ({hotkey})'">
+  An author-localized label for the toast viewport to provide context for screen reader users.
+</ParamField>
+
+### Root
+
+The toast that automatically closes. It should not be held open to acquire a user response.
+
+<ParamField path="type" type="'foreground' | 'background'" default="'foreground'">
+  Control the sensitivity of the toast for accessibility purposes. For toasts that are the result of a user action, use `foreground`. Toasts generated from background tasks should use `background`.
+</ParamField>
+
+<ParamField path="duration" type="number">
+  Time in milliseconds that toast should remain visible for. Overrides value from provider.
+</ParamField>
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the toast.
+</ParamField>
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state of the toast when it is initially rendered. Use when you do not need to control its open state.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state changes.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is pressed.
+</ParamField>
+
+<ParamField path="onPause" type="() => void">
+  Event handler called when the dismiss timer is paused.
+</ParamField>
+
+<ParamField path="onResume" type="() => void">
+  Event handler called when the dismiss timer is resumed.
+</ParamField>
+
+<ParamField path="onSwipeStart" type="(event: SwipeEvent) => void">
+  Event handler called when starting a swipe interaction.
+</ParamField>
+
+<ParamField path="onSwipeMove" type="(event: SwipeEvent) => void">
+  Event handler called during a swipe interaction.
+</ParamField>
+
+<ParamField path="onSwipeEnd" type="(event: SwipeEvent) => void">
+  Event handler called at the end of a swipe interaction.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed.
+</ParamField>
+
+### Title
+
+An optional title for the toast.
+
+### Description
+
+The toast message.
+
+### Action
+
+An action that is safe to ignore to ensure users are not expected to complete tasks with unexpected side effects as a result of a time limit.
+
+<ParamField path="altText" type="string" required>
+  A short description for screen readers announcing the action.
+</ParamField>
+
+### Close
+
+A button that closes the toast.
+
+## Examples
+
+### Basic Usage
+
+<CodeGroup>
+```tsx Basic
+import * as Toast from '@radix-ui/react-toast';
+import { useState } from 'react';
+
+export default () => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Toast.Provider swipeDirection="right">
+      <button onClick={() => setOpen(true)}>Add to calendar</button>
+
+      <Toast.Root open={open} onOpenChange={setOpen}>
+        <Toast.Title>Scheduled: Catch up</Toast.Title>
+        <Toast.Description>Friday, February 10, 2023 at 5:30 PM</Toast.Description>
+        <Toast.Action altText="Goto schedule to undo">Undo</Toast.Action>
+        <Toast.Close aria-label="Close">
+          <span aria-hidden>×</span>
+        </Toast.Close>
+      </Toast.Root>
+
+      <Toast.Viewport />
+    </Toast.Provider>
+  );
+};
+```
+</CodeGroup>
+
+### Multiple Toasts
+
+<CodeGroup>
+```tsx Multiple
+import * as Toast from '@radix-ui/react-toast';
+import { useState } from 'react';
+
+export default () => {
+  const [toasts, setToasts] = useState([]);
+
+  const addToast = () => {
+    setToasts((prev) => [
+      ...prev,
+      { id: Date.now(), title: 'New notification', description: 'You have a new message' },
+    ]);
+  };
+
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
+
+  return (
+    <Toast.Provider>
+      <button onClick={addToast}>Show toast</button>
+
+      {toasts.map((toast) => (
+        <Toast.Root key={toast.id} onOpenChange={(open) => !open && removeToast(toast.id)}>
+          <Toast.Title>{toast.title}</Toast.Title>
+          <Toast.Description>{toast.description}</Toast.Description>
+          <Toast.Close>Close</Toast.Close>
+        </Toast.Root>
+      ))}
+
+      <Toast.Viewport />
+    </Toast.Provider>
+  );
+};
+```
+</CodeGroup>
+
+## Data Attributes
+
+### Root
+
+- `data-state` - `"open"` or `"closed"`
+- `data-swipe` - `"start"`, `"move"`, `"cancel"`, or `"end"`
+- `data-swipe-direction` - `"up"`, `"down"`, `"left"`, or `"right"`
+
+## CSS Variables
+
+### Root
+
+- `--radix-toast-swipe-move-x` - The offset during a swipe (horizontal)
+- `--radix-toast-swipe-move-y` - The offset during a swipe (vertical)
+- `--radix-toast-swipe-end-x` - The final offset of a swipe (horizontal)
+- `--radix-toast-swipe-end-y` - The final offset of a swipe (vertical)
+
+## Keyboard Interactions
+
+- `F8` - Focuses the toast viewport (configurable via `hotkey` prop)
+- `Tab` - Moves focus to the next focusable element
+- `Shift + Tab` - Moves focus to the previous focusable element
+- `Space` - When focus is on an action or close button, closes the toast
+- `Enter` - When focus is on an action or close button, closes the toast
+- `Escape` - Closes the toast

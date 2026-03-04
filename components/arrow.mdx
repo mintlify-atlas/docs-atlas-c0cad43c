@@ -1,0 +1,177 @@
+---
+title: Arrow
+description: Renders an arrow element for popovers and tooltips.
+---
+
+## Overview
+
+Arrow renders an SVG arrow element that can be used to point to referenced content in popovers, tooltips, and other floating elements. It's typically positioned automatically by popper-based components.
+
+## Features
+
+- Renders as an SVG element
+- Customizable dimensions
+- Works with Radix Popper-based components
+- Can be replaced with custom content using `asChild`
+
+## Installation
+
+```bash
+npm install @radix-ui/react-arrow
+```
+
+## Anatomy
+
+```tsx
+import * as Arrow from '@radix-ui/react-arrow';
+
+export default () => <Arrow.Root />
+```
+
+## API Reference
+
+### Root
+
+The arrow component.
+
+<ParamField path="width" type="number" default="10">
+  The width of the arrow in pixels.
+</ParamField>
+
+<ParamField path="height" type="number" default="5">
+  The height of the arrow in pixels.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+## Examples
+
+### Basic Usage
+
+<CodeGroup>
+```tsx Basic
+import * as Arrow from '@radix-ui/react-arrow';
+import * as Popover from '@radix-ui/react-popover';
+
+export default () => (
+  <Popover.Root>
+    <Popover.Trigger>Open</Popover.Trigger>
+    <Popover.Portal>
+      <Popover.Content>
+        <Popover.Arrow asChild>
+          <Arrow.Root />
+        </Popover.Arrow>
+        Popover content
+      </Popover.Content>
+    </Popover.Portal>
+  </Popover.Root>
+);
+```
+</CodeGroup>
+
+### Custom Size
+
+<CodeGroup>
+```tsx Custom Size
+import * as Arrow from '@radix-ui/react-arrow';
+
+export default () => (
+  <Arrow.Root width={20} height={10} />
+);
+```
+</CodeGroup>
+
+### With Tooltip
+
+<CodeGroup>
+```tsx Tooltip
+import * as Arrow from '@radix-ui/react-arrow';
+import * as Tooltip from '@radix-ui/react-tooltip';
+
+export default () => (
+  <Tooltip.Provider>
+    <Tooltip.Root>
+      <Tooltip.Trigger>Hover me</Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content
+          style={{
+            backgroundColor: 'black',
+            color: 'white',
+            padding: 10,
+            borderRadius: 4,
+          }}
+        >
+          <Arrow.Root style={{ fill: 'black' }} />
+          Tooltip content
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  </Tooltip.Provider>
+);
+```
+</CodeGroup>
+
+### Custom Arrow with asChild
+
+<CodeGroup>
+```tsx Custom Arrow
+import * as Arrow from '@radix-ui/react-arrow';
+
+export default () => (
+  <Arrow.Root asChild>
+    <div
+      style={{
+        width: 0,
+        height: 0,
+        borderLeft: '10px solid transparent',
+        borderRight: '10px solid transparent',
+        borderBottom: '10px solid black',
+      }}
+    />
+  </Arrow.Root>
+);
+```
+</CodeGroup>
+
+## Styling
+
+The default arrow is an SVG with a simple triangle shape. You can style it using CSS:
+
+```css
+/* Target the SVG */
+[data-radix-arrow] {
+  fill: white;
+}
+
+/* Or style the polygon */
+[data-radix-arrow] polygon {
+  fill: white;
+}
+```
+
+## Use with Popper Components
+
+Arrow is designed to work with Radix's Popper-based components:
+
+- Popover
+- Tooltip
+- Dropdown Menu
+- Context Menu
+- Hover Card
+
+These components automatically position the arrow to point at the trigger element.
+
+## How It Works
+
+The Arrow component:
+
+1. Renders an SVG element with a triangle polygon by default
+2. Uses `preserveAspectRatio="none"` to allow stretching
+3. Can be replaced entirely using the `asChild` prop
+4. Is positioned by parent Popper components using CSS transforms
+
+## Accessibility
+
+The arrow is purely decorative and doesn't affect accessibility. It's automatically hidden from screen readers.

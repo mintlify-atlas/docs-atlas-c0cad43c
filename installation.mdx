@@ -1,0 +1,342 @@
+---
+title: Installation
+description: Install Radix UI Primitives and get started building accessible React components.
+---
+
+## Prerequisites
+
+Before installing Radix UI Primitives, make sure you have:
+
+- **Node.js** 18 or later
+- **React** 16.8 or later (requires Hooks support)
+- **React DOM** 16.8 or later
+
+<Note>
+  Radix UI Primitives requires React 16.8 or newer because it uses React Hooks. It supports React 16.8, 17, 18, and 19.
+</Note>
+
+## Installation Methods
+
+You can install Radix UI Primitives using your preferred package manager:
+
+<CodeGroup>
+
+```bash npm
+npm install @radix-ui/react-dialog
+```
+
+```bash yarn
+yarn add @radix-ui/react-dialog
+```
+
+```bash pnpm
+pnpm add @radix-ui/react-dialog
+```
+
+</CodeGroup>
+
+<Tip>
+  Radix UI components are published as separate packages. This allows you to install only the components you need, keeping your bundle size minimal.
+</Tip>
+
+## Package Structure
+
+Each Radix UI component is published as an individual package under the `@radix-ui` scope:
+
+- `@radix-ui/react-dialog` - Dialog component
+- `@radix-ui/react-accordion` - Accordion component
+- `@radix-ui/react-dropdown-menu` - Dropdown menu component
+- `@radix-ui/react-switch` - Switch component
+- And many more...
+
+This modular approach means you only bundle what you use.
+
+## Installing Multiple Components
+
+If you need multiple components, install them individually:
+
+<CodeGroup>
+
+```bash npm
+npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-tooltip
+```
+
+```bash yarn
+yarn add @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-tooltip
+```
+
+```bash pnpm
+pnpm add @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-tooltip
+```
+
+</CodeGroup>
+
+## TypeScript Setup
+
+Radix UI Primitives are written in TypeScript and include type definitions out of the box. No additional setup is required.
+
+<Steps>
+  <Step title="Install Component">
+    Install the component as shown above.
+  </Step>
+  
+  <Step title="Import and Use">
+    TypeScript will automatically pick up the type definitions:
+    
+    ```tsx
+    import * as Dialog from '@radix-ui/react-dialog';
+    
+    // Full type safety and autocomplete
+    function MyDialog() {
+      return (
+        <Dialog.Root>
+          <Dialog.Trigger>Open</Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay />
+            <Dialog.Content>
+              <Dialog.Title>Dialog Title</Dialog.Title>
+              <Dialog.Description>Dialog description</Dialog.Description>
+              <Dialog.Close>Close</Dialog.Close>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      );
+    }
+    ```
+  </Step>
+</Steps>
+
+### Type Definitions
+
+If you're using TypeScript and want to ensure you have the React type definitions installed:
+
+<CodeGroup>
+
+```bash npm
+npm install --save-dev @types/react @types/react-dom
+```
+
+```bash yarn
+yarn add --dev @types/react @types/react-dom
+```
+
+```bash pnpm
+pnpm add -D @types/react @types/react-dom
+```
+
+</CodeGroup>
+
+<Note>
+  The `@types/react` and `@types/react-dom` packages are peer dependencies and marked as optional, but they're recommended for TypeScript projects.
+</Note>
+
+## Peer Dependencies
+
+Radix UI components have the following peer dependencies:
+
+```json
+{
+  "react": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc",
+  "react-dom": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc"
+}
+```
+
+These should already be installed in your React project. If not, install them:
+
+<CodeGroup>
+
+```bash npm
+npm install react react-dom
+```
+
+```bash yarn
+yarn add react react-dom
+```
+
+```bash pnpm
+pnpm add react react-dom
+```
+
+</CodeGroup>
+
+## Quick Start Example
+
+Here's a complete example using the Dialog component:
+
+```tsx Dialog.tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import './dialog.css';
+
+export default function DialogDemo() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger asChild>
+        <button className="button">Open Dialog</button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="dialog-overlay" />
+        <Dialog.Content className="dialog-content">
+          <Dialog.Title className="dialog-title">
+            Edit Profile
+          </Dialog.Title>
+          <Dialog.Description className="dialog-description">
+            Make changes to your profile here. Click save when you're done.
+          </Dialog.Description>
+          <div className="dialog-fieldset">
+            <label htmlFor="name">Name</label>
+            <input id="name" defaultValue="Pedro Duarte" />
+          </div>
+          <div className="dialog-actions">
+            <Dialog.Close asChild>
+              <button className="button-green">Save changes</button>
+            </Dialog.Close>
+          </div>
+          <Dialog.Close asChild>
+            <button className="icon-button" aria-label="Close">
+              ×
+            </button>
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+<Note>
+  Components are completely unstyled by default. You'll need to add your own styles. See the [Styling](/styling) guide for different approaches.
+</Note>
+
+## Version Compatibility
+
+Radix UI follows semantic versioning. Check the [changelog](https://github.com/radix-ui/primitives/blob/main/packages/react/dialog/CHANGELOG.md) for each component to see breaking changes and migration guides.
+
+<Warning>
+  Major version updates may include breaking changes. Always check the changelog before upgrading.
+</Warning>
+
+## Using with Frameworks
+
+### Next.js
+
+Radix UI works seamlessly with Next.js. Simply install and import components as shown above.
+
+```tsx app/page.tsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+export default function Page() {
+  return (
+    <Dialog.Root>
+      {/* Your dialog content */}
+    </Dialog.Root>
+  );
+}
+```
+
+<Tip>
+  If you're using Next.js App Router with Server Components, make sure to add `'use client'` at the top of files that use Radix UI components, as they require client-side interactivity.
+</Tip>
+
+### Remix
+
+Radix UI works great with Remix:
+
+```tsx app/routes/index.tsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+export default function Index() {
+  return (
+    <Dialog.Root>
+      {/* Your dialog content */}
+    </Dialog.Root>
+  );
+}
+```
+
+### Vite
+
+Radix UI is fully compatible with Vite:
+
+```tsx src/App.tsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+function App() {
+  return (
+    <Dialog.Root>
+      {/* Your dialog content */}
+    </Dialog.Root>
+  );
+}
+
+export default App;
+```
+
+## Verifying Installation
+
+To verify your installation is working:
+
+<Steps>
+  <Step title="Create a test component">
+    Create a new file with a simple component:
+    
+    ```tsx
+    import * as Switch from '@radix-ui/react-switch';
+    
+    export function TestSwitch() {
+      return (
+        <Switch.Root>
+          <Switch.Thumb />
+        </Switch.Root>
+      );
+    }
+    ```
+  </Step>
+  
+  <Step title="Import and render">
+    Import your test component and render it in your app.
+  </Step>
+  
+  <Step title="Check the output">
+    You should see the component render without errors. It won't have any styles yet - that's expected!
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Module not found
+
+If you see a "Module not found" error:
+
+1. Verify the package is installed: check your `package.json`
+2. Restart your development server
+3. Clear your build cache
+4. Ensure the package name is correct (e.g., `@radix-ui/react-dialog`, not `@radix-ui/dialog`)
+
+### Type errors
+
+If you're getting TypeScript errors:
+
+1. Make sure `@types/react` and `@types/react-dom` are installed
+2. Verify your React version is compatible (16.8+)
+3. Check that your `tsconfig.json` includes the necessary configurations
+
+### Peer dependency warnings
+
+Peer dependency warnings are usually safe to ignore if you have React and React DOM already installed. However, make sure your versions are compatible.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Styling" icon="palette" href="/styling">
+    Learn how to style your components
+  </Card>
+  <Card title="Composition" icon="cubes" href="/composition">
+    Understand the composable API
+  </Card>
+  <Card title="Components" icon="grid" href="/components/dialog">
+    Explore available components
+  </Card>
+  <Card title="Examples" icon="code" href="https://github.com/radix-ui/primitives/tree/main/packages/react">
+    View code examples on GitHub
+  </Card>
+</CardGroup>

@@ -1,0 +1,300 @@
+---
+title: Roving Focus
+description: Manages focus navigation within a group of elements using arrow keys, with support for horizontal and vertical orientation.
+---
+
+`RovingFocusGroup` provides a robust implementation of the [roving tabindex pattern](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/#kbd_roving_tabindex), allowing users to navigate through a group of focusable items using arrow keys while maintaining a single tab stop.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-roving-focus
+```
+
+## Components
+
+### RovingFocusGroup
+
+The root component that manages focus state for all items within the group.
+
+```tsx
+interface RovingFocusGroupProps extends PrimitiveDivProps {
+  orientation?: 'horizontal' | 'vertical' | 'both';
+  dir?: 'ltr' | 'rtl';
+  loop?: boolean;
+  currentTabStopId?: string | null;
+  defaultCurrentTabStopId?: string;
+  onCurrentTabStopIdChange?: (tabStopId: string | null) => void;
+  onEntryFocus?: (event: Event) => void;
+  preventScrollOnEntryFocus?: boolean;
+}
+```
+
+### RovingFocusGroupItem
+
+Represents a focusable item within the group.
+
+```tsx
+interface RovingFocusItemProps extends PrimitiveSpanProps {
+  tabStopId?: string;
+  focusable?: boolean;
+  active?: boolean;
+}
+```
+
+## Props
+
+### RovingFocusGroup
+
+<ParamField path="orientation" type="'horizontal' | 'vertical' | 'both'">
+  The orientation of the group, which determines which arrow keys navigate between items:
+  - `horizontal`: Left/Right arrows
+  - `vertical`: Up/Down arrows
+  - `both`: All arrow keys
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction. Affects horizontal keyboard navigation.
+</ParamField>
+
+<ParamField path="loop" type="boolean">
+  Whether keyboard navigation should wrap around when reaching the first or last item.
+  
+  Default: `false`
+</ParamField>
+
+<ParamField path="currentTabStopId" type="string | null">
+  The controlled tab stop id. Use with `onCurrentTabStopIdChange` for controlled mode.
+</ParamField>
+
+<ParamField path="defaultCurrentTabStopId" type="string">
+  The default tab stop id for uncontrolled mode.
+</ParamField>
+
+<ParamField path="onCurrentTabStopIdChange" type="(tabStopId: string | null) => void">
+  Callback fired when the current tab stop changes.
+</ParamField>
+
+<ParamField path="onEntryFocus" type="(event: Event) => void">
+  Event handler called when focus enters the group. Can be prevented.
+</ParamField>
+
+<ParamField path="preventScrollOnEntryFocus" type="boolean">
+  Whether to prevent scrolling when focus enters the group.
+  
+  Default: `false`
+</ParamField>
+
+## Usage
+
+### Basic Example - Horizontal Navigation
+
+```tsx
+import { RovingFocusGroup, RovingFocusGroupItem } from '@radix-ui/react-roving-focus';
+
+function Toolbar() {
+  return (
+    <RovingFocusGroup orientation="horizontal">
+      <RovingFocusGroupItem asChild>
+        <button>Cut</button>
+      </RovingFocusGroupItem>
+      <RovingFocusGroupItem asChild>
+        <button>Copy</button>
+      </RovingFocusGroupItem>
+      <RovingFocusGroupItem asChild>
+        <button>Paste</button>
+      </RovingFocusGroupItem>
+    </RovingFocusGroup>
+  );
+}
+```
+
+### Vertical List with Looping
+
+```tsx
+import { RovingFocusGroup, RovingFocusGroupItem } from '@radix-ui/react-roving-focus';
+
+function Menu() {
+  return (
+    <RovingFocusGroup orientation="vertical" loop>
+      <RovingFocusGroupItem asChild>
+        <div role="menuitem">New File</div>
+      </RovingFocusGroupItem>
+      <RovingFocusGroupItem asChild>
+        <div role="menuitem">Open</div>
+      </RovingFocusGroupItem>
+      <RovingFocusGroupItem asChild>
+        <div role="menuitem">Save</div>
+      </RovingFocusGroupItem>
+      <RovingFocusGroupItem asChild>
+        <div role="menuitem">Exit</div>
+      </RovingFocusGroupItem>
+    </RovingFocusGroup>
+  );
+}
+```
+
+### Controlled Focus State
+
+```tsx
+import { RovingFocusGroup, RovingFocusGroupItem } from '@radix-ui/react-roving-focus';
+import { useState } from 'react';
+
+function ControlledToolbar() {
+  const [currentItem, setCurrentItem] = useState<string | null>('item-1');
+
+  return (
+    <div>
+      <p>Current item: {currentItem}</p>
+      <RovingFocusGroup 
+        orientation="horizontal"
+        currentTabStopId={currentItem}
+        onCurrentTabStopIdChange={setCurrentItem}
+      >
+        <RovingFocusGroupItem tabStopId="item-1" asChild>
+          <button>Item 1</button>
+        </RovingFocusGroupItem>
+        <RovingFocusGroupItem tabStopId="item-2" asChild>
+          <button>Item 2</button>
+        </RovingFocusGroupItem>
+        <RovingFocusGroupItem tabStopId="item-3" asChild>
+          <button>Item 3</button>
+        </RovingFocusGroupItem>
+      </RovingFocusGroup>
+    </div>
+  );
+}
+```
+
+### Grid Navigation (2D)
+
+```tsx
+import { RovingFocusGroup, RovingFocusGroupItem } from '@radix-ui/react-roving-focus';
+
+function ColorPicker() {
+  const colors = [
+    ['red', 'orange', 'yellow'],
+    ['green', 'blue', 'purple'],
+    ['pink', 'brown', 'gray'],
+  ];
+
+  return (
+    <RovingFocusGroup orientation="both" loop>
+      {colors.map((row, i) => (
+        <div key={i} style={{ display: 'flex' }}>
+          {row.map((color) => (
+            <RovingFocusGroupItem key={color} asChild>
+              <button
+                style={{
+                  width: 40,
+                  height: 40,
+                  backgroundColor: color,
+                }}
+                aria-label={color}
+              />
+            </RovingFocusGroupItem>
+          ))}
+        </div>
+      ))}
+    </RovingFocusGroup>
+  );
+}
+```
+
+### With Disabled Items
+
+```tsx
+import { RovingFocusGroup, RovingFocusGroupItem } from '@radix-ui/react-roving-focus';
+
+function MenuWithDisabledItems() {
+  return (
+    <RovingFocusGroup orientation="vertical">
+      <RovingFocusGroupItem asChild>
+        <button>New</button>
+      </RovingFocusGroupItem>
+      <RovingFocusGroupItem focusable={false} asChild>
+        <button disabled>Save (disabled)</button>
+      </RovingFocusGroupItem>
+      <RovingFocusGroupItem asChild>
+        <button>Exit</button>
+      </RovingFocusGroupItem>
+    </RovingFocusGroup>
+  );
+}
+```
+
+### RTL Support
+
+```tsx
+import { RovingFocusGroup, RovingFocusGroupItem } from '@radix-ui/react-roving-focus';
+
+function RTLToolbar() {
+  return (
+    <RovingFocusGroup orientation="horizontal" dir="rtl">
+      <RovingFocusGroupItem asChild>
+        <button>جديد</button>
+      </RovingFocusGroupItem>
+      <RovingFocusGroupItem asChild>
+        <button>حفظ</button>
+      </RovingFocusGroupItem>
+      <RovingFocusGroupItem asChild>
+        <button>خروج</button>
+      </RovingFocusGroupItem>
+    </RovingFocusGroup>
+  );
+}
+```
+
+## Keyboard Interactions
+
+<ResponseField name="Tab">
+  Moves focus to the current tab stop (or first item if none is set).
+</ResponseField>
+
+<ResponseField name="ArrowDown" type="vertical orientation">
+  Moves focus to the next item.
+</ResponseField>
+
+<ResponseField name="ArrowUp" type="vertical orientation">
+  Moves focus to the previous item.
+</ResponseField>
+
+<ResponseField name="ArrowRight" type="horizontal orientation">
+  Moves focus to the next item (in LTR) or previous item (in RTL).
+</ResponseField>
+
+<ResponseField name="ArrowLeft" type="horizontal orientation">
+  Moves focus to the previous item (in LTR) or next item (in RTL).
+</ResponseField>
+
+<ResponseField name="Home">
+  Moves focus to the first item.
+</ResponseField>
+
+<ResponseField name="End">
+  Moves focus to the last item.
+</ResponseField>
+
+## Accessibility
+
+The roving tabindex pattern:
+
+- Maintains only one tab stop in the group
+- Uses arrow keys for navigation within the group
+- Follows WAI-ARIA best practices
+- Supports RTL languages
+- Respects disabled/non-focusable items
+
+## Notes
+
+<Note>
+  Only one item in the group has `tabIndex={0}` at a time. All other items have `tabIndex={-1}`. This ensures a single tab stop while allowing full keyboard navigation with arrow keys.
+</Note>
+
+<Note>
+  The component automatically handles focus management, including updating tab indices, focusing items, and managing keyboard navigation based on orientation and direction.
+</Note>
+
+<Note>
+  Items marked with `focusable={false}` are skipped during keyboard navigation but remain in the DOM.
+</Note>

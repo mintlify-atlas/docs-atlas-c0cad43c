@@ -1,0 +1,182 @@
+---
+title: useIsHydrated
+description: A hook that determines whether the component tree has been hydrated on the client.
+---
+
+`useIsHydrated` is a hook that reliably determines whether a React component tree has been hydrated on the client side. This is useful for conditional rendering based on whether the app is running on the server or has been hydrated in the browser.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-use-is-hydrated
+```
+
+## Function Signature
+
+```tsx
+function useIsHydrated(): boolean
+```
+
+## Return Value
+
+<ResponseField name="isHydrated" type="boolean">
+  Returns `false` during server-side rendering and initial render on the client, and `true` after hydration is complete.
+</ResponseField>
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useIsHydrated } from '@radix-ui/react-use-is-hydrated';
+
+function ClientOnlyComponent() {
+  const isHydrated = useIsHydrated();
+
+  if (!isHydrated) {
+    // Return server-safe fallback
+    return <div>Loading...</div>;
+  }
+
+  // Render client-only content after hydration
+  return (
+    <div>
+      Current time: {new Date().toLocaleTimeString()}
+    </div>
+  );
+}
+```
+
+### Conditional Browser API Usage
+
+```tsx
+import { useIsHydrated } from '@radix-ui/react-use-is-hydrated';
+
+function GeolocationComponent() {
+  const isHydrated = useIsHydrated();
+  const [location, setLocation] = useState<GeolocationCoordinates | null>(null);
+
+  useEffect(() => {
+    if (isHydrated && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        setLocation(position.coords);
+      });
+    }
+  }, [isHydrated]);
+
+  if (!isHydrated) {
+    return <div>Detecting location...</div>;
+  }
+
+  return (
+    <div>
+      {location 
+        ? `Lat: ${location.latitude}, Lng: ${location.longitude}`
+        : 'Location unavailable'
+      }
+    </div>
+  );
+}
+```
+
+### Avoiding Hydration Mismatches
+
+```tsx
+import { useIsHydrated } from '@radix-ui/react-use-is-hydrated';
+
+function UserPreferences() {
+  const isHydrated = useIsHydrated();
+  const [theme, setTheme] = useState('light');
+
+  useEffect(() => {
+    if (isHydrated) {
+      // Only access localStorage after hydration
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme);
+    }
+  }, [isHydrated]);
+
+  // Render neutral state until hydrated to avoid mismatch
+  if (!isHydrated) {
+    return <div className="theme-neutral">Content</div>;
+  }
+
+  return <div className={`theme-${theme}`}>Content</div>;
+}
+```
+
+### Progressive Enhancement
+
+```tsx
+import { useIsHydrated } from '@radix-ui/react-use-is-hydrated';
+
+function EnhancedButton() {
+  const isHydrated = useIsHydrated();
+  const [count, setCount] = useState(0);
+
+  return (
+    <button 
+      onClick={() => setCount(c => c + 1)}
+      disabled={!isHydrated}
+    >
+      {isHydrated ? `Clicked ${count} times` : 'Enable JavaScript'}
+    </button>
+  );
+}
+```
+
+### Conditional Third-Party Scripts
+
+```tsx
+import { useIsHydrated } from '@radix-ui/react-use-is-hydrated';
+
+function AnalyticsWrapper({ children }: { children: React.ReactNode }) {
+  const isHydrated = useIsHydrated();
+
+  useEffect(() => {
+    if (isHydrated) {
+      // Initialize analytics only after hydration
+      initializeAnalytics();
+    }
+  }, [isHydrated]);
+
+  return <>{children}</>;
+}
+```
+
+## Implementation Details
+
+The hook uses `useSyncExternalStore` from React 18's `use-sync-external-store/shim` package:
+
+- **Server/SSR**: Returns `false` (via `getServerSnapshot`)
+- **Client (after hydration)**: Returns `true` (via `getSnapshot`)
+- **Subscribe function**: Returns a no-op (the value never changes after initial hydration)
+
+This approach ensures:
+- No hydration warnings or mismatches
+- Compatibility with React's concurrent features
+- Works consistently in both SSR and client-only scenarios
+
+## When to Use
+
+Use this hook when you need to:
+
+- Conditionally render client-only features
+- Access browser APIs safely
+- Avoid SSR/hydration mismatches
+- Implement progressive enhancement
+- Initialize client-side libraries after hydration
+
+## Notes
+
+<Note>
+  This hook uses `useSyncExternalStore`, which is part of React 18. The shim package ensures compatibility with React 17 and earlier versions.
+</Note>
+
+<Note>
+  The hook returns `false` on the server and during the initial render on the client, then switches to `true` after hydration. This ensures the server and client render the same content initially.
+</Note>
+
+<Note>
+  Unlike checking `typeof window !== 'undefined'`, this hook correctly handles the hydration phase and doesn't cause hydration mismatches.
+</Note>

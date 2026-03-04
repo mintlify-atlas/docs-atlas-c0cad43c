@@ -1,0 +1,216 @@
+---
+title: "Tabs"
+description: "A set of layered sections of content, displayed one at a time."
+---
+
+## Overview
+
+Tabs organize content into multiple sections and allow users to navigate between them. Only one section is visible at a time.
+
+## Features
+
+- Full keyboard navigation
+- Supports horizontal/vertical orientation
+- Supports automatic/manual activation
+- Can be controlled or uncontrolled
+- Focus automatically managed
+- Accessible by default with proper ARIA attributes
+
+## Installation
+
+```bash
+npm install @radix-ui/react-tabs
+```
+
+## Anatomy
+
+```jsx
+import * as Tabs from '@radix-ui/react-tabs';
+
+export default () => (
+  <Tabs.Root>
+    <Tabs.List>
+      <Tabs.Trigger />
+    </Tabs.List>
+    <Tabs.Content />
+  </Tabs.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the tabs component parts.
+
+<ParamField path="value" type="string">
+  The controlled value of the tab to activate.
+</ParamField>
+
+<ParamField path="defaultValue" type="string">
+  The value of the tab that should be active when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Event handler called when the value changes.
+</ParamField>
+
+<ParamField path="orientation" type="'horizontal' | 'vertical'" default="'horizontal'">
+  The orientation of the tabs. Mainly affects keyboard navigation (left/right vs. up/down).
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction of the tabs. If omitted, inherits from the parent.
+</ParamField>
+
+<ParamField path="activationMode" type="'automatic' | 'manual'" default="'automatic'">
+  Whether a tab is activated automatically or manually.
+  - **automatic**: Tabs are activated when receiving focus
+  - **manual**: Tabs are activated when clicked or Space/Enter is pressed
+</ParamField>
+
+### List
+
+Contains the triggers that are aligned along the edge of the active content.
+
+<ParamField path="loop" type="boolean" default="true">
+  When true, keyboard navigation will loop from last tab to first, and vice versa.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Trigger
+
+The button that activates its associated content.
+
+<ParamField path="value" type="string" required>
+  A unique value that associates the trigger with content.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the tab.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Content
+
+Contains the content associated with a trigger.
+
+<ParamField path="value" type="string" required>
+  A unique value that associates the content with a trigger.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as Tabs from '@radix-ui/react-tabs';
+import './styles.css';
+
+export default () => (
+  <Tabs.Root className="TabsRoot" defaultValue="tab1">
+    <Tabs.List className="TabsList" aria-label="Manage your account">
+      <Tabs.Trigger className="TabsTrigger" value="tab1">
+        Account
+      </Tabs.Trigger>
+      <Tabs.Trigger className="TabsTrigger" value="tab2">
+        Password
+      </Tabs.Trigger>
+      <Tabs.Trigger className="TabsTrigger" value="tab3">
+        Settings
+      </Tabs.Trigger>
+    </Tabs.List>
+    <Tabs.Content className="TabsContent" value="tab1">
+      <p>Make changes to your account here.</p>
+    </Tabs.Content>
+    <Tabs.Content className="TabsContent" value="tab2">
+      <p>Change your password here.</p>
+    </Tabs.Content>
+    <Tabs.Content className="TabsContent" value="tab3">
+      <p>Edit your settings here.</p>
+    </Tabs.Content>
+  </Tabs.Root>
+);
+```
+
+```jsx Vertical
+import * as Tabs from '@radix-ui/react-tabs';
+import './styles.css';
+
+export default () => (
+  <Tabs.Root
+    className="TabsRoot"
+    defaultValue="tab1"
+    orientation="vertical"
+  >
+    <Tabs.List className="TabsList" aria-label="Manage your account">
+      <Tabs.Trigger className="TabsTrigger" value="tab1">
+        Account
+      </Tabs.Trigger>
+      <Tabs.Trigger className="TabsTrigger" value="tab2">
+        Password
+      </Tabs.Trigger>
+    </Tabs.List>
+    <Tabs.Content className="TabsContent" value="tab1">
+      <p>Make changes to your account here.</p>
+    </Tabs.Content>
+    <Tabs.Content className="TabsContent" value="tab2">
+      <p>Change your password here.</p>
+    </Tabs.Content>
+  </Tabs.Root>
+);
+```
+
+```jsx Controlled
+import { useState } from 'react';
+import * as Tabs from '@radix-ui/react-tabs';
+
+export default () => {
+  const [activeTab, setActiveTab] = useState('tab1');
+
+  return (
+    <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+      <Tabs.List>
+        <Tabs.Trigger value="tab1">Account</Tabs.Trigger>
+        <Tabs.Trigger value="tab2">Password</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="tab1">
+        <p>Account content</p>
+      </Tabs.Content>
+      <Tabs.Content value="tab2">
+        <p>Password content</p>
+      </Tabs.Content>
+    </Tabs.Root>
+  );
+};
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Adheres to the [Tabs WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/).
+</Note>
+
+### Keyboard Interactions
+
+- **Tab** - When focus moves onto the tabs, focuses the active trigger. When a trigger is focused, moves focus to the active content.
+- **ArrowDown** - Moves focus to the next trigger (in vertical orientation) and activates its content.
+- **ArrowRight** - Moves focus to the next trigger (in horizontal orientation) and activates its content.
+- **ArrowUp** - Moves focus to the previous trigger (in vertical orientation) and activates its content.
+- **ArrowLeft** - Moves focus to the previous trigger (in horizontal orientation) and activates its content.
+- **Home** - Moves focus to the first trigger and activates its content.
+- **End** - Moves focus to the last trigger and activates its content.

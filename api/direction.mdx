@@ -1,0 +1,238 @@
+---
+title: Direction
+description: Provider and hook for managing text direction (LTR/RTL) in your application.
+---
+
+`Direction` provides a context provider and hook for managing text direction throughout your application. This is essential for supporting right-to-left (RTL) languages like Arabic, Hebrew, and Persian.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-direction
+```
+
+## Components
+
+### DirectionProvider
+
+A context provider that sets the text direction for all descendants.
+
+```tsx
+interface DirectionProviderProps {
+  children?: React.ReactNode;
+  dir: 'ltr' | 'rtl';
+}
+```
+
+## Hooks
+
+### useDirection
+
+Returns the current text direction from context, with optional local override.
+
+```tsx
+function useDirection(localDir?: 'ltr' | 'rtl'): 'ltr' | 'rtl'
+```
+
+## Usage
+
+### Basic Setup
+
+```tsx
+import { DirectionProvider } from '@radix-ui/react-direction';
+
+function App() {
+  const [dir, setDir] = useState<'ltr' | 'rtl'>('ltr');
+
+  return (
+    <DirectionProvider dir={dir}>
+      <YourApp />
+      <button onClick={() => setDir(dir === 'ltr' ? 'rtl' : 'ltr')}>
+        Toggle Direction
+      </button>
+    </DirectionProvider>
+  );
+}
+```
+
+### Using the Hook
+
+```tsx
+import { useDirection } from '@radix-ui/react-direction';
+
+function NavigationArrow() {
+  const direction = useDirection();
+  
+  return (
+    <button>
+      {direction === 'ltr' ? '→' : '←'}
+    </button>
+  );
+}
+```
+
+### Local Direction Override
+
+```tsx
+import { useDirection } from '@radix-ui/react-direction';
+
+function Component({ dir }: { dir?: 'ltr' | 'rtl' }) {
+  // Local dir prop overrides context
+  const direction = useDirection(dir);
+  
+  return (
+    <div style={{ direction }}>
+      Content respects {direction} direction
+    </div>
+  );
+}
+```
+
+### Conditional Styling Based on Direction
+
+```tsx
+import { useDirection } from '@radix-ui/react-direction';
+
+function Card() {
+  const direction = useDirection();
+  
+  return (
+    <div
+      style={{
+        paddingLeft: direction === 'ltr' ? '20px' : '0',
+        paddingRight: direction === 'rtl' ? '20px' : '0',
+      }}
+    >
+      Card content
+    </div>
+  );
+}
+```
+
+### Multi-language Support
+
+```tsx
+import { DirectionProvider } from '@radix-ui/react-direction';
+import { useState } from 'react';
+
+const languages = {
+  en: { dir: 'ltr', name: 'English' },
+  ar: { dir: 'rtl', name: 'العربية' },
+  he: { dir: 'rtl', name: 'עברית' },
+} as const;
+
+function App() {
+  const [locale, setLocale] = useState<keyof typeof languages>('en');
+  const { dir, name } = languages[locale];
+
+  return (
+    <DirectionProvider dir={dir}>
+      <div dir={dir}>
+        <select 
+          value={locale} 
+          onChange={(e) => setLocale(e.target.value as keyof typeof languages)}
+        >
+          {Object.entries(languages).map(([code, { name }]) => (
+            <option key={code} value={code}>{name}</option>
+          ))}
+        </select>
+        <YourApp />
+      </div>
+    </DirectionProvider>
+  );
+}
+```
+
+### Keyboard Navigation
+
+```tsx
+import { useDirection } from '@radix-ui/react-direction';
+import { useCallback } from 'react';
+
+function Slider({ value, onChange }: { 
+  value: number; 
+  onChange: (value: number) => void;
+}) {
+  const direction = useDirection();
+  
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    const isLTR = direction === 'ltr';
+    
+    if (event.key === 'ArrowRight') {
+      // In RTL, right arrow should decrease value
+      onChange(value + (isLTR ? 1 : -1));
+    } else if (event.key === 'ArrowLeft') {
+      // In RTL, left arrow should increase value
+      onChange(value + (isLTR ? -1 : 1));
+    }
+  }, [direction, value, onChange]);
+
+  return (
+    <div 
+      role="slider" 
+      aria-valuenow={value}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
+      {value}
+    </div>
+  );
+}
+```
+
+### Nested Direction Contexts
+
+```tsx
+import { DirectionProvider, useDirection } from '@radix-ui/react-direction';
+
+function App() {
+  return (
+    <DirectionProvider dir="ltr">
+      <Page>
+        {/* Nested provider for a specific section */}
+        <DirectionProvider dir="rtl">
+          <ArabicContent />
+        </DirectionProvider>
+      </Page>
+    </DirectionProvider>
+  );
+}
+
+function ArabicContent() {
+  const direction = useDirection(); // Returns 'rtl'
+  return <div dir={direction}>محتوى عربي</div>;
+}
+```
+
+## Type Definitions
+
+```tsx
+type Direction = 'ltr' | 'rtl';
+
+interface DirectionProviderProps {
+  children?: React.ReactNode;
+  dir: Direction;
+}
+
+function useDirection(localDir?: Direction): Direction
+```
+
+## Default Behavior
+
+- If no `DirectionProvider` is present, `useDirection()` returns `'ltr'` by default
+- A local `dir` prop passed to `useDirection(dir)` takes precedence over context
+- Direction context can be nested, with inner providers overriding outer ones
+
+## Notes
+
+<Note>
+  Remember to also set the `dir` attribute on your HTML elements when using this provider. The provider manages the logical direction in JavaScript, but CSS and HTML need the `dir` attribute for proper text rendering.
+</Note>
+
+<Note>
+  Many Radix UI primitives automatically respect the direction context for keyboard navigation and layout positioning. Check individual component documentation for direction-aware features.
+</Note>
+
+<Note>
+  For proper RTL support, you should also use [CSS logical properties](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Logical_Properties) (like `padding-inline-start` instead of `padding-left`) where possible.
+</Note>

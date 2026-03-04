@@ -1,0 +1,145 @@
+---
+title: Collapsible
+description: An interactive component which expands and collapses a panel.
+---
+
+## Overview
+
+Collapsible is an interactive component that can be expanded and collapsed to show or hide content.
+
+## Features
+
+- Full keyboard navigation
+- Can be controlled or uncontrolled
+- Supports CSS animations and transitions
+
+## Installation
+
+```bash
+npm install @radix-ui/react-collapsible
+```
+
+## Anatomy
+
+```tsx
+import * as Collapsible from '@radix-ui/react-collapsible';
+
+export default () => (
+  <Collapsible.Root>
+    <Collapsible.Trigger />
+    <Collapsible.Content />
+  </Collapsible.Root>
+)
+```
+
+## API Reference
+
+### Root
+
+Contains all the parts of a collapsible.
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state of the collapsible when it is initially rendered. Use when you do not need to control its open state.
+</ParamField>
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the collapsible. Must be used in conjunction with `onOpenChange`.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state of the collapsible changes.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, prevents the user from interacting with the collapsible.
+</ParamField>
+
+### Trigger
+
+The button that toggles the collapsible.
+
+### Content
+
+The component that contains the collapsible content.
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+## Examples
+
+### Basic Usage
+
+<CodeGroup>
+```tsx Basic
+import * as Collapsible from '@radix-ui/react-collapsible';
+import { useState } from 'react';
+
+export default () => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Collapsible.Root open={open} onOpenChange={setOpen}>
+      <Collapsible.Trigger>
+        {open ? 'Hide' : 'Show'} content
+      </Collapsible.Trigger>
+      <Collapsible.Content>
+        <div>
+          This is the collapsible content. It can be any element.
+        </div>
+      </Collapsible.Content>
+    </Collapsible.Root>
+  );
+};
+```
+</CodeGroup>
+
+### Uncontrolled
+
+<CodeGroup>
+```tsx Uncontrolled
+import * as Collapsible from '@radix-ui/react-collapsible';
+
+export default () => (
+  <Collapsible.Root defaultOpen>
+    <Collapsible.Trigger>Toggle</Collapsible.Trigger>
+    <Collapsible.Content>
+      Content that is visible by default.
+    </Collapsible.Content>
+  </Collapsible.Root>
+);
+```
+</CodeGroup>
+
+## Data Attributes
+
+### Root
+
+- `data-state` - `"open"` or `"closed"`
+- `data-disabled` - Present when disabled
+
+### Trigger
+
+- `data-state` - `"open"` or `"closed"`
+- `data-disabled` - Present when disabled
+
+### Content
+
+- `data-state` - `"open"` or `"closed"`
+- `data-disabled` - Present when disabled
+
+## CSS Variables
+
+### Content
+
+- `--radix-collapsible-content-height` - The height of the content when open
+- `--radix-collapsible-content-width` - The width of the content when open
+
+<Note>
+These CSS variables can be used to animate the height and width of the content.
+</Note>
+
+## Keyboard Interactions
+
+- `Space` - Opens/closes the collapsible
+- `Enter` - Opens/closes the collapsible

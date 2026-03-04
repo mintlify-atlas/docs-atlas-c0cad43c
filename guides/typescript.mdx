@@ -1,0 +1,407 @@
+---
+title: TypeScript
+description: Learn how to use Radix UI Primitives with TypeScript for type-safe component development
+---
+
+Radix UI Primitives are written in TypeScript and provide comprehensive type definitions. All components export their prop types, making it easy to extend and compose them in a type-safe manner.
+
+## Type Exports
+
+Each component package exports TypeScript types for all its parts:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import type { 
+  DialogProps,
+  DialogTriggerProps,
+  DialogContentProps,
+  DialogTitleProps,
+  DialogDescriptionProps,
+  DialogCloseProps,
+} from '@radix-ui/react-dialog';
+```
+
+## Component Type Inference
+
+Radix components use `React.forwardRef` with proper typing. You can infer element types using React's utility types:
+
+```tsx
+import * as Switch from '@radix-ui/react-switch';
+import { ComponentPropsWithoutRef, ElementRef } from 'react';
+
+// Get the element type
+type SwitchElement = ElementRef<typeof Switch.Root>;
+// Result: HTMLButtonElement
+
+// Get the props type
+type SwitchProps = ComponentPropsWithoutRef<typeof Switch.Root>;
+// Result: SwitchProps including all button props
+```
+
+## Extending Component Props
+
+You can extend Radix component props to create your own typed components:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
+
+interface MyDialogProps extends ComponentPropsWithoutRef<typeof Dialog.Content> {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}
+
+const MyDialog = forwardRef<
+  ElementRef<typeof Dialog.Content>,
+  MyDialogProps
+>(({ title, description, children, ...props }, ref) => (
+  <Dialog.Portal>
+    <Dialog.Overlay className="overlay" />
+    <Dialog.Content ref={ref} {...props}>
+      <Dialog.Title>{title}</Dialog.Title>
+      {description && <Dialog.Description>{description}</Dialog.Description>}
+      {children}
+      <Dialog.Close>Close</Dialog.Close>
+    </Dialog.Content>
+  </Dialog.Portal>
+));
+
+MyDialog.displayName = 'MyDialog';
+```
+
+## Generic Props
+
+Some components like Accordion have discriminated union types for their props:
+
+```tsx
+import * as Accordion from '@radix-ui/react-accordion';
+
+// Single mode - value is a string
+function SingleAccordion() {
+  return (
+    <Accordion.Root 
+      type="single" 
+      collapsible
+      defaultValue="item-1" // string
+      onValueChange={(value) => {
+        // value is string
+        console.log(value);
+      }}
+    >
+      {/* items */}
+    </Accordion.Root>
+  );
+}
+
+// Multiple mode - value is string[]
+function MultipleAccordion() {
+  return (
+    <Accordion.Root 
+      type="multiple"
+      defaultValue={["item-1", "item-2"]} // string[]
+      onValueChange={(value) => {
+        // value is string[]
+        console.log(value);
+      }}
+    >
+      {/* items */}
+    </Accordion.Root>
+  );
+}
+```
+
+<Note>
+The `type` prop determines the types of `value`, `defaultValue`, and the `onValueChange` callback parameter.
+</Note>
+
+## Controlled vs Uncontrolled Types
+
+Radix components support both controlled and uncontrolled usage with appropriate types:
+
+```tsx
+import * as Collapsible from '@radix-ui/react-collapsible';
+import { useState } from 'react';
+
+// Uncontrolled
+function UncontrolledCollapsible() {
+  return (
+    <Collapsible.Root defaultOpen={false}>
+      {/* content */}
+    </Collapsible.Root>
+  );
+}
+
+// Controlled
+function ControlledCollapsible() {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <Collapsible.Root 
+      open={open} 
+      onOpenChange={setOpen}
+    >
+      {/* content */}
+    </Collapsible.Root>
+  );
+}
+```
+
+## Ref Types
+
+All Radix components properly forward refs with correct types:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { useRef } from 'react';
+
+function MyComponent() {
+  // Type is inferred as React.RefObject<HTMLDivElement>
+  const contentRef = useRef<React.ElementRef<typeof Dialog.Content>>(null);
+  
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger>Open</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Content ref={contentRef}>
+          Content
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+## Primitive Component Types
+
+Radix uses a `Primitive` component system. Each primitive extends native HTML element props:
+
+```tsx
+import { Primitive } from '@radix-ui/react-primitive';
+import { ComponentPropsWithoutRef } from 'react';
+
+// These are equivalent:
+type ButtonProps = ComponentPropsWithoutRef<typeof Primitive.button>;
+type ButtonProps2 = React.ButtonHTMLAttributes<HTMLButtonElement>;
+```
+
+## Type-Safe Event Handlers
+
+Event handlers maintain proper types:
+
+```tsx
+import * as Switch from '@radix-ui/react-switch';
+
+function MySwitch() {
+  return (
+    <Switch.Root
+      onCheckedChange={(checked) => {
+        // checked is boolean
+        console.log(checked);
+      }}
+      onClick={(event) => {
+        // event is React.MouseEvent<HTMLButtonElement>
+        console.log(event.currentTarget);
+      }}
+    >
+      <Switch.Thumb />
+    </Switch.Root>
+  );
+}
+```
+
+## Creating Wrapper Libraries
+
+Build type-safe wrapper components:
+
+<Steps>
+  <Step title="Define base component types">
+    ```tsx
+    import * as DialogPrimitive from '@radix-ui/react-dialog';
+    import { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
+
+    type DialogContentElement = ElementRef<typeof DialogPrimitive.Content>;
+    type DialogContentProps = ComponentPropsWithoutRef<typeof DialogPrimitive.Content>;
+    ```
+  </Step>
+
+  <Step title="Extend with custom props">
+    ```tsx
+    interface MyDialogContentProps extends DialogContentProps {
+      /** Custom prop for styling */
+      variant?: 'default' | 'large';
+      /** Custom prop for behavior */
+      closeOnOverlayClick?: boolean;
+    }
+    ```
+  </Step>
+
+  <Step title="Create typed component">
+    ```tsx
+    const DialogContent = forwardRef<DialogContentElement, MyDialogContentProps>(
+      ({ variant = 'default', closeOnOverlayClick = true, ...props }, ref) => {
+        return (
+          <DialogPrimitive.Portal>
+            <DialogPrimitive.Overlay />
+            <DialogPrimitive.Content
+              ref={ref}
+              onInteractOutside={(e) => {
+                if (!closeOnOverlayClick) e.preventDefault();
+              }}
+              className={`dialog-content dialog-content--${variant}`}
+              {...props}
+            />
+          </DialogPrimitive.Portal>
+        );
+      }
+    );
+    DialogContent.displayName = 'DialogContent';
+    ```
+  </Step>
+</Steps>
+
+## AsChild Prop Type
+
+The `asChild` prop allows component composition with proper typing:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { motion } from 'framer-motion';
+
+function AnimatedDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger asChild>
+        <button className="custom-button">
+          Open
+        </button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Content asChild>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            Content
+          </motion.div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+<Note>
+When using `asChild`, the Radix component merges its props with the child component's props.
+</Note>
+
+## Common Type Patterns
+
+### Discriminated Unions
+
+```tsx
+import type { AccordionSingleProps, AccordionMultipleProps } from '@radix-ui/react-accordion';
+
+// Type is automatically discriminated by the 'type' property
+type AccordionProps = AccordionSingleProps | AccordionMultipleProps;
+
+function handleAccordion(props: AccordionProps) {
+  if (props.type === 'single') {
+    // props.value is string | undefined
+    // props.onValueChange is (value: string) => void
+  } else {
+    // props.value is string[] | undefined
+    // props.onValueChange is (value: string[]) => void
+  }
+}
+```
+
+### Polymorphic Components
+
+```tsx
+import { forwardRef } from 'react';
+import { Primitive } from '@radix-ui/react-primitive';
+
+type ButtonProps<T extends React.ElementType = 'button'> = {
+  as?: T;
+} & React.ComponentPropsWithoutRef<T>;
+
+const Button = forwardRef(
+  <T extends React.ElementType = 'button'>(
+    { as, ...props }: ButtonProps<T>,
+    ref: React.Ref<Element>
+  ) => {
+    const Component = as || 'button';
+    return <Component ref={ref} {...props} />;
+  }
+);
+```
+
+## Troubleshooting
+
+### Type Errors with Refs
+
+If you get type errors with refs, ensure you're using the correct type:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { ElementRef, useRef } from 'react';
+
+// ✅ Correct
+const ref = useRef<ElementRef<typeof Dialog.Content>>(null);
+
+// ❌ Incorrect
+const ref = useRef<HTMLDivElement>(null);
+```
+
+### Type Inference Issues
+
+If TypeScript can't infer types properly, explicitly annotate them:
+
+```tsx
+import * as Accordion from '@radix-ui/react-accordion';
+
+const MyAccordion = () => {
+  return (
+    <Accordion.Root<'single'> type="single" collapsible>
+      {/* content */}
+    </Accordion.Root>
+  );
+};
+```
+
+### Strict Mode
+
+Radix Primitives work with TypeScript's strict mode enabled:
+
+```json filename="tsconfig.json"
+{
+  "compilerOptions": {
+    "strict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true
+  }
+}
+```
+
+## Type Utilities
+
+Useful type utilities when working with Radix:
+
+```tsx
+import { ComponentPropsWithoutRef, ElementRef, ComponentProps } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+
+// Extract element type
+type DialogElement = ElementRef<typeof Dialog.Content>;
+
+// Extract props without ref
+type DialogProps = ComponentPropsWithoutRef<typeof Dialog.Content>;
+
+// Extract props with ref
+type DialogPropsWithRef = ComponentProps<typeof Dialog.Content>;
+
+// Extract specific prop types
+type OnOpenChange = NonNullable<DialogProps['onOpenChange']>;
+// Result: (open: boolean) => void
+```

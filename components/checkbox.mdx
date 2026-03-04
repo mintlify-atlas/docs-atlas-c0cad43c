@@ -1,0 +1,237 @@
+---
+title: "Checkbox"
+description: "A control that allows the user to toggle between checked and unchecked."
+---
+
+## Overview
+
+Checkbox provides a binary or tristate control that users can check or uncheck. It supports an indeterminate state for partial selections and can be used in forms or as a standalone control.
+
+## Features
+
+- Supports indeterminate state
+- Can be controlled or uncontrolled
+- Full keyboard navigation
+- Works inside forms
+- Accessible by default with proper ARIA attributes
+- Custom styling with data attributes
+
+## Installation
+
+```bash
+npm install @radix-ui/react-checkbox
+```
+
+## Anatomy
+
+```jsx
+import * as Checkbox from '@radix-ui/react-checkbox';
+
+export default () => (
+  <Checkbox.Root>
+    <Checkbox.Indicator />
+  </Checkbox.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the checkbox component parts. An `input` will also render when used within a `form` to ensure events propagate correctly.
+
+<ParamField path="checked" type="boolean | 'indeterminate'">
+  The controlled checked state of the checkbox.
+</ParamField>
+
+<ParamField path="defaultChecked" type="boolean | 'indeterminate'">
+  The checked state when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onCheckedChange" type="(checked: boolean | 'indeterminate') => void">
+  Event handler called when the checked state changes.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the checkbox.
+</ParamField>
+
+<ParamField path="required" type="boolean">
+  When true, indicates that the user must check the checkbox before submitting the form.
+</ParamField>
+
+<ParamField path="name" type="string">
+  The name of the checkbox. Submitted with its owning form as part of a name/value pair.
+</ParamField>
+
+<ParamField path="value" type="string" default="'on'">
+  The value given as data when submitted with a name.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Indicator
+
+Renders when the checkbox is in a checked or indeterminate state. You can style this element directly, or you can use it as a wrapper to put an icon into, or both.
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { CheckIcon } from '@radix-ui/react-icons';
+import './styles.css';
+
+export default () => (
+  <form>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <Checkbox.Root className="CheckboxRoot" defaultChecked id="c1">
+        <Checkbox.Indicator className="CheckboxIndicator">
+          <CheckIcon />
+        </Checkbox.Indicator>
+      </Checkbox.Root>
+      <label className="Label" htmlFor="c1">
+        Accept terms and conditions.
+      </label>
+    </div>
+  </form>
+);
+```
+
+```jsx Indeterminate
+import { useState, useEffect } from 'react';
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { CheckIcon, MinusIcon } from '@radix-ui/react-icons';
+
+export default () => {
+  const [items, setItems] = useState({
+    item1: false,
+    item2: false,
+    item3: false,
+  });
+
+  const allChecked = Object.values(items).every(Boolean);
+  const someChecked = Object.values(items).some(Boolean);
+  const indeterminate = someChecked && !allChecked;
+
+  return (
+    <div>
+      <Checkbox.Root
+        checked={allChecked ? true : indeterminate ? 'indeterminate' : false}
+        onCheckedChange={(checked) => {
+          const newValue = checked === true;
+          setItems({
+            item1: newValue,
+            item2: newValue,
+            item3: newValue,
+          });
+        }}
+      >
+        <Checkbox.Indicator>
+          {indeterminate ? <MinusIcon /> : <CheckIcon />}
+        </Checkbox.Indicator>
+      </Checkbox.Root>
+      <label>Select all</label>
+
+      <div style={{ marginLeft: 20 }}>
+        <div>
+          <Checkbox.Root
+            checked={items.item1}
+            onCheckedChange={(checked) =>
+              setItems((prev) => ({ ...prev, item1: !!checked }))
+            }
+          >
+            <Checkbox.Indicator>
+              <CheckIcon />
+            </Checkbox.Indicator>
+          </Checkbox.Root>
+          <label>Item 1</label>
+        </div>
+        <div>
+          <Checkbox.Root
+            checked={items.item2}
+            onCheckedChange={(checked) =>
+              setItems((prev) => ({ ...prev, item2: !!checked }))
+            }
+          >
+            <Checkbox.Indicator>
+              <CheckIcon />
+            </Checkbox.Indicator>
+          </Checkbox.Root>
+          <label>Item 2</label>
+        </div>
+        <div>
+          <Checkbox.Root
+            checked={items.item3}
+            onCheckedChange={(checked) =>
+              setItems((prev) => ({ ...prev, item3: !!checked }))
+            }
+          >
+            <Checkbox.Indicator>
+              <CheckIcon />
+            </Checkbox.Indicator>
+          </Checkbox.Root>
+          <label>Item 3</label>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+```jsx In Form
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { CheckIcon } from '@radix-ui/react-icons';
+
+export default () => (
+  <form
+    onSubmit={(event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      console.log(Object.fromEntries(formData));
+    }}
+  >
+    <Checkbox.Root name="terms" value="accepted">
+      <Checkbox.Indicator>
+        <CheckIcon />
+      </Checkbox.Indicator>
+    </Checkbox.Root>
+    <label>I accept the terms</label>
+
+    <button type="submit">Submit</button>
+  </form>
+);
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Adheres to the [tri-state Checkbox WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/).
+</Note>
+
+### Keyboard Interactions
+
+- **Space** - Toggles the checkbox.
+
+### Data Attributes
+
+**Root**
+
+- `[data-state]` - "checked", "unchecked", or "indeterminate"
+- `[data-disabled]` - Present when disabled
+
+**Indicator**
+
+- `[data-state]` - "checked", "unchecked", or "indeterminate"
+- `[data-disabled]` - Present when disabled

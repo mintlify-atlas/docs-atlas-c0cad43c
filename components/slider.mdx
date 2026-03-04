@@ -1,0 +1,246 @@
+---
+title: "Slider"
+description: "An input where the user selects a value from within a given range."
+---
+
+## Overview
+
+Slider provides an input for selecting numeric values from a continuous or discrete range. It supports single or multiple thumbs for range selection.
+
+## Features
+
+- Can be controlled or uncontrolled
+- Supports multiple thumbs
+- Supports a minimum value between thumbs
+- Supports horizontal/vertical orientation
+- Supports custom step intervals
+- Full keyboard navigation
+- Works inside forms
+- Accessible by default with proper ARIA attributes
+
+## Installation
+
+```bash
+npm install @radix-ui/react-slider
+```
+
+## Anatomy
+
+```jsx
+import * as Slider from '@radix-ui/react-slider';
+
+export default () => (
+  <Slider.Root>
+    <Slider.Track>
+      <Slider.Range />
+    </Slider.Track>
+    <Slider.Thumb />
+  </Slider.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the slider component parts.
+
+<ParamField path="value" type="number[]">
+  The controlled value of the slider. Must be an array of numbers.
+</ParamField>
+
+<ParamField path="defaultValue" type="number[]">
+  The value when initially rendered (uncontrolled). Must be an array of numbers.
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: number[]) => void">
+  Event handler called when the value changes.
+</ParamField>
+
+<ParamField path="onValueCommit" type="(value: number[]) => void">
+  Event handler called when the value changes at the end of an interaction. Useful when you only need to capture a final value e.g. to update a backend service.
+</ParamField>
+
+<ParamField path="name" type="string">
+  The name of the slider. Submitted with its owning form as part of a name/value pair.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the slider.
+</ParamField>
+
+<ParamField path="orientation" type="'horizontal' | 'vertical'" default="'horizontal'">
+  The orientation of the slider.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction of the slider. If omitted, inherits from the parent.
+</ParamField>
+
+<ParamField path="inverted" type="boolean" default="false">
+  Whether the slider is visually inverted.
+</ParamField>
+
+<ParamField path="min" type="number" default="0">
+  The minimum value for the slider.
+</ParamField>
+
+<ParamField path="max" type="number" default="100">
+  The maximum value for the slider.
+</ParamField>
+
+<ParamField path="step" type="number" default="1">
+  The stepping interval.
+</ParamField>
+
+<ParamField path="minStepsBetweenThumbs" type="number" default="0">
+  The minimum permitted steps between multiple thumbs.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Track
+
+The track that contains the range.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Range
+
+The range part. Must live inside Track.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Thumb
+
+A draggable thumb. You can render multiple thumbs.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as Slider from '@radix-ui/react-slider';
+import './styles.css';
+
+export default () => (
+  <form>
+    <Slider.Root className="SliderRoot" defaultValue={[50]} max={100} step={1}>
+      <Slider.Track className="SliderTrack">
+        <Slider.Range className="SliderRange" />
+      </Slider.Track>
+      <Slider.Thumb className="SliderThumb" aria-label="Volume" />
+    </Slider.Root>
+  </form>
+);
+```
+
+```jsx Range
+import * as Slider from '@radix-ui/react-slider';
+import './styles.css';
+
+export default () => (
+  <Slider.Root
+    className="SliderRoot"
+    defaultValue={[25, 75]}
+    max={100}
+    step={1}
+    minStepsBetweenThumbs={1}
+  >
+    <Slider.Track className="SliderTrack">
+      <Slider.Range className="SliderRange" />
+    </Slider.Track>
+    <Slider.Thumb className="SliderThumb" aria-label="Minimum value" />
+    <Slider.Thumb className="SliderThumb" aria-label="Maximum value" />
+  </Slider.Root>
+);
+```
+
+```jsx Vertical
+import * as Slider from '@radix-ui/react-slider';
+import './styles.css';
+
+export default () => (
+  <Slider.Root
+    className="SliderRoot"
+    defaultValue={[50]}
+    orientation="vertical"
+    style={{ height: 150 }}
+  >
+    <Slider.Track className="SliderTrack">
+      <Slider.Range className="SliderRange" />
+    </Slider.Track>
+    <Slider.Thumb className="SliderThumb" />
+  </Slider.Root>
+);
+```
+
+```jsx Controlled
+import { useState } from 'react';
+import * as Slider from '@radix-ui/react-slider';
+
+export default () => {
+  const [value, setValue] = useState([50]);
+
+  return (
+    <div>
+      <Slider.Root value={value} onValueChange={setValue} max={100} step={1}>
+        <Slider.Track>
+          <Slider.Range />
+        </Slider.Track>
+        <Slider.Thumb />
+      </Slider.Root>
+      <p>Value: {value}</p>
+    </div>
+  );
+};
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Adheres to the [Slider WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/slider/).
+</Note>
+
+### Keyboard Interactions
+
+- **ArrowRight** - Increments the value by the step amount.
+- **ArrowLeft** - Decrements the value by the step amount.
+- **ArrowUp** - Increases the value by the step amount (vertical orientation).
+- **ArrowDown** - Decreases the value by the step amount (vertical orientation).
+- **PageUp** - Increases the value by 10% of the total range.
+- **PageDown** - Decreases the value by 10% of the total range.
+- **Home** - Sets the value to the minimum.
+- **End** - Sets the value to the maximum.
+
+### Data Attributes
+
+**Root**
+
+- `[data-disabled]` - Present when disabled
+- `[data-orientation]` - "horizontal" or "vertical"
+
+**Track**
+
+- `[data-disabled]` - Present when disabled
+- `[data-orientation]` - "horizontal" or "vertical"
+
+**Range**
+
+- `[data-disabled]` - Present when disabled
+- `[data-orientation]` - "horizontal" or "vertical"
+
+**Thumb**
+
+- `[data-disabled]` - Present when disabled
+- `[data-orientation]` - "horizontal" or "vertical"

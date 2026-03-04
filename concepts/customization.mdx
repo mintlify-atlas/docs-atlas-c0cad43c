@@ -1,0 +1,882 @@
+---
+title: "Customization"
+description: "Learn how to style Radix UI components with complete flexibility using any styling solution"
+---
+
+## Overview
+
+Radix UI Primitives are designed to be styled however you want. They ship with **zero presentational styles**, giving you a clean slate to build your design system.
+
+<Warning>
+No CSS is included. No styles need to be overridden. No specificity battles. Just pure, unstyled components ready for your design.
+</Warning>
+
+---
+
+## Zero Styles Philosophy
+
+Radix components render with no default styling—only the minimal browser defaults remain.
+
+### Why Zero Styles?
+
+Traditional component libraries force you to:
+
+1. **Override opinionated styles** - Fight specificity wars
+2. **Import unwanted CSS** - Bloat your bundle
+3. **Work within constraints** - Limited to pre-made designs
+4. **Use specific tools** - Locked into their styling system
+
+Radix takes a different approach:
+
+- ✅ No styles to override
+- ✅ No CSS imports required
+- ✅ Complete design freedom
+- ✅ Any styling solution works
+
+<Note>
+Radix handles the hard parts (accessibility, behavior, keyboard interaction) and leaves styling entirely to you.
+</Note>
+
+### What You Get
+
+Out of the box, components provide:
+
+- **Semantic HTML structure** - Proper element hierarchy
+- **ARIA attributes** - Full accessibility
+- **Data attributes** - Hooks for state-based styling
+- **Event handlers** - Complete interaction logic
+- **Keyboard navigation** - Built-in keyboard support
+
+Everything except visual appearance.
+
+---
+
+## Styling Approaches
+
+Radix works with any styling solution. Choose what fits your project.
+
+### Plain CSS
+
+Use regular CSS classes:
+
+```css
+/* styles.css */
+.accordion-root {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.accordion-item {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.accordion-item:last-child {
+  border-bottom: none;
+}
+
+.accordion-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.accordion-trigger:hover {
+  background-color: #f9fafb;
+}
+
+.accordion-content {
+  padding: 16px;
+}
+```
+
+```jsx
+import * as Accordion from '@radix-ui/react-accordion';
+import './styles.css';
+
+function MyAccordion() {
+  return (
+    <Accordion.Root className="accordion-root" type="single" collapsible>
+      <Accordion.Item className="accordion-item" value="item-1">
+        <Accordion.Header>
+          <Accordion.Trigger className="accordion-trigger">
+            Is it accessible?
+          </Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content className="accordion-content">
+          Yes. It adheres to the WAI-ARIA design patterns.
+        </Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+### CSS Modules
+
+Scoped styles with CSS Modules:
+
+```css
+/* Accordion.module.css */
+.root {
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+}
+
+.item {
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.trigger {
+  padding: 16px;
+  width: 100%;
+}
+
+.content {
+  padding: 16px;
+}
+```
+
+```jsx
+import * as Accordion from '@radix-ui/react-accordion';
+import styles from './Accordion.module.css';
+
+function MyAccordion() {
+  return (
+    <Accordion.Root className={styles.root} type="single" collapsible>
+      <Accordion.Item className={styles.item} value="item-1">
+        <Accordion.Header>
+          <Accordion.Trigger className={styles.trigger}>
+            Trigger
+          </Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content className={styles.content}>
+          Content
+        </Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+### Tailwind CSS
+
+Utility-first styling:
+
+```jsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+function MyDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+        Open Dialog
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 shadow-xl max-w-md w-full">
+          <Dialog.Title className="text-xl font-semibold mb-2">
+            Dialog Title
+          </Dialog.Title>
+          <Dialog.Description className="text-gray-600 mb-4">
+            This is a description of the dialog.
+          </Dialog.Description>
+          <div className="flex gap-2 justify-end">
+            <Dialog.Close className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+              Cancel
+            </Dialog.Close>
+            <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              Confirm
+            </button>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+### CSS-in-JS (Styled Components, Emotion)
+
+```jsx
+import * as Checkbox from '@radix-ui/react-checkbox';
+import styled from 'styled-components';
+
+const StyledCheckboxRoot = styled(Checkbox.Root)`
+  width: 20px;
+  height: 20px;
+  border: 2px solid ${props => props.theme.colors.gray[400]};
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  cursor: pointer;
+
+  &:hover {
+    border-color: ${props => props.theme.colors.blue[500]};
+  }
+
+  &:focus {
+    outline: 2px solid ${props => props.theme.colors.blue[500]};
+    outline-offset: 2px;
+  }
+`;
+
+const StyledCheckboxIndicator = styled(Checkbox.Indicator)`
+  color: ${props => props.theme.colors.blue[500]};
+`;
+
+function MyCheckbox() {
+  return (
+    <StyledCheckboxRoot>
+      <StyledCheckboxIndicator>
+        <CheckIcon />
+      </StyledCheckboxIndicator>
+    </StyledCheckboxRoot>
+  );
+}
+```
+
+### Vanilla Extract
+
+Type-safe CSS:
+
+```typescript
+// styles.css.ts
+import { style } from '@vanilla-extract/css';
+
+export const trigger = style({
+  padding: 16,
+  backgroundColor: 'transparent',
+  border: 'none',
+  width: '100%',
+  cursor: 'pointer',
+  ':hover': {
+    backgroundColor: '#f9fafb',
+  },
+});
+```
+
+```jsx
+import * as Accordion from '@radix-ui/react-accordion';
+import * as styles from './styles.css';
+
+function MyAccordion() {
+  return (
+    <Accordion.Root type="single" collapsible>
+      <Accordion.Item value="item-1">
+        <Accordion.Header>
+          <Accordion.Trigger className={styles.trigger}>
+            Trigger
+          </Accordion.Trigger>
+        </Accordion.Header>
+        {/* ... */}
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+### Inline Styles
+
+Direct style objects:
+
+```jsx
+<Dialog.Content
+  style={{
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'white',
+    padding: 24,
+    borderRadius: 8,
+    boxShadow: '0 10px 38px -10px rgba(0, 0, 0, 0.35)',
+    maxWidth: 450,
+    width: '90vw',
+  }}
+>
+  {/* Content */}
+</Dialog.Content>
+```
+
+<Tip>
+Choose the styling solution that matches your team's preferences and project requirements. Radix doesn't care which you use.
+</Tip>
+
+---
+
+## Data Attributes for State
+
+Radix components expose their internal state through data attributes, making state-based styling straightforward.
+
+### Common Data Attributes
+
+#### `data-state`
+
+Represents the component's current state:
+
+```jsx
+<Accordion.Trigger /> // data-state="closed" or data-state="open"
+<Dialog.Content />   // data-state="closed" or data-state="open"
+<Checkbox.Root />    // data-state="checked" or data-state="unchecked"
+```
+
+Style based on state:
+
+```css
+[data-state="open"] {
+  background-color: #f0f9ff;
+}
+
+[data-state="closed"] {
+  background-color: white;
+}
+
+/* Animate based on state */
+[data-state="open"] {
+  animation: slideDown 300ms ease-out;
+}
+
+[data-state="closed"] {
+  animation: slideUp 200ms ease-in;
+}
+```
+
+#### `data-disabled`
+
+Present when the component is disabled:
+
+```jsx
+<Accordion.Trigger disabled /> // data-disabled present
+```
+
+```css
+[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+```
+
+#### `data-orientation`
+
+Indicates layout direction:
+
+```jsx
+<Accordion.Root orientation="vertical" /> // data-orientation="vertical"
+<Accordion.Root orientation="horizontal" /> // data-orientation="horizontal"
+```
+
+```css
+[data-orientation="vertical"] {
+  flex-direction: column;
+}
+
+[data-orientation="horizontal"] {
+  flex-direction: row;
+}
+```
+
+#### `data-highlighted`
+
+Present when an item is highlighted (e.g., in menus):
+
+```css
+[data-highlighted] {
+  background-color: #f0f9ff;
+  outline: none;
+}
+```
+
+### Component-Specific Attributes
+
+Each component may expose additional attributes. Check the component's documentation for a complete list.
+
+**Example: Accordion**
+
+From `packages/react/accordion/src/accordion.tsx:314`:
+
+```tsx
+<Primitive.div
+  {...accordionProps}
+  data-orientation={orientation}
+  ref={composedRefs}
+  onKeyDown={disabled ? undefined : handleKeyDown}
+/>
+```
+
+**Example: Dialog**
+
+From `packages/react/dialog/src/dialog.tsx:109`:
+
+```tsx
+<Primitive.button
+  type="button"
+  aria-haspopup="dialog"
+  aria-expanded={context.open}
+  aria-controls={context.contentId}
+  data-state={getState(context.open)}
+  {...triggerProps}
+  ref={composedTriggerRef}
+  onClick={composeEventHandlers(props.onClick, context.onOpenToggle)}
+/>
+```
+
+---
+
+## Advanced Styling Patterns
+
+### Animating State Changes
+
+Use CSS animations with data attributes:
+
+```css
+@keyframes slideDown {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.accordion-content[data-state="open"] {
+  animation: slideDown 300ms ease-out;
+}
+
+.accordion-content[data-state="closed"] {
+  animation: slideUp 200ms ease-in;
+}
+```
+
+<Note>
+Radix provides CSS variables like `--radix-accordion-content-height` for smooth animations. See component documentation for available variables.
+</Note>
+
+### CSS Variables from Components
+
+Some components expose CSS custom properties:
+
+```css
+/* Accordion provides content dimensions */
+.accordion-content {
+  overflow: hidden;
+}
+
+.accordion-content[data-state="open"] {
+  animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+```
+
+From `packages/react/accordion/src/accordion.tsx:491`:
+
+```tsx
+<CollapsiblePrimitive.Content
+  role="region"
+  aria-labelledby={itemContext.triggerId}
+  data-orientation={accordionContext.orientation}
+  {...collapsibleScope}
+  {...contentProps}
+  ref={forwardedRef}
+  style={{
+    ['--radix-accordion-content-height' as any]: 'var(--radix-collapsible-content-height)',
+    ['--radix-accordion-content-width' as any]: 'var(--radix-collapsible-content-width)',
+    ...props.style,
+  }}
+/>
+```
+
+### Focus Styles
+
+Add accessible focus indicators:
+
+```css
+.trigger:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Remove default focus styles */
+.trigger:focus {
+  outline: none;
+}
+```
+
+### Hover States
+
+Style interactive elements:
+
+```css
+.trigger:hover:not([data-disabled]) {
+  background-color: #f9fafb;
+}
+
+[data-disabled]:hover {
+  cursor: not-allowed;
+}
+```
+
+### Responsive Styles
+
+Adapt to screen sizes:
+
+```css
+.dialog-content {
+  max-width: 450px;
+  width: 90vw;
+}
+
+@media (max-width: 640px) {
+  .dialog-content {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+  }
+}
+```
+
+---
+
+## Theming
+
+Implement design systems with CSS variables:
+
+```css
+:root {
+  --color-background: white;
+  --color-foreground: #18181b;
+  --color-primary: #2563eb;
+  --color-border: #e5e7eb;
+  --radius: 8px;
+  --spacing: 16px;
+}
+
+[data-theme="dark"] {
+  --color-background: #18181b;
+  --color-foreground: #fafafa;
+  --color-primary: #60a5fa;
+  --color-border: #3f3f46;
+}
+
+.accordion-root {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.accordion-trigger {
+  color: var(--color-foreground);
+  padding: var(--spacing);
+}
+
+.accordion-trigger[data-state="open"] {
+  color: var(--color-primary);
+}
+```
+
+```jsx
+function App() {
+  const [theme, setTheme] = useState('light');
+
+  return (
+    <div data-theme={theme}>
+      <Accordion.Root className="accordion-root" type="single" collapsible>
+        {/* ... */}
+      </Accordion.Root>
+    </div>
+  );
+}
+```
+
+---
+
+## Best Practices
+
+### 1. Use Data Attributes for State
+
+<Warning>
+Don't add your own state classes—use the data attributes Radix provides.
+</Warning>
+
+❌ **Avoid:**
+```jsx
+<Accordion.Trigger className={isOpen ? 'open' : 'closed'}>
+```
+
+✅ **Instead:**
+```jsx
+<Accordion.Trigger>
+```
+```css
+[data-state="open"] { /* styles */ }
+[data-state="closed"] { /* styles */ }
+```
+
+### 2. Maintain Accessibility
+
+Don't remove focus indicators:
+
+```css
+/* Bad: removes all focus styles */
+.trigger:focus {
+  outline: none;
+}
+
+/* Good: provides visible focus indicator */
+.trigger:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+```
+
+### 3. Consider Touch Targets
+
+Ensure interactive elements are large enough:
+
+```css
+.trigger {
+  min-height: 44px; /* Minimum touch target size */
+  padding: 12px 16px;
+}
+```
+
+### 4. Test with User Preferences
+
+Respect user settings:
+
+```css
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .accordion-content {
+    animation: none;
+  }
+}
+
+/* Respect contrast preferences */
+@media (prefers-contrast: high) {
+  .trigger {
+    border: 2px solid currentColor;
+  }
+}
+```
+
+---
+
+## Real-World Example
+
+Complete styled Dialog component:
+
+```css
+/* dialog.css */
+@keyframes overlayShow {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 38px -10px rgba(0, 0, 0, 0.35);
+  padding: 24px;
+  max-width: 450px;
+  width: 90vw;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog-content:focus {
+  outline: none;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.dialog-description {
+  margin: 0;
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+.button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.button-primary {
+  background-color: #2563eb;
+  color: white;
+}
+
+.button-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.button-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.button-secondary:hover {
+  background-color: #e5e7eb;
+}
+
+.icon-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.icon-button:hover {
+  background-color: #f3f4f6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-overlay,
+  .dialog-content {
+    animation: none;
+  }
+}
+```
+
+```jsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { Cross2Icon } from '@radix-ui/react-icons';
+import './dialog.css';
+
+function MyDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger className="button button-primary">
+        Open Dialog
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="dialog-overlay" />
+        <Dialog.Content className="dialog-content">
+          <Dialog.Title className="dialog-title">
+            Edit profile
+          </Dialog.Title>
+          <Dialog.Description className="dialog-description">
+            Make changes to your profile here. Click save when you're done.
+          </Dialog.Description>
+          
+          <fieldset style={{ marginBottom: 16 }}>
+            <label htmlFor="name">Name</label>
+            <input id="name" defaultValue="John Doe" />
+          </fieldset>
+          
+          <fieldset style={{ marginBottom: 16 }}>
+            <label htmlFor="username">Username</label>
+            <input id="username" defaultValue="@johndoe" />
+          </fieldset>
+
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <Dialog.Close className="button button-secondary">
+              Cancel
+            </Dialog.Close>
+            <button className="button button-primary">
+              Save changes
+            </button>
+          </div>
+
+          <Dialog.Close className="icon-button" aria-label="Close">
+            <Cross2Icon />
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+---
+
+## Summary
+
+Radix UI's zero-styles approach gives you:
+
+- **Complete freedom** - Style however you want
+- **Any tooling** - Use your preferred styling solution
+- **State hooks** - Data attributes for state-based styling
+- **No overhead** - Zero CSS to download or override
+- **Full control** - Every visual aspect is yours to design
+
+<Tip>
+Start with the structure Radix provides, then add your styles. You're building on a solid, accessible foundation.
+</Tip>
+
+---
+
+## Related Concepts
+
+- [Philosophy](/concepts/philosophy) - Understand why Radix takes this approach
+- [Composability](/concepts/composability) - Learn how to compose styled components
+- [State Management](/concepts/state-management) - Control state that affects styling

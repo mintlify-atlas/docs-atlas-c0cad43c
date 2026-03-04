@@ -1,0 +1,552 @@
+---
+title: Dropdown Menu
+description: Displays a menu to the user triggered by a button, typically used for navigation or commands.
+---
+
+## Overview
+
+A dropdown menu displays a list of actions or options triggered by a button.
+
+## Features
+
+- Can be controlled or uncontrolled
+- Supports submenus with configurable reading direction
+- Supports items, labels, groups of items
+- Supports checkable items (single or multiple)
+- Customize side, alignment, offsets, collision handling
+- Focus is fully managed
+- Full keyboard navigation
+- Typeahead support
+- Optional modal or non-modal mode
+
+## Installation
+
+```bash
+npm install @radix-ui/react-dropdown-menu
+```
+
+## Anatomy
+
+Import all parts and piece them together.
+
+```tsx
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+
+export default () => (
+  <DropdownMenu.Root>
+    <DropdownMenu.Trigger />
+    <DropdownMenu.Portal>
+      <DropdownMenu.Content>
+        <DropdownMenu.Label />
+        <DropdownMenu.Item />
+
+        <DropdownMenu.Group>
+          <DropdownMenu.Item />
+        </DropdownMenu.Group>
+
+        <DropdownMenu.CheckboxItem>
+          <DropdownMenu.ItemIndicator />
+        </DropdownMenu.CheckboxItem>
+
+        <DropdownMenu.RadioGroup>
+          <DropdownMenu.RadioItem>
+            <DropdownMenu.ItemIndicator />
+          </DropdownMenu.RadioItem>
+        </DropdownMenu.RadioGroup>
+
+        <DropdownMenu.Sub>
+          <DropdownMenu.SubTrigger />
+          <DropdownMenu.Portal>
+            <DropdownMenu.SubContent />
+          </DropdownMenu.Portal>
+        </DropdownMenu.Sub>
+
+        <DropdownMenu.Separator />
+        <DropdownMenu.Arrow />
+      </DropdownMenu.Content>
+    </DropdownMenu.Portal>
+  </DropdownMenu.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the parts of a dropdown menu.
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the dropdown menu. Must be used in conjunction with `onOpenChange`.
+</ParamField>
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state of the dropdown menu when it is initially rendered. Use when you do not need to control its open state.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state of the dropdown menu changes.
+</ParamField>
+
+<ParamField path="dir" type="'ltr' | 'rtl'">
+  The reading direction of submenus when applicable. If omitted, inherits globally from DirectionProvider or assumes LTR (left-to-right) reading mode.
+</ParamField>
+
+<ParamField path="modal" type="boolean" default="true">
+  The modality of the dropdown menu. When set to `true`, interaction with outside elements will be disabled and only menu content will be visible to screen readers.
+</ParamField>
+
+### Trigger
+
+The button that toggles the dropdown menu.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<Note>
+Supports all standard HTML button attributes.
+</Note>
+
+### Portal
+
+When used, portals the content part into the `body`.
+
+<ParamField path="container" type="HTMLElement" default="document.body">
+  Specify a container element to portal the content into.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+### Content
+
+The component that pops out when the dropdown menu is open.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="false">
+  When `true`, keyboard navigation will loop from last item to first, and vice versa.
+</ParamField>
+
+<ParamField path="side" type="'top' | 'right' | 'bottom' | 'left'" default="'bottom'">
+  The preferred side of the trigger to render against when open.
+</ParamField>
+
+<ParamField path="sideOffset" type="number" default="0">
+  The distance in pixels from the trigger.
+</ParamField>
+
+<ParamField path="align" type="'start' | 'center' | 'end'" default="'center'">
+  The preferred alignment against the trigger. May change when collisions occur.
+</ParamField>
+
+<ParamField path="alignOffset" type="number" default="0">
+  An offset in pixels from the "start" or "end" alignment options.
+</ParamField>
+
+<ParamField path="avoidCollisions" type="boolean" default="true">
+  When `true`, overrides the `side` and `align` preferences to prevent collisions with boundary edges.
+</ParamField>
+
+<ParamField path="collisionBoundary" type="Element | Element[]" default="[]">
+  The element used as the collision boundary. By default this is the viewport.
+</ParamField>
+
+<ParamField path="collisionPadding" type="number | Padding" default="0">
+  The distance in pixels from the boundary edges where collision detection should occur.
+</ParamField>
+
+<ParamField path="sticky" type="'partial' | 'always'" default="'partial'">
+  The sticky behavior on the align axis.
+</ParamField>
+
+<ParamField path="hideWhenDetached" type="boolean" default="false">
+  Whether to hide the content when the trigger becomes fully occluded.
+</ParamField>
+
+<ParamField path="onCloseAutoFocus" type="(event: Event) => void">
+  Event handler called when focus moves to the trigger after closing. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is down. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer event occurs outside the bounds of the component. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+<ParamField path="onInteractOutside" type="(event: PointerDownOutsideEvent | FocusOutsideEvent) => void">
+  Event handler called when an interaction happens outside the bounds of the component. It can be prevented by calling `event.preventDefault`.
+</ParamField>
+
+### Item
+
+The component that contains the dropdown menu items.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="onSelect" type="(event: Event) => void">
+  Event handler called when the user selects an item (via mouse or keyboard). Calling `event.preventDefault` in this handler will prevent the dropdown menu from closing when selecting that item.
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes. By default, the typeahead behavior will use the `.textContent` of the item. Use this when the content is complex, or you have non-textual content inside.
+</ParamField>
+
+### Group
+
+Used to group multiple items. Use in conjunction with `DropdownMenu.Label` to ensure good accessibility via automatic labelling.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+### Label
+
+Used to render a label. It won't be focusable using arrow keys.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+### CheckboxItem
+
+An item that can be controlled and rendered like a checkbox.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="checked" type="boolean | 'indeterminate'">
+  The controlled checked state of the item. Must be used in conjunction with `onCheckedChange`.
+</ParamField>
+
+<ParamField path="onCheckedChange" type="(checked: boolean) => void">
+  Event handler called when the checked state changes.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="onSelect" type="(event: Event) => void">
+  Event handler called when the user selects an item (via mouse or keyboard). Calling `event.preventDefault` in this handler will prevent the dropdown menu from closing when selecting that item.
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes.
+</ParamField>
+
+### RadioGroup
+
+Used to group multiple `DropdownMenu.RadioItem`s.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="value" type="string">
+  The value of the selected item in the group.
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Event handler called when the value changes.
+</ParamField>
+
+### RadioItem
+
+An item that can be controlled and rendered like a radio.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="value" type="string" required>
+  The unique value of the item.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="onSelect" type="(event: Event) => void">
+  Event handler called when the user selects an item (via mouse or keyboard).
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes.
+</ParamField>
+
+### ItemIndicator
+
+Renders when the parent `DropdownMenu.CheckboxItem` or `DropdownMenu.RadioItem` is checked. You can style this element directly, or you can use it as a wrapper to put an icon into, or both.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean">
+  Used to force mounting when more control is needed. Useful when controlling animation with React animation libraries.
+</ParamField>
+
+### Separator
+
+Used to visually separate items in the dropdown menu.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+### Sub
+
+Contains all the parts of a submenu.
+
+<ParamField path="open" type="boolean">
+  The controlled open state of the submenu. Must be used in conjunction with `onOpenChange`.
+</ParamField>
+
+<ParamField path="defaultOpen" type="boolean">
+  The open state of the submenu when it is initially rendered. Use when you do not need to control its open state.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Event handler called when the open state of the submenu changes.
+</ParamField>
+
+### SubTrigger
+
+An item that opens a submenu. Must be rendered inside `DropdownMenu.Sub`.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, prevents the user from interacting with the item.
+</ParamField>
+
+<ParamField path="textValue" type="string">
+  Optional text used for typeahead purposes.
+</ParamField>
+
+### SubContent
+
+The component that pops out when a submenu is open. Must be rendered inside `DropdownMenu.Sub`.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="false">
+  When `true`, keyboard navigation will loop from last item to first, and vice versa.
+</ParamField>
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Event handler called when the escape key is down.
+</ParamField>
+
+<ParamField path="onPointerDownOutside" type="(event: PointerDownOutsideEvent) => void">
+  Event handler called when a pointer event occurs outside the bounds of the component.
+</ParamField>
+
+### Arrow
+
+An optional arrow element to render alongside the dropdown menu.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child, merging their props and behavior.
+</ParamField>
+
+<ParamField path="width" type="number" default="10">
+  The width of the arrow in pixels.
+</ParamField>
+
+<ParamField path="height" type="number" default="5">
+  The height of the arrow in pixels.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+
+```tsx Basic Usage
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+
+function DropdownMenuDemo() {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger className="button">
+        Options
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content className="dropdown-menu-content">
+          <DropdownMenu.Item className="dropdown-menu-item">
+            New Tab
+          </DropdownMenu.Item>
+          <DropdownMenu.Item className="dropdown-menu-item">
+            New Window
+          </DropdownMenu.Item>
+          <DropdownMenu.Separator className="dropdown-menu-separator" />
+          <DropdownMenu.Item className="dropdown-menu-item">
+            Settings
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+```
+
+```tsx With Checkboxes and Radio
+import { useState } from 'react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { CheckIcon } from '@radix-ui/react-icons';
+
+function DropdownMenuWithSelections() {
+  const [showBookmarks, setShowBookmarks] = useState(true);
+  const [showUrls, setShowUrls] = useState(false);
+  const [person, setPerson] = useState('pedro');
+
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>View</DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content>
+          <DropdownMenu.Label>View Options</DropdownMenu.Label>
+          <DropdownMenu.CheckboxItem
+            checked={showBookmarks}
+            onCheckedChange={setShowBookmarks}
+          >
+            <DropdownMenu.ItemIndicator>
+              <CheckIcon />
+            </DropdownMenu.ItemIndicator>
+            Show Bookmarks
+          </DropdownMenu.CheckboxItem>
+          <DropdownMenu.CheckboxItem
+            checked={showUrls}
+            onCheckedChange={setShowUrls}
+          >
+            <DropdownMenu.ItemIndicator>
+              <CheckIcon />
+            </DropdownMenu.ItemIndicator>
+            Show Full URLs
+          </DropdownMenu.CheckboxItem>
+          
+          <DropdownMenu.Separator />
+          
+          <DropdownMenu.Label>People</DropdownMenu.Label>
+          <DropdownMenu.RadioGroup value={person} onValueChange={setPerson}>
+            <DropdownMenu.RadioItem value="pedro">
+              <DropdownMenu.ItemIndicator>
+                <CheckIcon />
+              </DropdownMenu.ItemIndicator>
+              Pedro Duarte
+            </DropdownMenu.RadioItem>
+            <DropdownMenu.RadioItem value="colm">
+              <DropdownMenu.ItemIndicator>
+                <CheckIcon />
+              </DropdownMenu.ItemIndicator>
+              Colm Tuite
+            </DropdownMenu.RadioItem>
+          </DropdownMenu.RadioGroup>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+```
+
+```tsx With Submenu
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+
+function DropdownMenuWithSubmenu() {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>File</DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content>
+          <DropdownMenu.Item>New File</DropdownMenu.Item>
+          <DropdownMenu.Item>Save</DropdownMenu.Item>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger>
+              Export
+            </DropdownMenu.SubTrigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.SubContent>
+                <DropdownMenu.Item>PDF</DropdownMenu.Item>
+                <DropdownMenu.Item>HTML</DropdownMenu.Item>
+                <DropdownMenu.Item>Markdown</DropdownMenu.Item>
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Sub>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item>Close</DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+```
+
+```tsx Controlled
+import { useState } from 'react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+
+function ControlledDropdownMenu() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DropdownMenu.Root open={open} onOpenChange={setOpen}>
+      <DropdownMenu.Trigger>
+        {open ? 'Close' : 'Open'}
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content>
+          <DropdownMenu.Item onSelect={() => console.log('Edit')}>
+            Edit
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onSelect={() => console.log('Duplicate')}>
+            Duplicate
+          </DropdownMenu.Item>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item
+            onSelect={() => {
+              console.log('Delete');
+              setOpen(false);
+            }}
+          >
+            Delete
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+```
+
+</CodeGroup>
+
+## Accessibility
+
+Adheres to the [Menu Button WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button) and uses roving tabindex to manage focus movement among menu items.
+
+### Keyboard Interactions
+
+- `Space` - Opens the dropdown menu and activates items
+- `Enter` - Opens the dropdown menu and activates items
+- `ArrowDown` - When focus is on trigger, opens the dropdown menu. When open, moves focus to the next item
+- `ArrowUp` - Moves focus to the previous item
+- `ArrowRight` - Opens a submenu or moves focus to the next item in a submenu
+- `ArrowLeft` - Closes a submenu or moves to the parent menu
+- `Esc` - Closes the dropdown menu and moves focus to trigger

@@ -1,0 +1,206 @@
+---
+title: Slot
+description: Merges its props onto its immediate child.
+---
+
+## Overview
+
+Slot merges its props onto its immediate child element. This is useful for composition patterns where you want to pass props through to a child component while maintaining the child's original props and ref.
+
+## Features
+
+- Merges props with the child component
+- Composes refs correctly
+- Supports event handler composition
+- Works with the `asChild` pattern
+
+## Installation
+
+```bash
+npm install @radix-ui/react-slot
+```
+
+## Anatomy
+
+```tsx
+import { Slot } from '@radix-ui/react-slot';
+
+export default () => (
+  <Slot>{/* child component */}</Slot>
+)
+```
+
+## API Reference
+
+### Slot
+
+Merges its props onto its immediate child.
+
+<ParamField path="children" type="React.ReactNode">
+  The child element to merge props onto. Must be a single React element.
+</ParamField>
+
+### Slottable
+
+Used inside components that use Slot to indicate which content should be rendered as the slotted element.
+
+## Examples
+
+### Basic Usage
+
+<CodeGroup>
+```tsx Basic
+import { Slot } from '@radix-ui/react-slot';
+
+const Button = ({ asChild, ...props }) => {
+  const Comp = asChild ? Slot : 'button';
+  return <Comp {...props} />;
+};
+
+// Usage
+export default () => (
+  <div>
+    <Button onClick={() => console.log('clicked')}>Regular Button</Button>
+
+    <Button asChild>
+      <a href="/home">Link that looks like a button</a>
+    </Button>
+  </div>
+);
+```
+</CodeGroup>
+
+### With Custom Component
+
+<CodeGroup>
+```tsx Custom Component
+import { Slot } from '@radix-ui/react-slot';
+
+const Card = ({ asChild, ...props }) => {
+  const Comp = asChild ? Slot : 'div';
+  return (
+    <Comp
+      {...props}
+      style={{
+        padding: 20,
+        borderRadius: 8,
+        border: '1px solid gray',
+        ...props.style,
+      }}
+    />
+  );
+};
+
+export default () => (
+  <Card asChild>
+    <article>
+      <h2>Article Title</h2>
+      <p>Article content...</p>
+    </article>
+  </Card>
+);
+```
+</CodeGroup>
+
+### Event Handler Composition
+
+<CodeGroup>
+```tsx Event Handlers
+import { Slot } from '@radix-ui/react-slot';
+
+const Button = ({ asChild, onClick, ...props }) => {
+  const Comp = asChild ? Slot : 'button';
+  
+  const handleClick = (e) => {
+    console.log('Button clicked');
+    onClick?.(e);
+  };
+
+  return <Comp {...props} onClick={handleClick} />;
+};
+
+export default () => (
+  <Button
+    asChild
+    onClick={() => console.log('Child clicked')}
+  >
+    <a href="#">
+      Both handlers will be called
+    </a>
+  </Button>
+);
+```
+</CodeGroup>
+
+### With Slottable
+
+<CodeGroup>
+```tsx Slottable
+import { Slot, Slottable } from '@radix-ui/react-slot';
+
+const Button = ({ asChild, icon, children, ...props }) => {
+  const Comp = asChild ? Slot : 'button';
+  
+  return (
+    <Comp {...props}>
+      {icon}
+      <Slottable>{children}</Slottable>
+    </Comp>
+  );
+};
+
+export default () => (
+  <Button
+    asChild
+    icon={<span>→</span>}
+  >
+    <a href="/next">
+      Next Page
+    </a>
+  </Button>
+);
+```
+</CodeGroup>
+
+## How It Works
+
+Slot works by:
+
+1. Taking a single child element
+2. Merging its own props with the child's props
+3. Composing refs using `composeRefs`
+4. Composing event handlers so both parent and child handlers are called
+5. Cloning the child element with the merged props
+
+## The asChild Pattern
+
+The `asChild` pattern is commonly used with Slot to allow components to be polymorphic:
+
+```tsx
+// Without asChild - renders a button
+<Button onClick={...}>Click me</Button>
+
+// With asChild - renders the child element (a link)
+<Button asChild>
+  <a href="...">Click me</a>
+</Button>
+```
+
+This pattern provides:
+
+- **Flexibility**: Users can render any element while keeping your component's functionality
+- **Accessibility**: Users can choose the most semantically appropriate element
+- **Styling**: The component's styles are applied regardless of the underlying element
+
+## Common Use Cases
+
+- Creating polymorphic components that can render as different elements
+- Building composable primitives that pass props to children
+- Implementing the `asChild` prop pattern in component libraries
+- Merging event handlers and refs in composite components
+
+## Limitations
+
+- Only works with a single child element
+- Child must be a valid React element, not a string or number
+- Does not work with React.Fragment as the direct child

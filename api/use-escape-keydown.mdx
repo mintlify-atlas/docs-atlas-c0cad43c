@@ -1,0 +1,135 @@
+---
+title: useEscapeKeydown
+description: A hook that listens for Escape key presses and triggers a callback handler.
+---
+
+`useEscapeKeydown` is a hook that listens for Escape key presses on a document and executes a callback when detected. It's commonly used for dismissing modals, dropdowns, and other overlay components.
+
+## Installation
+
+```bash
+npm install @radix-ui/react-use-escape-keydown
+```
+
+## Function Signature
+
+```tsx
+function useEscapeKeydown(
+  onEscapeKeyDown?: (event: KeyboardEvent) => void,
+  ownerDocument?: Document
+): void
+```
+
+## Parameters
+
+<ParamField path="onEscapeKeyDown" type="(event: KeyboardEvent) => void">
+  Callback function to be invoked when the Escape key is pressed. Receives the keyboard event as an argument.
+</ParamField>
+
+<ParamField path="ownerDocument" type="Document">
+  The document to listen on for keydown events.
+  
+  Default: `globalThis?.document`
+</ParamField>
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { useEscapeKeydown } from '@radix-ui/react-use-escape-keydown';
+
+function Modal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  useEscapeKeydown(() => {
+    if (isOpen) {
+      onClose();
+    }
+  });
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal">
+      <h2>Modal Content</h2>
+      <button onClick={onClose}>Close</button>
+    </div>
+  );
+}
+```
+
+### With Event Prevention
+
+```tsx
+import { useEscapeKeydown } from '@radix-ui/react-use-escape-keydown';
+
+function Dialog({ onDismiss }: { onDismiss: () => void }) {
+  useEscapeKeydown((event) => {
+    // Prevent default browser behavior
+    event.preventDefault();
+    
+    // Custom logic before dismissing
+    if (confirm('Are you sure you want to close?')) {
+      onDismiss();
+    }
+  });
+
+  return <div className="dialog">Dialog content</div>;
+}
+```
+
+### Custom Document
+
+```tsx
+import { useEscapeKeydown } from '@radix-ui/react-use-escape-keydown';
+
+function IframeModal({ iframeRef, onClose }: { 
+  iframeRef: RefObject<HTMLIFrameElement>;
+  onClose: () => void;
+}) {
+  const iframeDocument = iframeRef.current?.contentDocument ?? document;
+  
+  useEscapeKeydown(() => {
+    onClose();
+  }, iframeDocument);
+
+  return <div>Modal inside iframe</div>;
+}
+```
+
+### Conditional Listening
+
+```tsx
+import { useEscapeKeydown } from '@radix-ui/react-use-escape-keydown';
+
+function Popover({ isOpen, canDismiss, onClose }: { 
+  isOpen: boolean;
+  canDismiss: boolean;
+  onClose: () => void;
+}) {
+  useEscapeKeydown(
+    isOpen && canDismiss ? onClose : undefined
+  );
+
+  if (!isOpen) return null;
+  return <div className="popover">Popover content</div>;
+}
+```
+
+## Implementation Details
+
+The hook:
+
+1. Uses `useCallbackRef` to ensure the callback doesn't cause unnecessary effect re-runs
+2. Adds a `keydown` event listener with `capture: true` to catch events early in the event flow
+3. Checks if the pressed key is 'Escape' before invoking the callback
+4. Cleans up the event listener when the component unmounts or dependencies change
+
+## Notes
+
+<Note>
+  The event listener is added with `capture: true`, which means it will intercept the event during the capture phase, before it reaches the target element. This ensures the Escape key is handled even if other elements prevent propagation.
+</Note>
+
+<Note>
+  The callback is wrapped with `useCallbackRef`, so you can safely pass inline functions or callbacks that change frequently without worrying about the effect re-running unnecessarily.
+</Note>

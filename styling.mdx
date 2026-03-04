@@ -1,0 +1,604 @@
+---
+title: Styling
+description: Learn how to style Radix UI Primitives with CSS, CSS-in-JS, Tailwind, or any styling solution.
+---
+
+## Overview
+
+Radix UI Primitives are **completely unstyled by default**. This gives you complete control over the styling without having to override opinionated design decisions.
+
+You can style components using:
+
+- Plain CSS or CSS Modules
+- CSS-in-JS libraries (styled-components, Emotion, etc.)
+- Utility-first frameworks (Tailwind CSS)
+- Inline styles
+- Any other styling solution that works with React
+
+<Note>
+  The unstyled approach means you're responsible for all visual styling, including layouts, colors, typography, animations, and responsive behavior.
+</Note>
+
+## Styling Approaches
+
+### Plain CSS
+
+The simplest approach is using regular CSS classes:
+
+<CodeGroup>
+
+```tsx Switch.tsx
+import * as Switch from '@radix-ui/react-switch';
+import './switch.css';
+
+export function SwitchDemo() {
+  return (
+    <div className="switch-container">
+      <label className="label" htmlFor="airplane-mode">
+        Airplane mode
+      </label>
+      <Switch.Root className="switch-root" id="airplane-mode">
+        <Switch.Thumb className="switch-thumb" />
+      </Switch.Root>
+    </div>
+  );
+}
+```
+
+```css switch.css
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.label {
+  color: black;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.switch-root {
+  width: 42px;
+  height: 25px;
+  background-color: #ccc;
+  border-radius: 9999px;
+  position: relative;
+  border: none;
+  cursor: pointer;
+}
+
+.switch-root[data-state='checked'] {
+  background-color: #22c55e;
+}
+
+.switch-thumb {
+  display: block;
+  width: 21px;
+  height: 21px;
+  background-color: white;
+  border-radius: 9999px;
+  transition: transform 100ms;
+  transform: translateX(2px);
+  will-change: transform;
+}
+
+.switch-thumb[data-state='checked'] {
+  transform: translateX(19px);
+}
+```
+
+</CodeGroup>
+
+### CSS Modules
+
+CSS Modules provide scoped styling:
+
+<CodeGroup>
+
+```tsx Dialog.tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import styles from './dialog.module.css';
+
+export function DialogDemo() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger className={styles.trigger}>
+        Open Dialog
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className={styles.overlay} />
+        <Dialog.Content className={styles.content}>
+          <Dialog.Title className={styles.title}>
+            Edit Profile
+          </Dialog.Title>
+          <Dialog.Description className={styles.description}>
+            Make changes to your profile here.
+          </Dialog.Description>
+          <Dialog.Close className={styles.closeButton}>
+            Close
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+```css dialog.module.css
+.trigger {
+  padding: 8px 16px;
+  background-color: #1c2424;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.content {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 38px -10px rgba(0, 0, 0, 0.35);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 450px;
+  max-height: 85vh;
+  padding: 25px;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.description {
+  margin: 10px 0 20px;
+  color: #666;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+```
+
+</CodeGroup>
+
+### Styled Components
+
+Use styled-components or Emotion for CSS-in-JS:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import styled from 'styled-components';
+
+const StyledOverlay = styled(Dialog.Overlay)`
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+`;
+
+const StyledContent = styled(Dialog.Content)`
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 38px -10px rgba(0, 0, 0, 0.35);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 450px;
+  padding: 25px;
+`;
+
+const StyledTitle = styled(Dialog.Title)`
+  margin: 0;
+  font-weight: 600;
+  font-size: 17px;
+`;
+
+export function DialogDemo() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger>Open</Dialog.Trigger>
+      <Dialog.Portal>
+        <StyledOverlay />
+        <StyledContent>
+          <StyledTitle>Edit Profile</StyledTitle>
+          <Dialog.Close>Close</Dialog.Close>
+        </StyledContent>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+### Tailwind CSS
+
+Radix UI works excellently with Tailwind CSS:
+
+```tsx
+import * as Accordion from '@radix-ui/react-accordion';
+
+export function AccordionDemo() {
+  return (
+    <Accordion.Root
+      type="single"
+      collapsible
+      className="w-full max-w-md mx-auto"
+    >
+      <Accordion.Item value="item-1" className="border-b">
+        <Accordion.Header>
+          <Accordion.Trigger className="flex w-full items-center justify-between py-4 text-left font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180">
+            What is Radix UI?
+            <svg
+              className="h-4 w-4 transition-transform duration-200"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+          <div className="pb-4 pt-0">
+            Radix UI is a collection of accessible, unstyled components for building high-quality design systems.
+          </div>
+        </Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+<Tip>
+  Use Tailwind's `data-*` attribute selectors to style different component states: `data-[state=open]`, `data-[state=checked]`, etc.
+</Tip>
+
+## Data Attributes
+
+Radix components expose data attributes that you can use for styling:
+
+### State Attributes
+
+Many components expose their state via `data-state`:
+
+```css
+/* Switch states */
+.switch-root[data-state='checked'] {
+  background-color: green;
+}
+
+.switch-root[data-state='unchecked'] {
+  background-color: gray;
+}
+
+/* Dialog states */
+.dialog-content[data-state='open'] {
+  animation: slideIn 200ms;
+}
+
+.dialog-content[data-state='closed'] {
+  animation: slideOut 200ms;
+}
+
+/* Accordion states */
+.accordion-trigger[data-state='open'] {
+  /* Styles for open state */
+}
+
+.accordion-trigger[data-state='closed'] {
+  /* Styles for closed state */
+}
+```
+
+### Disabled State
+
+Components expose a `data-disabled` attribute when disabled:
+
+```css
+.button[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+```
+
+### Orientation
+
+Some components like Slider and Toolbar expose orientation:
+
+```css
+.slider-root[data-orientation='horizontal'] {
+  width: 200px;
+  height: 20px;
+}
+
+.slider-root[data-orientation='vertical'] {
+  width: 20px;
+  height: 200px;
+}
+```
+
+### Side and Align
+
+Positioned components like Tooltip and Popover expose side and alignment:
+
+```css
+.tooltip-content[data-side='top'] {
+  /* Styles for top-positioned tooltip */
+}
+
+.tooltip-content[data-side='bottom'] {
+  /* Styles for bottom-positioned tooltip */
+}
+
+.popover-content[data-align='start'] {
+  /* Styles for start-aligned popover */
+}
+```
+
+## Animating with Data Attributes
+
+You can create smooth animations using data attributes:
+
+```css
+/* Accordion animation */
+.accordion-content {
+  overflow: hidden;
+}
+
+.accordion-content[data-state='open'] {
+  animation: slideDown 300ms ease-out;
+}
+
+.accordion-content[data-state='closed'] {
+  animation: slideUp 300ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+```
+
+<Note>
+  Some components provide CSS variables (like `--radix-accordion-content-height`) that you can use in your animations.
+</Note>
+
+## CSS Variables
+
+Radix components expose CSS variables for dynamic values:
+
+```css
+/* Collapsible content height */
+.collapsible-content[data-state='open'] {
+  height: var(--radix-collapsible-content-height);
+}
+
+/* Collapsible content width */
+.collapsible-content[data-state='open'] {
+  width: var(--radix-collapsible-content-width);
+}
+
+/* Navigation menu viewport */
+.navigation-menu-viewport {
+  width: var(--radix-navigation-menu-viewport-width);
+  height: var(--radix-navigation-menu-viewport-height);
+}
+```
+
+## Styling Best Practices
+
+<Steps>
+  <Step title="Start with layout and structure">
+    First, establish the basic layout and positioning using CSS or your preferred framework.
+  </Step>
+  
+  <Step title="Add interactive states">
+    Use data attributes to style hover, focus, active, and disabled states.
+  </Step>
+  
+  <Step title="Implement animations">
+    Add smooth transitions and animations for state changes using data attributes.
+  </Step>
+  
+  <Step title="Ensure accessibility">
+    Test with keyboard navigation and screen readers. Make sure focus indicators are visible.
+  </Step>
+  
+  <Step title="Make it responsive">
+    Use media queries or responsive utilities to adapt to different screen sizes.
+  </Step>
+</Steps>
+
+## Common Patterns
+
+### Focus Visible
+
+Style focus states for keyboard navigation:
+
+```css
+.button:focus-visible {
+  outline: 2px solid blue;
+  outline-offset: 2px;
+}
+```
+
+### Hover and Active States
+
+```css
+.button:hover {
+  background-color: #2a3333;
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+```
+
+### Responsive Design
+
+```css
+.dialog-content {
+  width: 90vw;
+  max-width: 450px;
+}
+
+@media (max-width: 640px) {
+  .dialog-content {
+    width: 95vw;
+    padding: 20px;
+  }
+}
+```
+
+## Examples by Framework
+
+<AccordionGroup>
+  <Accordion title="Tailwind CSS Example">
+    ```tsx
+    import * as Dialog from '@radix-ui/react-dialog';
+    
+    export function DialogDemo() {
+      return (
+        <Dialog.Root>
+          <Dialog.Trigger className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">
+            Open Dialog
+          </Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out" />
+            <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 shadow-xl max-w-md w-[90vw]">
+              <Dialog.Title className="text-xl font-semibold mb-2">
+                Edit Profile
+              </Dialog.Title>
+              <Dialog.Description className="text-gray-600 mb-4">
+                Make changes to your profile here.
+              </Dialog.Description>
+              <Dialog.Close className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                ×
+              </Dialog.Close>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      );
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="CSS Modules Example">
+    ```tsx
+    import * as Switch from '@radix-ui/react-switch';
+    import styles from './switch.module.css';
+    
+    export function SwitchDemo() {
+      return (
+        <Switch.Root className={styles.root}>
+          <Switch.Thumb className={styles.thumb} />
+        </Switch.Root>
+      );
+    }
+    ```
+    
+    ```css
+    .root {
+      width: 42px;
+      height: 25px;
+      background-color: var(--gray-400);
+      border-radius: 9999px;
+      position: relative;
+    }
+    
+    .root[data-state='checked'] {
+      background-color: var(--green-500);
+    }
+    
+    .thumb {
+      display: block;
+      width: 21px;
+      height: 21px;
+      background-color: white;
+      border-radius: 9999px;
+      transition: transform 100ms;
+    }
+    
+    .thumb[data-state='checked'] {
+      transform: translateX(19px);
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Design System Integration
+
+Radix UI Primitives work great as the foundation for design systems:
+
+1. **Create styled wrappers** - Wrap Radix components with your design system's styling
+2. **Use design tokens** - Apply your design tokens (colors, spacing, typography) to Radix components
+3. **Document patterns** - Create a pattern library showing how to use styled components
+4. **Share across teams** - Distribute your styled components as a package
+
+<Warning>
+  When creating wrapper components, make sure to forward all props and refs correctly to maintain accessibility features.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Composition" icon="cubes" href="/composition">
+    Learn about the composable API design
+  </Card>
+  <Card title="Accessibility" icon="universal-access" href="/accessibility">
+    Understand accessibility features
+  </Card>
+  <Card title="Components" icon="grid" href="/components/dialog">
+    Browse all available components
+  </Card>
+  <Card title="Examples" icon="palette" href="https://www.radix-ui.com/themes">
+    See Radix Themes for pre-styled examples
+  </Card>
+</CardGroup>

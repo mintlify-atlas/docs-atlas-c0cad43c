@@ -1,0 +1,542 @@
+---
+title: Accessibility
+description: Learn how Radix UI Primitives implement WAI-ARIA patterns, keyboard navigation, and screen reader support for accessible web applications.
+---
+
+## Overview
+
+Accessibility is at the core of Radix UI Primitives. Every component is built to adhere to [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/) and is thoroughly tested with assistive technologies.
+
+<Note>
+  While Radix handles most accessibility concerns, you're still responsible for providing accessible content, labels, and color contrast in your designs.
+</Note>
+
+## Core Accessibility Features
+
+<CardGroup cols={2}>
+  <Card title="WAI-ARIA Compliance" icon="clipboard-check">
+    All components implement ARIA design patterns with proper roles, states, and properties.
+  </Card>
+  
+  <Card title="Keyboard Navigation" icon="keyboard">
+    Full keyboard support with intuitive shortcuts and focus management.
+  </Card>
+  
+  <Card title="Screen Reader Support" icon="volume-high">
+    Tested with NVDA, JAWS, and VoiceOver for optimal screen reader experience.
+  </Card>
+  
+  <Card title="Focus Management" icon="bullseye">
+    Automatic focus trapping, restoration, and visible focus indicators.
+  </Card>
+</CardGroup>
+
+## WAI-ARIA Implementation
+
+Radix components automatically apply appropriate ARIA attributes:
+
+### Roles
+
+Components use semantic HTML and ARIA roles:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+<Dialog.Content>
+  {/* Automatically has role="dialog" */}
+  {/* Automatically has aria-modal="true" */}
+</Dialog.Content>
+```
+
+```tsx
+import * as Switch from '@radix-ui/react-switch';
+
+<Switch.Root>
+  {/* Automatically has role="switch" */}
+  {/* Automatically has aria-checked="true|false" */}
+</Switch.Root>
+```
+
+### States and Properties
+
+ARIA states are managed automatically:
+
+```tsx
+import * as Accordion from '@radix-ui/react-accordion';
+
+<Accordion.Trigger>
+  {/* aria-expanded="true|false" - managed automatically */}
+  {/* aria-controls="content-id" - linked to content */}
+  {/* aria-disabled="true" - when disabled prop is set */}
+</Accordion.Trigger>
+```
+
+### Relationships
+
+Component relationships are established via ARIA:
+
+```tsx
+import * as Tabs from '@radix-ui/react-tabs';
+
+<Tabs.Root>
+  <Tabs.List>
+    <Tabs.Trigger value="tab1">
+      {/* aria-controls="panel-tab1" */}
+      {/* aria-selected="true|false" */}
+    </Tabs.Trigger>
+  </Tabs.List>
+  
+  <Tabs.Content value="tab1">
+    {/* role="tabpanel" */}
+    {/* aria-labelledby="trigger-tab1" */}
+  </Tabs.Content>
+</Tabs.Root>
+```
+
+## Keyboard Navigation
+
+All interactive components support keyboard navigation:
+
+### Common Keyboard Patterns
+
+<AccordionGroup>
+  <Accordion title="Dialogs and Modals">
+    - **Escape** - Closes the dialog
+    - **Tab** - Moves focus to next focusable element within dialog
+    - **Shift + Tab** - Moves focus to previous focusable element
+    - Focus is trapped within the dialog while open
+    - Focus returns to trigger element when closed
+  </Accordion>
+  
+  <Accordion title="Dropdown Menus and Context Menus">
+    - **Space / Enter** - Opens menu and focuses first item
+    - **Arrow Down** - Focuses next menu item
+    - **Arrow Up** - Focuses previous menu item
+    - **Home** - Focuses first menu item
+    - **End** - Focuses last menu item
+    - **Escape** - Closes menu
+    - **A-Z** - Focuses first item starting with that letter (type-ahead)
+  </Accordion>
+  
+  <Accordion title="Tabs">
+    - **Arrow Left** - Focuses previous tab
+    - **Arrow Right** - Focuses next tab
+    - **Home** - Focuses first tab
+    - **End** - Focuses last tab
+    - **Tab** - Moves focus into the tab panel
+  </Accordion>
+  
+  <Accordion title="Accordion">
+    - **Space / Enter** - Toggles the accordion item
+    - **Arrow Down** - Focuses next accordion trigger
+    - **Arrow Up** - Focuses previous accordion trigger
+    - **Home** - Focuses first accordion trigger
+    - **End** - Focuses last accordion trigger
+  </Accordion>
+  
+  <Accordion title="Slider">
+    - **Arrow Up / Right** - Increases value by step
+    - **Arrow Down / Left** - Decreases value by step
+    - **Home** - Sets value to minimum
+    - **End** - Sets value to maximum
+    - **Page Up** - Increases value by larger step
+    - **Page Down** - Decreases value by larger step
+  </Accordion>
+  
+  <Accordion title="Radio Group">
+    - **Arrow Down / Right** - Focuses and selects next radio
+    - **Arrow Up / Left** - Focuses and selects previous radio
+    - **Space** - Selects focused radio if not already selected
+  </Accordion>
+</AccordionGroup>
+
+### Focus Management
+
+Radix handles complex focus scenarios:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { useRef } from 'react';
+
+function SearchDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger>Search</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Content>
+          {/* Focus automatically moves here when dialog opens */}
+          <input type="text" placeholder="Search..." autoFocus />
+          {/* Focus is trapped - Tab only cycles through dialog content */}
+          {/* Focus returns to trigger when dialog closes */}
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+## Screen Reader Support
+
+Radix components are tested with major screen readers:
+
+- **NVDA** (Windows)
+- **JAWS** (Windows)
+- **VoiceOver** (macOS, iOS)
+- **TalkBack** (Android)
+
+### Announcements
+
+Components make appropriate announcements:
+
+```tsx
+import * as Toast from '@radix-ui/react-toast';
+
+<Toast.Root>
+  <Toast.Title>Success</Toast.Title>
+  <Toast.Description>
+    {/* Screen readers announce this automatically */}
+    Your changes have been saved.
+  </Toast.Description>
+</Toast.Root>
+```
+
+### Labels and Descriptions
+
+Provide accessible labels and descriptions:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+<Dialog.Content>
+  {/* Title is used as aria-labelledby */}
+  <Dialog.Title>Delete Account</Dialog.Title>
+  
+  {/* Description is used as aria-describedby */}
+  <Dialog.Description>
+    This action cannot be undone. This will permanently delete your account.
+  </Dialog.Description>
+</Dialog.Content>
+```
+
+<Warning>
+  Always include `Dialog.Title` and `Dialog.Description` for dialogs. Screen readers rely on these for context.
+</Warning>
+
+### Visually Hidden Content
+
+Use the VisuallyHidden utility for screen reader-only content:
+
+```tsx
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+
+function IconButton() {
+  return (
+    <button>
+      <CloseIcon />
+      <VisuallyHidden.Root>
+        Close dialog
+      </VisuallyHidden.Root>
+    </button>
+  );
+}
+```
+
+## Form Accessibility
+
+Radix form components integrate with native form behavior:
+
+### Labels
+
+Always associate labels with form controls:
+
+```tsx
+import * as Label from '@radix-ui/react-label';
+import * as Switch from '@radix-ui/react-switch';
+
+function FormField() {
+  return (
+    <div>
+      <Label.Root htmlFor="airplane-mode">
+        Airplane mode
+      </Label.Root>
+      <Switch.Root id="airplane-mode">
+        <Switch.Thumb />
+      </Switch.Root>
+    </div>
+  );
+}
+```
+
+### Required Fields
+
+Indicate required fields:
+
+```tsx
+import * as Checkbox from '@radix-ui/react-checkbox';
+
+<div>
+  <Checkbox.Root required id="terms">
+    <Checkbox.Indicator>
+      <CheckIcon />
+    </Checkbox.Indicator>
+  </Checkbox.Root>
+  <label htmlFor="terms">
+    I agree to the terms <span aria-label="required">*</span>
+  </label>
+</div>
+```
+
+### Error Messages
+
+Link error messages to form controls:
+
+```tsx
+import * as Form from '@radix-ui/react-form';
+
+function EmailField() {
+  return (
+    <Form.Field name="email">
+      <Form.Label>Email</Form.Label>
+      <Form.Control type="email" required />
+      <Form.Message match="valueMissing">
+        Please enter your email
+      </Form.Message>
+      <Form.Message match="typeMismatch">
+        Please enter a valid email
+      </Form.Message>
+    </Form.Field>
+  );
+}
+```
+
+## Focus Indicators
+
+Visible focus indicators are crucial for keyboard users:
+
+```css
+/* Ensure focus indicators are visible */
+.button:focus-visible {
+  outline: 2px solid blue;
+  outline-offset: 2px;
+}
+
+/* Don't remove focus indicators */
+.button:focus {
+  /* ❌ Never do this */
+  outline: none;
+}
+```
+
+<Tip>
+  Use `:focus-visible` instead of `:focus` to show indicators only for keyboard navigation, not mouse clicks.
+</Tip>
+
+## Color Contrast
+
+While Radix doesn't provide styles, ensure your designs meet WCAG standards:
+
+- **Text**: Minimum 4.5:1 contrast ratio (AA)
+- **Large text**: Minimum 3:1 contrast ratio (AA)
+- **UI components**: Minimum 3:1 contrast ratio (AA)
+- **Focus indicators**: Clearly visible against background
+
+<Note>
+  Use tools like [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) to verify your color choices.
+</Note>
+
+## Live Regions
+
+For dynamic content updates, use live regions:
+
+```tsx
+import * as Toast from '@radix-ui/react-toast';
+
+<Toast.Viewport>
+  {/* Toast automatically uses role="status" or role="alert" */}
+  <Toast.Root>
+    <Toast.Description>
+      {/* Announced to screen readers automatically */}
+      File uploaded successfully
+    </Toast.Description>
+  </Toast.Root>
+</Toast.Viewport>
+```
+
+## Testing for Accessibility
+
+<Steps>
+  <Step title="Keyboard Testing">
+    Test all interactions using only the keyboard:
+    - Tab through all interactive elements
+    - Ensure focus indicators are visible
+    - Try all keyboard shortcuts
+    - Verify focus doesn't get trapped unexpectedly
+  </Step>
+  
+  <Step title="Screen Reader Testing">
+    Test with at least one screen reader:
+    - NVDA (free, Windows)
+    - VoiceOver (built-in, macOS/iOS)
+    - Verify announcements are clear and complete
+    - Check that content is read in logical order
+  </Step>
+  
+  <Step title="Automated Testing">
+    Use automated tools to catch common issues:
+    - [axe DevTools](https://www.deque.com/axe/devtools/)
+    - [WAVE](https://wave.webaim.org/)
+    - [Lighthouse](https://developers.google.com/web/tools/lighthouse)
+  </Step>
+  
+  <Step title="Manual Inspection">
+    Review the rendered HTML:
+    - Check ARIA attributes are correct
+    - Verify semantic HTML is used
+    - Ensure IDs are unique
+    - Check heading hierarchy
+  </Step>
+</Steps>
+
+## Common Accessibility Patterns
+
+### Modal Dialogs
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+function AccessibleDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger>Open Settings</Dialog.Trigger>
+      <Dialog.Portal>
+        {/* Overlay prevents interaction with background */}
+        <Dialog.Overlay className="dialog-overlay" />
+        <Dialog.Content>
+          {/* Always include title */}
+          <Dialog.Title>Settings</Dialog.Title>
+          
+          {/* Always include description */}
+          <Dialog.Description>
+            Manage your application preferences
+          </Dialog.Description>
+          
+          {/* Content */}
+          <form>{/* ... */}</form>
+          
+          {/* Provide a way to close */}
+          <Dialog.Close aria-label="Close">×</Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+### Tooltips
+
+```tsx
+import * as Tooltip from '@radix-ui/react-tooltip';
+
+function AccessibleTooltip() {
+  return (
+    <Tooltip.Provider>
+      <Tooltip.Root>
+        <Tooltip.Trigger aria-label="Settings">
+          <SettingsIcon />
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content>
+            {/* Tooltip content is announced to screen readers */}
+            Application settings
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
+```
+
+### Custom Components
+
+When building custom components, preserve accessibility:
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { forwardRef } from 'react';
+
+interface CustomDialogProps {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}
+
+export const CustomDialog = forwardRef<
+  HTMLDivElement,
+  CustomDialogProps
+>(({ title, description, children }, forwardedRef) => {
+  return (
+    <Dialog.Content ref={forwardedRef}>
+      {/* Always include title and description */}
+      <Dialog.Title>{title}</Dialog.Title>
+      <Dialog.Description>{description}</Dialog.Description>
+      {children}
+    </Dialog.Content>
+  );
+});
+```
+
+## Accessibility Checklist
+
+Before shipping, verify:
+
+- [ ] All interactive elements are keyboard accessible
+- [ ] Focus indicators are visible and meet contrast requirements
+- [ ] All images have alt text (or are marked decorative)
+- [ ] All form inputs have associated labels
+- [ ] Error messages are linked to their inputs
+- [ ] Color is not the only way to convey information
+- [ ] Text meets minimum contrast ratios
+- [ ] Heading hierarchy is logical (h1, h2, h3...)
+- [ ] ARIA attributes are used correctly
+- [ ] Content is announced properly to screen readers
+- [ ] Focus is managed correctly in dynamic content
+- [ ] Tested with keyboard only
+- [ ] Tested with at least one screen reader
+- [ ] Passed automated accessibility tests
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card title="WAI-ARIA Practices" icon="book" href="https://www.w3.org/WAI/ARIA/apg/">
+    Official ARIA authoring practices guide
+  </Card>
+  
+  <Card title="WebAIM" icon="universal-access" href="https://webaim.org/">
+    Web accessibility resources and training
+  </Card>
+  
+  <Card title="A11y Project" icon="users" href="https://www.a11yproject.com/">
+    Community-driven accessibility guidance
+  </Card>
+  
+  <Card title="MDN Accessibility" icon="graduation-cap" href="https://developer.mozilla.org/en-US/docs/Web/Accessibility">
+    Comprehensive accessibility documentation
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components" icon="grid" href="/components/dialog">
+    Explore accessible components
+  </Card>
+  <Card title="Form Component" icon="input-text" href="/components/form">
+    Build accessible forms
+  </Card>
+  <Card title="Visually Hidden" icon="eye-slash" href="/components/visually-hidden">
+    Screen reader-only content
+  </Card>
+  <Card title="Label Component" icon="tag" href="/components/label">
+    Associate labels with inputs
+  </Card>
+</CardGroup>

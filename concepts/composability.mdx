@@ -1,0 +1,605 @@
+---
+title: "Composability"
+description: "Understanding how Radix UI components compose with direct DOM access and predictable behavior"
+---
+
+## Overview
+
+Composability is at the heart of Radix UI Primitives. Every component is designed to compose naturally, just like native HTML elements, giving you complete control over the DOM structure and behavior.
+
+<Note>
+Radix components follow a **1-to-1 mapping principle**: each component renders exactly one DOM element (unless explicitly documented otherwise).
+</Note>
+
+---
+
+## 1-to-1 DOM Mapping
+
+The fundamental principle of composability in Radix is that each component maps to a single DOM node.
+
+### What This Means
+
+When you write:
+
+```jsx
+<Accordion.Item value="item-1">
+  <Accordion.Header>
+    <Accordion.Trigger>Toggle</Accordion.Trigger>
+  </Accordion.Header>
+  <Accordion.Content>
+    Content here
+  </Accordion.Content>
+</Accordion.Item>
+```
+
+You get exactly this DOM structure:
+
+```html
+<div data-state="closed"> <!-- Accordion.Item -->
+  <h3> <!-- Accordion.Header -->
+    <button> <!-- Accordion.Trigger -->
+      Toggle
+    </button>
+  </h3>
+  <div> <!-- Accordion.Content -->
+    Content here
+  </div>
+</div>
+```
+
+### Benefits
+
+1. **Predictable** - You know exactly what gets rendered
+2. **Inspectable** - DevTools show the real DOM structure
+3. **Styleable** - Direct access to elements for CSS
+4. **Debuggable** - No hidden wrapper elements to confuse you
+
+<Tip>
+Because each component renders one element, you can reason about the DOM structure by reading the JSX.
+</Tip>
+
+### Exceptions Are Documented
+
+When a component deviates from this pattern (like `Dialog.Portal` which renders to a different part of the DOM), it's clearly documented with rationale.
+
+---
+
+## Ref Forwarding
+
+Refs are forwarded to the underlying DOM element, working exactly as you'd expect with native elements.
+
+### Basic Ref Usage
+
+```jsx
+import { useRef } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+
+function MyDialog() {
+  const triggerRef = useRef(null);
+  const contentRef = useRef(null);
+
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger ref={triggerRef}>
+        Open Dialog
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Content ref={contentRef}>
+          <Dialog.Title>Title</Dialog.Title>
+          {/* ... */}
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+Now:
+- `triggerRef.current` is the `<button>` element
+- `contentRef.current` is the `<div>` element containing the dialog content
+
+### Accessing DOM Methods
+
+Because refs point to real DOM nodes, you can use any DOM API:
+
+```jsx
+const inputRef = useRef(null);
+
+// Focus the input
+inputRef.current?.focus();
+
+// Get bounding box
+const rect = inputRef.current?.getBoundingClientRect();
+
+// Scroll into view
+inputRef.current?.scrollIntoView();
+```
+
+### Ref Composition
+
+Radix uses the `useComposedRefs` hook internally to merge multiple refs. This is from `packages/react/compose-refs/src/compose-refs.tsx:55`:
+
+```tsx
+function useComposedRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
+  return React.useCallback(composeRefs(...refs), refs);
+}
+```
+
+This means internal refs (used for behavior) and your refs both work simultaneously.
+
+---
+
+## The `asChild` Prop
+
+The `asChild` prop is the key to advanced composition. It tells Radix to merge its functionality with your own element instead of rendering a default one.
+
+### Without `asChild`
+
+```jsx
+<Dialog.Trigger className="my-button">
+  Open Dialog
+</Dialog.Trigger>
+```
+
+Renders:
+
+```html
+<button class="my-button" type="button" aria-haspopup="dialog">
+  Open Dialog
+</button>
+```
+
+### With `asChild`
+
+```jsx
+<Dialog.Trigger asChild>
+  <a href="/dialog" className="my-link">
+    Open Dialog
+  </a>
+</Dialog.Trigger>
+```
+
+Renders:
+
+```html
+<a href="/dialog" class="my-link" role="button" aria-haspopup="dialog">
+  Open Dialog
+</a>
+```
+
+<Note>
+Radix merges its props (event handlers, aria attributes, etc.) with your element's props. Your element's props take precedence where appropriate.
+</Note>
+
+### How It Works
+
+The `asChild` prop leverages Radix's Slot component (from `packages/react/slot/src/slot.tsx:45`):
+
+```tsx
+const Slot = React.forwardRef<HTMLElement, SlotProps>((props, forwardedRef) => {
+  const { children, ...slotProps } = props;
+  const childrenArray = React.Children.toArray(children);
+  const slottable = childrenArray.find(isSlottable);
+
+  if (slottable) {
+    const newElement = slottable.props.children;
+    return (
+      <SlotClone {...slotProps} ref={forwardedRef}>
+        {React.isValidElement(newElement)
+          ? React.cloneElement(newElement, undefined, newChildren)
+          : null}
+      </SlotClone>
+    );
+  }
+
+  return (
+    <SlotClone {...slotProps} ref={forwardedRef}>
+      {children}
+    </SlotClone>
+  );
+});
+```
+
+The Slot component:
+1. Takes the child element you provide
+2. Clones it with Radix's props merged in
+3. Forwards refs correctly
+
+---
+
+## Event Handler Composition
+
+Event handlers compose automatically, allowing you to add custom logic without breaking built-in behavior.
+
+### Adding Your Own Handlers
+
+```jsx
+<Accordion.Trigger
+  onClick={(event) => {
+    console.log('Trigger clicked!');
+    // Radix's internal onClick still runs
+  }}
+>
+  Toggle
+</Accordion.Trigger>
+```
+
+### Handler Execution Order
+
+1. Your handler runs first
+2. Radix's internal handler runs second
+3. Event propagates unless stopped
+
+### Preventing Default Behavior
+
+You can prevent Radix's behavior when needed:
+
+```jsx
+<Dialog.Trigger
+  onClick={(event) => {
+    if (someCondition) {
+      event.preventDefault(); // Stops dialog from opening
+    }
+  }}
+>
+  Conditional Open
+</Dialog.Trigger>
+```
+
+### How It Works
+
+Radix uses `composeEventHandlers` internally (from `@radix-ui/primitive`):
+
+```tsx
+function composeEventHandlers<E>(
+  originalEventHandler?: (event: E) => void,
+  ourEventHandler?: (event: E) => void,
+  { checkForDefaultPrevented = true } = {}
+) {
+  return function handleEvent(event: E) {
+    originalEventHandler?.(event);
+
+    if (
+      checkForDefaultPrevented === false ||
+      !(event as unknown as Event).defaultPrevented
+    ) {
+      return ourEventHandler?.(event);
+    }
+  };
+}
+```
+
+This ensures:
+- Your handler runs first
+- Radix respects `preventDefault()`
+- Event propagation works naturally
+
+---
+
+## Composition Patterns
+
+### Pattern 1: Wrapping with Custom Components
+
+Create your own components that wrap Radix:
+
+```jsx
+// components/Button.jsx
+import * as Dialog from '@radix-ui/react-dialog';
+
+export function DialogButton({ children, ...props }) {
+  return (
+    <Dialog.Trigger asChild>
+      <button className="btn btn-primary" {...props}>
+        {children}
+      </button>
+    </Dialog.Trigger>
+  );
+}
+
+// Usage
+<Dialog.Root>
+  <DialogButton>Open</DialogButton>
+  {/* ... */}
+</Dialog.Root>
+```
+
+### Pattern 2: Polymorphic Components
+
+Create components that can render as different elements:
+
+```jsx
+function Button({ as: Comp = 'button', children, ...props }) {
+  return (
+    <Dialog.Trigger asChild>
+      <Comp className="btn" {...props}>
+        {children}
+      </Comp>
+    </Dialog.Trigger>
+  );
+}
+
+// Render as button
+<Button>Click me</Button>
+
+// Render as link
+<Button as="a" href="/page">Go to page</Button>
+```
+
+### Pattern 3: Animation Libraries
+
+Compose with animation libraries like Framer Motion:
+
+```jsx
+import { motion } from 'framer-motion';
+import * as Dialog from '@radix-ui/react-dialog';
+
+function AnimatedDialog() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger>Open</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay asChild>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+        </Dialog.Overlay>
+        <Dialog.Content asChild>
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+          >
+            <Dialog.Title>Animated Dialog</Dialog.Title>
+            {/* ... */}
+          </motion.div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+### Pattern 4: Extending with Additional Props
+
+Add your own props while preserving Radix functionality:
+
+```jsx
+function AccordionItem({ value, children, icon, badge }) {
+  return (
+    <Accordion.Item value={value}>
+      <Accordion.Header>
+        <Accordion.Trigger>
+          <span className="trigger-content">
+            {icon && <span className="icon">{icon}</span>}
+            <span className="label">{children}</span>
+            {badge && <span className="badge">{badge}</span>}
+          </span>
+        </Accordion.Trigger>
+      </Accordion.Header>
+      {/* ... */}
+    </Accordion.Item>
+  );
+}
+
+// Usage
+<AccordionItem
+  value="item-1"
+  icon={<IconChevron />}
+  badge={<Badge>New</Badge>}
+>
+  Click me
+</AccordionItem>
+```
+
+---
+
+## Prop Merging Behavior
+
+When using `asChild`, props are merged intelligently:
+
+### Event Handlers
+
+Both handlers run (yours first, then Radix's):
+
+```jsx
+<Dialog.Trigger asChild>
+  <button onClick={myHandler}>
+    Open
+  </button>
+</Dialog.Trigger>
+```
+
+Both `myHandler` and Radix's internal handler execute.
+
+### Styles
+
+Style objects are merged:
+
+```jsx
+<Dialog.Trigger asChild>
+  <button style={{ color: 'red', padding: 16 }}>
+    Open
+  </button>
+</Dialog.Trigger>
+```
+
+Radix's styles (if any) merge with yours.
+
+### Class Names
+
+Class names are concatenated:
+
+```jsx
+<Dialog.Trigger asChild>
+  <button className="my-button">
+    Open
+  </button>
+</Dialog.Trigger>
+```
+
+Results in `className="my-button [radix-classes]"`.
+
+### Other Props
+
+Child props take precedence:
+
+```jsx
+<Dialog.Trigger asChild>
+  <button type="submit"> {/* type="submit" wins over type="button" */}
+    Open
+  </button>
+</Dialog.Trigger>
+```
+
+From `packages/react/slot/src/slot.tsx:164`:
+
+```tsx
+function mergeProps(slotProps: AnyProps, childProps: AnyProps) {
+  const overrideProps = { ...childProps };
+
+  for (const propName in childProps) {
+    const slotPropValue = slotProps[propName];
+    const childPropValue = childProps[propName];
+
+    const isHandler = /^on[A-Z]/.test(propName);
+    if (isHandler) {
+      if (slotPropValue && childPropValue) {
+        overrideProps[propName] = (...args: unknown[]) => {
+          childPropValue(...args);
+          slotPropValue(...args);
+        };
+      } else if (slotPropValue) {
+        overrideProps[propName] = slotPropValue;
+      }
+    } else if (propName === 'style') {
+      overrideProps[propName] = { ...slotPropValue, ...childPropValue };
+    } else if (propName === 'className') {
+      overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(' ');
+    }
+  }
+
+  return { ...slotProps, ...overrideProps };
+}
+```
+
+---
+
+## Real-World Examples
+
+### Example 1: Custom Accordion Trigger
+
+```jsx
+import * as Accordion from '@radix-ui/react-accordion';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
+
+function CustomAccordion() {
+  return (
+    <Accordion.Root type="single" collapsible>
+      <Accordion.Item value="item-1">
+        <Accordion.Header>
+          <Accordion.Trigger className="accordion-trigger">
+            <span>What is Radix?</span>
+            <ChevronDownIcon aria-hidden />
+          </Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content className="accordion-content">
+          Radix is a library of unstyled, accessible components.
+        </Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
+  );
+}
+```
+
+### Example 2: Dialog with Custom Close Button
+
+```jsx
+import * as Dialog from '@radix-ui/react-dialog';
+import { Cross1Icon } from '@radix-ui/react-icons';
+
+function MyDialog() {
+  const closeButtonRef = useRef(null);
+
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger asChild>
+        <button className="btn-primary">Open Settings</button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="dialog-overlay" />
+        <Dialog.Content className="dialog-content">
+          <Dialog.Title>Settings</Dialog.Title>
+          <Dialog.Description>
+            Configure your preferences here.
+          </Dialog.Description>
+          
+          {/* Dialog content */}
+          <div className="settings-form">
+            {/* Form fields */}
+          </div>
+
+          <Dialog.Close asChild>
+            <button
+              ref={closeButtonRef}
+              className="icon-button"
+              aria-label="Close"
+              onClick={() => console.log('Dialog closing')}
+            >
+              <Cross1Icon />
+            </button>
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+```
+
+### Example 3: Checkbox with Label Composition
+
+```jsx
+import * as Checkbox from '@radix-ui/react-checkbox';
+import * as Label from '@radix-ui/react-label';
+import { CheckIcon } from '@radix-ui/react-icons';
+
+function CheckboxWithLabel({ id, label }) {
+  return (
+    <div className="checkbox-wrapper">
+      <Checkbox.Root className="checkbox-root" id={id}>
+        <Checkbox.Indicator className="checkbox-indicator">
+          <CheckIcon />
+        </Checkbox.Indicator>
+      </Checkbox.Root>
+      <Label.Root className="checkbox-label" htmlFor={id}>
+        {label}
+      </Label.Root>
+    </div>
+  );
+}
+```
+
+---
+
+## Summary
+
+Radix UI's composability gives you:
+
+- **Direct DOM access** through 1-to-1 component mapping
+- **Predictable refs** that point to actual DOM elements
+- **Flexible composition** via the `asChild` prop
+- **Natural event handling** with automatic handler composition
+- **Full control** over rendering and behavior
+
+<Tip>
+Think of Radix components as enhanced HTML elements—they behave like native elements but with accessibility and interaction patterns built in.
+</Tip>
+
+---
+
+## Related Concepts
+
+- [Philosophy](/concepts/philosophy) - Understand the principles behind composability
+- [Customization](/concepts/customization) - Learn how to style composed components
+- [State Management](/concepts/state-management) - Control component state in composed structures

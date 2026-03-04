@@ -1,0 +1,124 @@
+---
+title: "Toggle"
+description: "A two-state button that can be either on or off."
+---
+
+## Overview
+
+Toggle provides a button that can be toggled between on and off states. It's useful for single-option selections like bold, italic, or favorite buttons.
+
+## Features
+
+- Can be controlled or uncontrolled
+- Full keyboard navigation
+- Accessible by default with proper ARIA attributes
+
+## Installation
+
+```bash
+npm install @radix-ui/react-toggle
+```
+
+## Anatomy
+
+```jsx
+import * as Toggle from '@radix-ui/react-toggle';
+
+export default () => <Toggle.Root />;
+```
+
+## API Reference
+
+### Root
+
+The toggle component.
+
+<ParamField path="pressed" type="boolean">
+  The controlled pressed state of the toggle.
+</ParamField>
+
+<ParamField path="defaultPressed" type="boolean">
+  The pressed state when initially rendered (uncontrolled).
+</ParamField>
+
+<ParamField path="onPressedChange" type="(pressed: boolean) => void">
+  Event handler called when the pressed state changes.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  When true, prevents the user from interacting with the toggle.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as Toggle from '@radix-ui/react-toggle';
+import { FontBoldIcon } from '@radix-ui/react-icons';
+import './styles.css';
+
+export default () => (
+  <Toggle.Root className="Toggle" aria-label="Toggle bold">
+    <FontBoldIcon />
+  </Toggle.Root>
+);
+```
+
+```jsx Controlled
+import { useState } from 'react';
+import * as Toggle from '@radix-ui/react-toggle';
+import { FontItalicIcon } from '@radix-ui/react-icons';
+import './styles.css';
+
+export default () => {
+  const [pressed, setPressed] = useState(false);
+
+  return (
+    <div>
+      <Toggle.Root
+        className="Toggle"
+        aria-label="Toggle italic"
+        pressed={pressed}
+        onPressedChange={setPressed}
+      >
+        <FontItalicIcon />
+      </Toggle.Root>
+      <p>Status: {pressed ? 'Pressed' : 'Not pressed'}</p>
+    </div>
+  );
+};
+```
+
+```jsx Disabled
+import * as Toggle from '@radix-ui/react-toggle';
+import { UnderlineIcon } from '@radix-ui/react-icons';
+
+export default () => (
+  <Toggle.Root aria-label="Toggle underline" disabled>
+    <UnderlineIcon />
+  </Toggle.Root>
+);
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Uses the [button role](https://www.w3.org/TR/wai-aria-1.2/#button) with `aria-pressed` attribute.
+</Note>
+
+### Keyboard Interactions
+
+- **Space** - Activates/deactivates the toggle.
+- **Enter** - Activates/deactivates the toggle.
+
+### Data Attributes
+
+**Root**
+
+- `[data-state]` - "on" or "off"
+- `[data-disabled]` - Present when disabled

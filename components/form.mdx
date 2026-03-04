@@ -1,0 +1,259 @@
+---
+title: "Form"
+description: "A form component with built-in validation and accessibility features."
+---
+
+## Overview
+
+Form provides a wrapper around form controls with built-in validation, error messaging, and accessibility features. It handles form state, validation messages, and proper ARIA attributes automatically.
+
+## Features
+
+- Built-in client-side and server-side validation
+- Automatic error message display
+- Accessible by default with proper ARIA attributes
+- Customizable validity state handling
+- Works with native HTML form elements
+- Supports custom validation messages
+- Integration with browser's constraint validation API
+
+## Installation
+
+```bash
+npm install @radix-ui/react-form
+```
+
+## Anatomy
+
+```jsx
+import * as Form from '@radix-ui/react-form';
+
+export default () => (
+  <Form.Root>
+    <Form.Field>
+      <Form.Label />
+      <Form.Control />
+      <Form.Message />
+    </Form.Field>
+    <Form.Submit />
+  </Form.Root>
+);
+```
+
+## API Reference
+
+### Root
+
+Contains all the form component parts. Renders a `<form>` element.
+
+<ParamField path="onSubmit" type="(event: React.FormEvent<HTMLFormElement>) => void">
+  Event handler called when the form is submitted.
+</ParamField>
+
+<ParamField path="onClearServerErrors" type="() => void">
+  A function to clear server errors. This is called when the user interacts with a field.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Field
+
+Groups a label, control, and message together. Automatically manages IDs and ARIA attributes.
+
+<ParamField path="name" type="string" required>
+  The name of the field. This is used to match the field with validation messages.
+</ParamField>
+
+<ParamField path="serverInvalid" type="boolean">
+  When true, indicates the field has a server error.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Label
+
+The label associated with a form control.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Control
+
+The form control (input, textarea, select, etc.). This should be used with native form elements or custom form controls.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### Message
+
+Displays validation messages for a field.
+
+<ParamField path="match" type="'valueMissing' | 'typeMismatch' | 'patternMismatch' | 'tooLong' | 'tooShort' | 'rangeUnderflow' | 'rangeOverflow' | 'stepMismatch' | 'badInput' | 'valid' | ((validity: ValidityState, formData: FormData) => boolean)">
+  Used to target a specific validity state or provide a custom matcher function. When the matcher succeeds, the message will be shown.
+</ParamField>
+
+<ParamField path="forceMatch" type="boolean">
+  When true, always shows the message regardless of validity state.
+</ParamField>
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+### ValidityState
+
+Provides access to the field's validity state. Useful for custom UI based on validation state.
+
+<ParamField path="children" type="(validity: ValidityState) => React.ReactNode" required>
+  A render prop that receives the validity state.
+</ParamField>
+
+### Submit
+
+The submit button for the form.
+
+<ParamField path="asChild" type="boolean" default="false">
+  Change the default rendered element for the one passed as a child.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```jsx Basic
+import * as Form from '@radix-ui/react-form';
+import './styles.css';
+
+export default () => (
+  <Form.Root className="FormRoot">
+    <Form.Field className="FormField" name="email">
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Form.Label className="FormLabel">Email</Form.Label>
+        <Form.Message className="FormMessage" match="valueMissing">
+          Please enter your email
+        </Form.Message>
+        <Form.Message className="FormMessage" match="typeMismatch">
+          Please provide a valid email
+        </Form.Message>
+      </div>
+      <Form.Control asChild>
+        <input className="Input" type="email" required />
+      </Form.Control>
+    </Form.Field>
+
+    <Form.Field className="FormField" name="question">
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Form.Label className="FormLabel">Question</Form.Label>
+        <Form.Message className="FormMessage" match="valueMissing">
+          Please enter a question
+        </Form.Message>
+      </div>
+      <Form.Control asChild>
+        <textarea className="Textarea" required />
+      </Form.Control>
+    </Form.Field>
+
+    <Form.Submit asChild>
+      <button className="Button" style={{ marginTop: 10 }}>
+        Submit
+      </button>
+    </Form.Submit>
+  </Form.Root>
+);
+```
+
+```jsx With Server Validation
+import { useState } from 'react';
+import * as Form from '@radix-ui/react-form';
+
+export default () => {
+  const [serverErrors, setServerErrors] = useState({});
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+
+    try {
+      const response = await fetch('/api/form', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errors = await response.json();
+        setServerErrors(errors);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <Form.Root onSubmit={handleSubmit} onClearServerErrors={() => setServerErrors({})}>
+      <Form.Field name="username" serverInvalid={!!serverErrors.username}>
+        <Form.Label>Username</Form.Label>
+        <Form.Control asChild>
+          <input type="text" required />
+        </Form.Control>
+        <Form.Message match="valueMissing">Please enter a username</Form.Message>
+        {serverErrors.username && (
+          <Form.Message forceMatch>{serverErrors.username}</Form.Message>
+        )}
+      </Form.Field>
+
+      <Form.Submit>Submit</Form.Submit>
+    </Form.Root>
+  );
+};
+```
+
+```jsx Custom Validation
+import * as Form from '@radix-ui/react-form';
+
+export default () => (
+  <Form.Root>
+    <Form.Field name="password">
+      <Form.Label>Password</Form.Label>
+      <Form.Control asChild>
+        <input type="password" required minLength={8} />
+      </Form.Control>
+      <Form.Message match="valueMissing">
+        Please enter a password
+      </Form.Message>
+      <Form.Message match="tooShort">
+        Password must be at least 8 characters
+      </Form.Message>
+      <Form.Message
+        match={(validity, formData) => {
+          const password = formData.get('password');
+          return validity.valid && !/[A-Z]/.test(password);
+        }}
+      >
+        Password must contain at least one uppercase letter
+      </Form.Message>
+    </Form.Field>
+
+    <Form.Submit>Submit</Form.Submit>
+  </Form.Root>
+);
+```
+</CodeGroup>
+
+## Accessibility
+
+<Note>
+Automatically manages ARIA attributes including `aria-invalid`, `aria-describedby`, and proper label associations.
+</Note>
+
+### Features
+
+- Automatic ID generation for labels and controls
+- Error messages are properly associated with controls
+- Invalid states are announced to screen readers
+- Works with browser's built-in form validation
+- Submit button is properly disabled during submission
