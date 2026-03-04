@@ -1,0 +1,199 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "Radix UI Primitives",
+  "projectDescription": "An open-source UI component library for building high-quality, accessible design systems and web apps.",
+  "theme": "willow",
+  "primaryColor": "#1c2424",
+  "lightColor": "#040404",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "styling",
+              "composition",
+              "accessibility"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/philosophy",
+              "concepts/composability",
+              "concepts/customization",
+              "concepts/state-management",
+              "concepts/internationalization"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/server-side-rendering",
+              "guides/animation",
+              "guides/typescript",
+              "guides/migration"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Components",
+        "groups": [
+          {
+            "group": "Overlays",
+            "pages": [
+              "components/dialog",
+              "components/alert-dialog",
+              "components/popover",
+              "components/hover-card",
+              "components/tooltip",
+              "components/context-menu",
+              "components/dropdown-menu"
+            ]
+          },
+          {
+            "group": "Navigation",
+            "pages": [
+              "components/navigation-menu",
+              "components/menubar",
+              "components/tabs",
+              "components/toolbar"
+            ]
+          },
+          {
+            "group": "Forms",
+            "pages": [
+              "components/form",
+              "components/checkbox",
+              "components/radio-group",
+              "components/select",
+              "components/slider",
+              "components/switch",
+              "components/toggle",
+              "components/toggle-group",
+              "components/label",
+              "components/one-time-password-field",
+              "components/password-toggle-field"
+            ]
+          },
+          {
+            "group": "Layout",
+            "pages": [
+              "components/accordion",
+              "components/collapsible",
+              "components/separator",
+              "components/scroll-area",
+              "components/aspect-ratio"
+            ]
+          },
+          {
+            "group": "Data Display",
+            "pages": [
+              "components/avatar",
+              "components/progress",
+              "components/toast"
+            ]
+          },
+          {
+            "group": "Utilities",
+            "pages": [
+              "components/accessible-icon",
+              "components/visually-hidden",
+              "components/portal",
+              "components/slot",
+              "components/arrow"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Hooks",
+            "pages": [
+              "api/use-controllable-state",
+              "api/use-callback-ref",
+              "api/use-escape-keydown",
+              "api/use-layout-effect",
+              "api/use-size",
+              "api/use-effect-event",
+              "api/use-is-hydrated"
+            ]
+          },
+          {
+            "group": "Primitives",
+            "pages": [
+              "api/primitive",
+              "api/compose-refs",
+              "api/direction",
+              "api/roving-focus",
+              "api/focus-scope",
+              "api/focus-guards",
+              "api/dismissable-layer",
+              "api/presence"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Accessible - WAI-ARIA compliant components with keyboard navigation and screen reader support",
+    "Unstyled - Zero default styles, fully customizable with any styling solution",
+    "Composable - Granular component APIs with 1-to-1 DOM mapping for maximum flexibility",
+    "Controlled & Uncontrolled - Support for both controlled and uncontrolled component states",
+    "Type-safe - Written in TypeScript with complete type definitions",
+    "Incremental Adoption - Use individual components or the entire library",
+    "SSR Compatible - Works with Next.js, Remix, and other React frameworks",
+    "Cross-browser - Tested across modern browsers and assistive technologies"
+  ],
+  "publicApiSurface": [
+    "@radix-ui/react-accordion",
+    "@radix-ui/react-alert-dialog",
+    "@radix-ui/react-aspect-ratio",
+    "@radix-ui/react-avatar",
+    "@radix-ui/react-checkbox",
+    "@radix-ui/react-collapsible",
+    "@radix-ui/react-context-menu",
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-dropdown-menu",
+    "@radix-ui/react-form",
+    "@radix-ui/react-hover-card",
+    "@radix-ui/react-label",
+    "@radix-ui/react-menubar",
+    "@radix-ui/react-navigation-menu",
+    "@radix-ui/react-one-time-password-field",
+    "@radix-ui/react-password-toggle-field",
+    "@radix-ui/react-popover",
+    "@radix-ui/react-progress",
+    "@radix-ui/react-radio-group",
+    "@radix-ui/react-scroll-area",
+    "@radix-ui/react-select",
+    "@radix-ui/react-separator",
+    "@radix-ui/react-slider",
+    "@radix-ui/react-switch",
+    "@radix-ui/react-tabs",
+    "@radix-ui/react-toast",
+    "@radix-ui/react-toggle",
+    "@radix-ui/react-toggle-group",
+    "@radix-ui/react-toolbar",
+    "@radix-ui/react-tooltip",
+    "@radix-ui/react-accessible-icon",
+    "@radix-ui/react-visually-hidden",
+    "@radix-ui/react-portal",
+    "@radix-ui/react-slot",
+    "@radix-ui/react-arrow",
+    "@radix-ui/react-use-controllable-state",
+    "@radix-ui/react-use-callback-ref",
+    "@radix-ui/react-use-escape-keydown",
+    "@radix-ui/react-use-layout-effect",
+    "@radix-ui/react-use-size"
+  ]
+}
